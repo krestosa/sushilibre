@@ -31,7 +31,7 @@ body {
 
 .background {
   z-index: -4;
-  background: url("assets/kitchen.jpg") center 42% / cover no-repeat;
+  background: url("https://tmhmedia.themodernhouse.com/uploads/2021/07/Timberyard_04-1200x1800.jpg") center 17% / cover no-repeat;
   transform: scale(1.015);
   filter: saturate(.72) contrast(.92) brightness(1.03) sepia(.12);
 }
@@ -48,8 +48,11 @@ body {
 .grain {
   z-index: 5;
   opacity: .21;
-  background-image: url("assets/noise.png");
-  background-size: 230px 230px;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,.14) 0 .45px, transparent .58px),
+    radial-gradient(circle, rgba(0,0,0,.16) 0 .45px, transparent .6px);
+  background-position: 0 0, 1.5px 1.5px;
+  background-size: 3px 3px;
   mix-blend-mode: soft-light;
 }
 
@@ -153,7 +156,7 @@ body {
 .footer-copy__item--right { right: 0; text-align: right; }
 
 @media (max-aspect-ratio: 4/3) {
-  .background { background-position: 50% 46%; }
+  .background { background-position: 50% 17%; }
   .title-lockup {
     top: 31%;
     left: 5vw;
@@ -199,6 +202,7 @@ body {
 
 @media (max-width: 560px) {
   body { overflow-y: auto; }
+  .background { background-size: auto 240%; background-position: 50% 17%; }
   .hero { min-height: 760px; height: 100svh; }
   .masthead { font-size: 9px; line-height: .96; }
   .masthead__date { top: 8.7%; }
