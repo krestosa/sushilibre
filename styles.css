@@ -42,6 +42,7 @@ body {
     linear-gradient(90deg, rgba(21, 42, 47, .30) 0%, rgba(56, 38, 18, .04) 28%, rgba(171, 100, 27, .27) 69%, rgba(31, 44, 44, .18) 100%),
     linear-gradient(180deg, rgba(8, 8, 7, .30) 0%, transparent 28%, rgba(20, 13, 7, .06) 52%, rgba(12, 9, 7, .48) 100%),
     radial-gradient(ellipse at center, transparent 35%, rgba(6, 6, 5, .32) 100%);
+  mix-blend-mode: normal;
 }
 
 .grain {
@@ -61,7 +62,7 @@ body {
   inset: 0;
   pointer-events: none;
   font-size: clamp(11px, .91vw, 18px);
-  font-weight: 650;
+  font-weight: 430;
   line-height: .92;
   letter-spacing: -.045em;
   text-transform: uppercase;
@@ -83,34 +84,28 @@ body {
   align-items: flex-end;
   white-space: nowrap;
   color: #fffef8;
-  text-transform: uppercase;
   text-shadow: 0 0 2px rgba(255,255,255,.84), 0 0 10px rgba(255,245,224,.22);
 }
 
 .title-word {
   display: block;
-  font-size: 10.9vw;
-  font-weight: 650;
+  font-size: 12.05vw;
+  font-weight: 220;
   line-height: .78;
   letter-spacing: -.078em;
 }
 
 .title-word--chef { margin-left: -.01em; }
-.title-word--experience {
-  margin-left: -.018em;
-  transform: scaleX(.98);
-  transform-origin: left bottom;
-}
+.title-word--experience { margin-left: -.018em; transform: scaleX(1.075); transform-origin: left bottom; }
 
 .title-note {
   position: relative;
   display: block;
-  flex: 0 0 11.4vw;
-  height: 8.4vw;
-  margin: 0 .7vw .45vw 1vw;
+  flex: 0 0 12.8vw;
+  height: 9.8vw;
+  margin: 0 .18vw .82vw 1.35vw;
   font-style: italic;
-  font-weight: 600;
-  text-transform: uppercase;
+  font-weight: 300;
   text-shadow: 0 0 2px rgba(255,255,255,.5);
 }
 
@@ -118,20 +113,19 @@ body {
   position: absolute;
   top: .15vw;
   left: 0;
-  font-size: 1.42vw;
-  font-weight: 650;
+  font-size: 1.72vw;
   line-height: .88;
   letter-spacing: -.065em;
 }
 
 .title-note__script {
   position: absolute;
-  left: -.45vw;
-  bottom: .18vw;
-  font-size: 1.95vw;
-  font-weight: 550;
-  letter-spacing: -.09em;
-  transform: rotate(-4deg) skewX(-7deg);
+  left: -.7vw;
+  bottom: .05vw;
+  font-size: 2.48vw;
+  font-weight: 250;
+  letter-spacing: -.105em;
+  transform: rotate(-5deg) skewX(-8deg);
   transform-origin: left center;
 }
 
@@ -145,7 +139,7 @@ body {
   border-bottom: 1px solid rgba(244, 241, 233, .38);
   text-transform: uppercase;
   font-size: clamp(10px, .77vw, 15.8px);
-  font-weight: 620;
+  font-weight: 430;
   line-height: 1.02;
   letter-spacing: -.045em;
   text-shadow: 0 1px 8px rgba(0,0,0,.52);
@@ -161,163 +155,63 @@ body {
 .footer-copy__item--center { left: 50%; transform: translateX(-50%); text-align: center; }
 .footer-copy__item--right { right: 0; text-align: right; }
 
-/* Tablet layout: the annotation occupies its own grid cell, so it can never
-   collide with either title line. This also covers compact landscape screens. */
-@media (max-width: 1100px) {
-  .hero { min-height: 100svh; }
+@media (max-aspect-ratio: 4/3) {
   .background { background-position: 50% 17%; }
-
   .title-lockup {
-    top: 24%;
-    left: 3.5vw;
-    right: 3.5vw;
+    top: 31%;
+    left: 5vw;
+    right: 5vw;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas:
-      "chef note"
-      "experience experience";
-    align-items: end;
-    column-gap: 3vw;
-    row-gap: clamp(12px, 2.8vh, 28px);
-    white-space: nowrap;
+    grid-template-columns: 1fr;
+    align-content: center;
   }
-
-  .title-word--chef {
-    grid-area: chef;
-    margin: 0;
-    font-size: clamp(72px, 17.4vw, 168px);
-    line-height: .72;
+  .title-word {
+    font-size: clamp(76px, 19.7vw, 180px);
+    line-height: .84;
+    letter-spacing: -.075em;
   }
-
-  .title-word--experience {
-    grid-area: experience;
-    width: 100%;
-    margin: 0;
-    font-size: clamp(52px, 13.5vw, 130px);
-    line-height: .74;
-    transform: none;
-  }
-
+  .title-word--experience { margin-left: 7vw; transform: none; }
   .title-note {
-    grid-area: note;
-    position: relative;
-    justify-self: end;
-    align-self: end;
-    width: clamp(132px, 24vw, 240px);
-    height: clamp(76px, 14vw, 142px);
-    margin: 0 1vw -.5vw 0;
+    position: absolute;
+    top: 13.3vw;
+    right: 7vw;
+    width: 26vw;
+    height: 20vw;
+    margin: 0;
   }
-
-  .title-note__stack {
-    top: 0;
-    font-size: clamp(14px, 2.45vw, 25px);
-  }
-
-  .title-note__script {
-    left: -.35em;
-    bottom: .02em;
-    font-size: clamp(16px, 2.85vw, 29px);
-  }
-
+  .title-note__stack { font-size: 3.55vw; }
+  .title-note__script { font-size: 5vw; left: -1vw; }
   .footer-copy {
-    bottom: max(22px, env(safe-area-inset-bottom));
+    bottom: max(24px, env(safe-area-inset-bottom));
     height: auto;
     display: grid;
     grid-template-columns: 1fr;
-    gap: 8px;
-    padding-bottom: 10px;
-    font-size: clamp(8px, 1.55vw, 11px);
+    gap: 10px;
+    border-bottom: 1px solid rgba(244, 241, 233, .35);
+    padding-bottom: 12px;
+    font-size: clamp(8px, 2.25vw, 12px);
     line-height: 1.08;
   }
-
   .footer-copy__item {
     position: static;
     transform: none;
   }
-
-  .footer-copy__item--center { text-align: center; }
+  .footer-copy__item--center { text-align: left; }
   .footer-copy__item--right { text-align: right; }
-}
-
-/* Short landscape tablets and phones need the lockup higher, without forcing
-   a minimum document height that would crop the footer. */
-@media (max-width: 1100px) and (max-height: 620px) {
-  .title-lockup {
-    top: 20%;
-    row-gap: 10px;
-  }
-
-  .title-word--chef { font-size: clamp(66px, 16vw, 150px); }
-  .title-word--experience { font-size: clamp(48px, 12.8vw, 118px); }
-  .title-note {
-    width: clamp(124px, 22vw, 210px);
-    height: clamp(68px, 12vw, 116px);
-  }
-  .footer-copy { gap: 5px; padding-bottom: 7px; }
 }
 
 @media (max-width: 560px) {
   body { overflow-y: auto; }
-  .hero { min-height: 720px; height: 100svh; }
-  .background { background-size: auto 210%; background-position: 50% 18%; }
-
-  .masthead {
-    font-size: 9px;
-    font-weight: 680;
-    line-height: .96;
-  }
-  .masthead__date { top: 8.2%; }
-
-  .title-lockup {
-    top: 22%;
-    left: 4vw;
-    right: 4vw;
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "chef"
-      "note"
-      "experience";
-    row-gap: clamp(8px, 1.6vh, 14px);
-  }
-
-  .title-word--chef {
-    font-size: 22vw;
-    line-height: .74;
-  }
-
-  .title-word--experience {
-    font-size: 14.7vw;
-    line-height: .76;
-    letter-spacing: -.075em;
-  }
-
-  .title-note {
-    justify-self: end;
-    width: 43vw;
-    height: 21vw;
-    margin: -1vw 4vw 0 0;
-  }
-
-  .title-note__stack {
-    font-size: 3.85vw;
-    line-height: .9;
-  }
-
-  .title-note__script {
-    left: -.45em;
-    bottom: .05em;
-    font-size: 4.45vw;
-  }
-
-  .footer-copy {
-    gap: 7px;
-    font-size: clamp(8px, 2.2vw, 10px);
-    line-height: 1.08;
-  }
-
+  .background { background-size: auto 240%; background-position: 50% 17%; }
+  .hero { min-height: 760px; height: 100svh; }
+  .masthead { font-size: 9px; line-height: .96; }
+  .masthead__date { top: 8.7%; }
+  .title-lockup { top: 27%; }
+  .title-word { font-size: 20.5vw; }
+  .title-word--experience { margin-left: 0; font-size: 17.1vw; }
+  .title-note { top: 16.5vw; right: 2vw; }
   .footer-copy br { display: none; }
-  .footer-copy__item { max-width: 96%; }
-  .footer-copy__item--center { text-align: left; }
+  .footer-copy__item { max-width: 94%; }
   .footer-copy__item--right { justify-self: end; }
 }
 
@@ -328,13 +222,17 @@ body {
   .footer-copy { animation-delay: .16s; }
 }
 
-@keyframes settle {
-  from {
-    transform: scale(1.04);
-    filter: saturate(.62) contrast(.90) brightness(.72) sepia(.16);
-  }
-}
+@keyframes settle { from { transform: scale(1.04); filter: saturate(.62) contrast(.90) brightness(.72) sepia(.16); } }
+@keyframes reveal { from { opacity: 0; transform: translateY(8px); } }
 
-@keyframes reveal {
-  from { opacity: 0; transform: translateY(8px); }
+@media (max-width: 560px) {
+  .title-lockup { top: 25%; }
+  .title-note {
+    top: 40vw;
+    right: 4vw;
+    width: 32vw;
+    height: 18vw;
+  }
+  .title-note__stack { font-size: 3.15vw; line-height: .9; }
+  .title-note__script { font-size: 4.35vw; left: -1vw; bottom: 0; }
 }
