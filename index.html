@@ -1,53 +1,84 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#15130f">
-  <meta name="description" content="Chef Experience — a cinematic culinary platform concept.">
-  <title>Chef Experience</title>
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="Sushi Libre Exclusive Experience en SushiClub Puerto Madero.">
+  <title>Sushi Libre — Exclusive Experience</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="hero" aria-labelledby="hero-title">
-    <div class="background" aria-hidden="true"></div>
-    <div class="color-grade" aria-hidden="true"></div>
-    <div class="grain" aria-hidden="true"></div>
+  <main class="campaign">
+    <div class="campaign__grain" aria-hidden="true"></div>
 
-    <header class="masthead">
-      <p class="masthead__left">E-COMMERCE<br>WEBSITE</p>
-      <p class="masthead__date">SEPTEMBER-OCTOBER 2025</p>
-      <p class="masthead__credit">DESIGN BY<br>AURELIA<br>STASHKOVA</p>
-    </header>
+    <div class="campaign__frame">
+      <header class="event-meta motion-item motion-item--meta" aria-label="Información del evento">
+        <span>Puerto Madero</span><span aria-hidden="true">•</span>
+        <span>Jue 30/07</span><span aria-hidden="true">•</span>
+        <span>A partir 20.00 hs</span><span aria-hidden="true">•</span>
+        <span>Incluye cubierto</span>
+      </header>
 
-    <section class="title-lockup" id="hero-title" aria-label="Chef Experience">
-      <span class="title-word title-word--chef">Chef</span>
-      <span class="title-note" aria-hidden="true">
-        <span class="title-note__stack">MORE<br>THAN<br>COOKING</span>
-        <span class="title-note__script">from kitchen</span>
-      </span>
-      <span class="title-word title-word--experience">Experience</span>
-    </section>
+      <section class="event-title" aria-labelledby="event-title">
+        <h1 id="event-title" class="motion-item motion-item--title">Sushi Libre</h1>
+        <p class="event-title__subtitle motion-item motion-item--subtitle">Exclusive Experience</p>
+      </section>
 
-    <footer class="footer-copy">
-      <p class="footer-copy__item footer-copy__item--left">
-        THE PLATFORM CONNECTS CLIENTS WITH PROFESSIONAL<br>
-        CHEFS FOR PRIVATE DINNERS, EVENTS, AND HOME-COOKED<br>
-        EXPERIENCES
+      <p class="inclusions motion-item motion-item--inclusions">
+        + Agua &amp; limonada clásica libre + café por persona
       </p>
-      <p class="footer-copy__item footer-copy__item--center">
-        USERS CAN EXPLORE CHEF PROFILES, VIEW MENUS, AND BOOK<br>
-        CULINARY EXPERIENCES DIRECTLY THROUGH THE WEBSITE
-      </p>
-      <p class="footer-copy__item footer-copy__item--right">
-        THE GOAL OF THE PROJECT WAS TO CREATE A CLEAN,<br>
-        ELEGANT, AND INTUITIVE INTERFACE THAT CONVEYS<br>
-        A SENSE OF EXCLUSIVITY AND TRUST
-      </p>
-    </footer>
+
+      <section class="pricing motion-item motion-item--pricing" aria-label="Precios">
+        <article class="price-card" aria-label="Precio general 110.000 pesos">
+          <span class="price-card__price"><span class="price-card__currency">$</span>110.000</span>
+        </article>
+
+        <article class="price-card price-card--benefit" aria-label="Precio con reintegro 82.500 pesos">
+          <span class="price-card__eyebrow">Con 25% de reintegro</span>
+          <span class="price-card__price"><span class="price-card__currency">$</span>82.500</span>
+        </article>
+      </section>
+
+      <div class="layered-logo layered-logo--finance motion-item motion-item--finance" role="img" aria-label="Galicia Éminent exclusivo Visa Signature">
+        <img src="assets/eminente-visa-1.svg" alt="">
+        <img src="assets/eminente-visa-2.svg" alt="">
+        <img src="assets/eminente-visa-3.svg" alt="">
+        <img src="assets/eminente-visa-4.svg" alt="">
+        <img src="assets/eminente-visa-5.svg" alt="">
+        <img src="assets/eminente-visa-6.svg" alt="">
+      </div>
+
+      <section class="voucher motion-item motion-item--voucher" aria-label="Voucher adicional">
+        <p class="voucher__amount">+ Voucher <strong>$15.000</strong></p>
+        <p class="voucher__condition">En tu próximo Sushi Libre, por consumo responsable</p>
+      </section>
+
+      <section class="reservation motion-item motion-item--reservation">
+        <p>Reserva previa</p>
+        <a href="https://sushiclub.com.ar/sushilibre" rel="noopener">sushiclub.com.ar/sushilibre</a>
+      </section>
+
+      <footer class="campaign-footer motion-item motion-item--footer">
+        <div class="brand-row" aria-label="SushiClub 25 aniversario">
+          <div class="layered-logo layered-logo--sushiclub" role="img" aria-label="SushiClub">
+            <img src="assets/sushiclub-1.svg" alt="">
+            <img src="assets/sushiclub-2.svg" alt="">
+          </div>
+          <div class="layered-logo layered-logo--anniversary" role="img" aria-label="25 Anniversary Edition">
+            <img src="assets/anniversary-25-1.svg" alt="">
+            <img src="assets/anniversary-25-2.svg" alt="">
+          </div>
+        </div>
+
+        <p class="legal">
+          Bases, condiciones y locales adheridos en sushiclub.com.ar/beneficios. 25% de reintegro únicamente con Galicia Éminent Visa Signature. Para pagos en el local únicamente a través de billeteras virtuales Apple Pay y Google Pay utilizando NFC (sin contacto).
+        </p>
+      </footer>
+    </div>
   </main>
 </body>
 </html>
