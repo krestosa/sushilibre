@@ -1,5 +1,6 @@
 {
   "title": "MENÚ",
+  "background": "assets/menu_bg.png",
   "sections": [
     {
       "id": "piezas",
