@@ -5,8 +5,8 @@
   --grid-gap: clamp(12px, 1.05vw, 22px);
   --dock-height: 104px;
   --dock-bottom: clamp(24px, 3.8vh, 38px);
-  --ease-out: cubic-bezier(.22, 1, .36, 1);
-  --ease-soft: cubic-bezier(.33, 1, .68, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 * {
@@ -66,7 +66,7 @@ video {
 
 .hero__black-filter {
   z-index: -3;
-  background: rgba(0, 0, 0, .43);
+  background: rgba(0, 0, 0, 0.43);
 }
 
 .hero__gradient {
@@ -74,20 +74,26 @@ video {
   background: linear-gradient(
     180deg,
     #000 0%,
-    rgba(0, 0, 0, .93) 16%,
-    rgba(0, 0, 0, .59) 39%,
-    rgba(0, 0, 0, .2) 58%,
+    rgba(0, 0, 0, 0.93) 16%,
+    rgba(0, 0, 0, 0.59) 39%,
+    rgba(0, 0, 0, 0.2) 58%,
     rgba(0, 0, 0, 0) 69.5%
   );
 }
 
 .hero__grain {
   z-index: 8;
-  opacity: .12;
+  opacity: 0.12;
   background-image:
-    radial-gradient(circle, rgba(255,255,255,.11) 0 .42px, transparent .56px),
-    radial-gradient(circle, rgba(0,0,0,.18) 0 .42px, transparent .58px);
-  background-position: 0 0, 1.5px 1.5px;
+    radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.11) 0 0.42px,
+      transparent 0.56px
+    ),
+    radial-gradient(circle, rgba(0, 0, 0, 0.18) 0 0.42px, transparent 0.58px);
+  background-position:
+    0 0,
+    1.5px 1.5px;
   background-size: 3px 3px;
   mix-blend-mode: soft-light;
 }
@@ -107,10 +113,10 @@ video {
   top: clamp(27px, 3.35vh, 41px);
   align-items: start;
   text-transform: uppercase;
-  font-size: clamp(10px, .72vw, 14px);
+  font-size: clamp(10px, 0.72vw, 14px);
   font-weight: 650;
-  line-height: .92;
-  letter-spacing: -.055em;
+  line-height: 0.92;
+  letter-spacing: -0.055em;
 }
 
 .masthead p {
@@ -156,32 +162,34 @@ video {
   color: #fff;
   font-size: clamp(108px, 10.55vw, 204px);
   font-weight: 300;
-  line-height: .78;
-  letter-spacing: -.075em;
-  text-shadow: 0 0 3px rgba(255,255,255,.64), 0 0 18px rgba(255,255,255,.18);
+  line-height: 0.78;
+  letter-spacing: -0.075em;
+  text-shadow:
+    0 0 3px rgba(255, 255, 255, 0.64),
+    0 0 18px rgba(255, 255, 255, 0.18);
 }
 
 .title-word--sushi {
   grid-column: 2 / span 4;
   justify-self: start;
-  margin-left: -.035em;
+  margin-left: -0.035em;
 }
 
 .title-kicker {
   grid-column: 6 / span 3;
   justify-self: center;
-  margin: .06em 0 0;
+  margin: 0.06em 0 0;
   font-size: clamp(18px, 1.58vw, 31px);
   font-weight: 500;
   line-height: 1;
-  letter-spacing: -.052em;
+  letter-spacing: -0.052em;
   text-align: center;
 }
 
 .title-word--libre {
   grid-column: 9 / span 4;
   justify-self: end;
-  margin-right: -.02em;
+  margin-right: -0.02em;
 }
 
 .hero-copy {
@@ -193,23 +201,23 @@ video {
   transform: translateX(-50%);
   text-align: center;
   text-transform: uppercase;
-  text-shadow: 0 1px 9px rgba(0,0,0,.72);
+  text-shadow: 0 1px 9px rgba(0, 0, 0, 0.72);
 }
 
 .hero-copy h2 {
   margin: 0;
-  font-size: clamp(14px, .98vw, 19px);
+  font-size: clamp(14px, 0.98vw, 19px);
   font-weight: 700;
   line-height: 1.05;
-  letter-spacing: -.035em;
+  letter-spacing: -0.035em;
 }
 
 .hero-copy p {
   margin: clamp(12px, 1.2vh, 17px) 0 0;
-  font-size: clamp(10px, .72vw, 14px);
+  font-size: clamp(10px, 0.72vw, 14px);
   font-weight: 500;
   line-height: 1.2;
-  letter-spacing: -.018em;
+  letter-spacing: -0.018em;
 }
 
 .booking-dock {
@@ -220,14 +228,17 @@ video {
   height: var(--dock-height);
   margin: 0 auto calc(-1 * var(--dock-height));
   display: grid;
-  grid-template-columns: minmax(158px, 1.16fr) minmax(150px, 1.08fr) minmax(0, 2.55fr) 108px;
+  grid-template-columns: minmax(158px, 1.16fr) minmax(150px, 1.08fr) minmax(
+      0,
+      2.55fr
+    ) 108px;
   align-items: stretch;
   gap: 9px;
   padding: 9px;
-  border: 1px solid rgba(255,255,255,.075);
+  border: 1px solid rgba(255, 255, 255, 0.075);
   border-radius: 12px;
-  background: rgba(9, 7, 6, .82);
-  box-shadow: 0 18px 46px rgba(0,0,0,.4);
+  background: rgba(9, 7, 6, 0.82);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(18px) saturate(118%);
   -webkit-backdrop-filter: blur(18px) saturate(118%);
 }
@@ -242,7 +253,7 @@ video {
 
 .booking-dock__label {
   margin-bottom: 7px;
-  color: rgba(255,255,255,.72);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 12px;
   font-weight: 400;
   line-height: 1;
@@ -252,7 +263,7 @@ video {
   font-size: 16px;
   font-weight: 500;
   line-height: 1;
-  letter-spacing: -.045em;
+  letter-spacing: -0.045em;
   white-space: nowrap;
 }
 
@@ -268,22 +279,22 @@ video {
   align-items: center;
   justify-content: center;
   min-width: 0;
-  border: 1px solid rgba(255,255,255,.025);
+  border: 1px solid rgba(255, 255, 255, 0.025);
   border-radius: 6px;
-  background: rgba(4,4,4,.76);
+  background: rgba(4, 4, 4, 0.76);
 }
 
 .countdown__unit strong {
   font-size: clamp(28px, 2.1vw, 40px);
   font-weight: 300;
-  line-height: .86;
-  letter-spacing: -.07em;
+  line-height: 0.86;
+  letter-spacing: -0.07em;
   font-variant-numeric: tabular-nums;
 }
 
 .countdown__unit span {
   margin-top: 9px;
-  font-size: 6px;
+  font-size: 10px;
   font-weight: 600;
   line-height: 1;
 }
@@ -297,11 +308,13 @@ video {
   color: #090706;
   font-size: 16px;
   font-weight: 700;
-  line-height: .92;
-  letter-spacing: -.04em;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
   text-align: center;
   text-decoration: none;
-  transition: transform 150ms ease-out, filter 150ms ease-out;
+  transition:
+    transform 150ms ease-out,
+    filter 150ms ease-out;
 }
 
 .booking-dock__cta:focus-visible {
@@ -316,12 +329,14 @@ video {
 }
 
 .booking-dock__cta:active {
-  transform: scale(.975);
+  transform: scale(0.975);
 }
 
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
   .booking-dock {
-    background: rgba(9, 7, 6, .95);
+    background: rgba(9, 7, 6, 0.95);
   }
 }
 
@@ -391,7 +406,7 @@ video {
     grid-row: 1;
     align-self: end;
     justify-self: end;
-    margin-bottom: .3em;
+    margin-bottom: 0.3em;
     font-size: clamp(15px, 2.8vw, 24px);
   }
 
@@ -575,7 +590,7 @@ video {
 
 @keyframes video-settle {
   from {
-    opacity: .84;
+    opacity: 0.84;
     scale: 1.025;
   }
 
@@ -586,8 +601,12 @@ video {
 }
 
 @keyframes shade-fade {
-  from { opacity: .7; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes rise-in {
@@ -637,6 +656,10 @@ video {
 }
 
 @keyframes quiet-fade {
-  from { opacity: .82; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.82;
+  }
+  to {
+    opacity: 1;
+  }
 }
