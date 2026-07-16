@@ -1,0 +1,105 @@
+/* Responsive title corrections applied after the base and hero refinement layers. */
+
+/* Compact desktop and landscape tablet: preserve the desktop one-line lockup. */
+@media (min-width: 621px) and (max-width: 1280px) and (orientation: landscape),
+       (min-width: 901px) and (max-width: 1280px) {
+  .hero {
+    min-height: 720px;
+  }
+
+  .hero__video {
+    object-position: 50% 50%;
+  }
+
+  .title-lockup {
+    top: clamp(34%, 38.5vh, 39.5%);
+    left: 50%;
+    right: auto;
+    width: min(1180px, calc(100vw - clamp(48px, 6vw, 92px)));
+    transform: translateX(-50%);
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-rows: auto;
+    column-gap: clamp(18px, 2vw, 32px);
+    row-gap: 0;
+    align-items: center;
+  }
+
+  .title-word {
+    font-size: clamp(76px, 9.15vw, 118px);
+  }
+
+  .title-word--sushi {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  .title-kicker {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    justify-self: center;
+    margin: .06em 0 0;
+    font-size: clamp(14px, 1.55vw, 20px);
+  }
+
+  .title-word--libre {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .hero-copy {
+    top: 63.5%;
+    width: min(720px, 72vw);
+  }
+}
+
+/* Portrait tablet: retain the successful mobile rhythm, but with tablet spacing and scale. */
+@media (min-width: 621px) and (max-width: 900px) and (orientation: portrait) {
+  .hero {
+    min-height: 860px;
+  }
+
+  .title-lockup {
+    top: 24.5%;
+    left: 50%;
+    right: auto;
+    width: calc(100% - clamp(44px, 7vw, 72px));
+    transform: translateX(-50%);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto auto auto;
+    column-gap: var(--grid-gap);
+    row-gap: clamp(7px, 1.1vh, 12px);
+  }
+
+  .title-word {
+    font-size: clamp(94px, 18.5vw, 142px);
+  }
+
+  .title-word--sushi {
+    grid-column: 1 / span 9;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  .title-kicker {
+    grid-column: 4 / span 9;
+    grid-row: 2;
+    align-self: auto;
+    justify-self: end;
+    margin: 0;
+    font-size: clamp(17px, 3.25vw, 25px);
+  }
+
+  .title-word--libre {
+    grid-column: 3 / span 10;
+    grid-row: 3;
+    justify-self: end;
+  }
+
+  .hero-copy {
+    top: 59%;
+    width: min(690px, 86vw);
+  }
+}
