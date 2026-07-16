@@ -185,6 +185,10 @@
       padding-top: 1vh;
     }
 
+    .menu-group__overlap-sentinel {
+      display: none;
+    }
+
     .menu-item {
       padding: 0 0 clamp(28px, 4vh, 52px);
       margin: 0 0 clamp(28px, 4vh, 52px);
@@ -282,7 +286,7 @@
       .menu-group {
         display: block;
         min-height: auto;
-        padding: 8vh 0 8vh;
+        padding: 8vh 0;
       }
 
       .menu-group + .menu-group {
@@ -292,12 +296,40 @@
       .menu-group__heading {
         z-index: 4;
         top: 0;
+        isolation: isolate;
         padding: 16px 0 22px;
         background: transparent;
         opacity: .62;
       }
 
+      .menu-group__heading::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        top: 0;
+        right: -16px;
+        bottom: -34px;
+        left: -16px;
+        opacity: 0;
+        pointer-events: none;
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, .97) 0%,
+          rgba(0, 0, 0, .93) 48%,
+          rgba(0, 0, 0, .72) 68%,
+          rgba(0, 0, 0, .34) 84%,
+          rgba(0, 0, 0, 0) 100%
+        );
+        transition: opacity 170ms ease-out;
+      }
+
+      .menu-group.is-active .menu-group__heading.is-overlapping::before {
+        opacity: 1;
+      }
+
       .menu-group__title-line {
+        position: relative;
+        z-index: 1;
         gap: 10px;
       }
 
@@ -311,6 +343,14 @@
 
       .menu-group__items {
         padding-top: 5vh;
+      }
+
+      .menu-group__overlap-sentinel {
+        display: block;
+        width: 1px;
+        height: 1px;
+        margin: 0;
+        pointer-events: none;
       }
 
       .menu-item {
@@ -330,7 +370,8 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .menu-group__heading {
+      .menu-group__heading,
+      .menu-group__heading::before {
         transition: none;
         transform: none;
       }
@@ -398,6 +439,58 @@
     tryCandidate(0);
   };
 
+  const configureMobileOverlapShadows = (groups) => {
+    const mobileQuery = window.matchMedia('(max-width: 720px)');
+    let observers = [];
+    let resizeFrame = 0;
+
+    const disconnectObservers = () => {
+      observers.forEach((observer) => observer.disconnect());
+      observers = [];
+      groups.forEach((group) => {
+        group.querySelector('.menu-group__heading')?.classList.remove('is-overlapping');
+      });
+    };
+
+    const configure = () => {
+      disconnectObservers();
+      if (!mobileQuery.matches || !('IntersectionObserver' in window)) return;
+
+      groups.forEach((group) => {
+        const heading = group.querySelector('.menu-group__heading');
+        const sentinel = group.querySelector('.menu-group__overlap-sentinel');
+        if (!heading || !sentinel) return;
+
+        const headingHeight = Math.ceil(heading.getBoundingClientRect().height);
+        const observer = new IntersectionObserver(([entry]) => {
+          const overlaps =
+            !entry.isIntersecting && entry.boundingClientRect.top <= headingHeight;
+          heading.classList.toggle('is-overlapping', overlaps);
+        }, {
+          root: null,
+          rootMargin: `-${headingHeight}px 0px 0px 0px`,
+          threshold: 0
+        });
+
+        observer.observe(sentinel);
+        observers.push(observer);
+      });
+    };
+
+    const scheduleConfigure = () => {
+      if (resizeFrame) return;
+      resizeFrame = window.requestAnimationFrame(() => {
+        resizeFrame = 0;
+        configure();
+      });
+    };
+
+    configure();
+    mobileQuery.addEventListener?.('change', scheduleConfigure);
+    window.addEventListener('resize', scheduleConfigure, { passive: true });
+    document.fonts?.ready.then(scheduleConfigure);
+  };
+
   const renderMenu = (data) => {
     if (!data || typeof data.title !== 'string' || !Array.isArray(data.sections)) {
       throw new TypeError('Invalid menu data.');
@@ -439,6 +532,11 @@
       const items = document.createElement('div');
       items.className = 'menu-group__items';
 
+      const overlapSentinel = document.createElement('span');
+      overlapSentinel.className = 'menu-group__overlap-sentinel';
+      overlapSentinel.setAttribute('aria-hidden', 'true');
+      items.append(overlapSentinel);
+
       validItems.forEach((entry) => {
         const item = document.createElement('article');
         item.className = 'menu-item';
@@ -463,6 +561,7 @@
 
     groups[0].classList.add('is-active');
     menuRoot.dataset.activeMenu = groups[0].dataset.menuGroup;
+    configureMobileOverlapShadows(groups);
 
     if (!('IntersectionObserver' in window)) return;
 
