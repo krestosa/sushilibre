@@ -190,10 +190,7 @@
     if (currentTitle === title && currentQuantity === quantity) return;
 
     const firstRender = !proxy.classList.contains('is-ready') || !currentTitle;
-    if (
-      firstRender ||
-      typeof proxyInner.animate !== 'function'
-    ) {
+    if (firstRender || typeof proxyInner.animate !== 'function') {
       swapAnimation?.cancel();
       setProxyText(title, quantity);
       return;
@@ -279,51 +276,58 @@
     const candidates = [];
     if (menuIntroHeading && !menuIntroHeading.dataset.motionReady) {
       menuIntroHeading.dataset.motionReady = 'true';
-      candidates.push({ element: menuIntroHeading, type: 'intro' });
+      candidates.push({ element: menuIntroHeading, type: 'intro', delay: 0 });
     }
 
     groups.forEach((group) => {
-      const items = group.querySelector('.menu-group__items');
-      if (!items || items.dataset.motionReady) return;
-      items.dataset.motionReady = 'true';
-      candidates.push({ element: items, type: 'group' });
+      const leadingItems = Array.from(group.querySelectorAll('.menu-item')).slice(0, 3);
+      leadingItems.forEach((item, index) => {
+        if (item.dataset.motionReady) return;
+        item.dataset.motionReady = 'true';
+        candidates.push({
+          element: item,
+          type: 'item',
+          delay: reducedMotion.matches ? 0 : index * 40
+        });
+      });
     });
 
     if (!candidates.length) return;
 
-    candidates.forEach(({ element }) => {
-      element.style.opacity = '0';
-      element.style.transform = reducedMotion.matches
+    const candidateByElement = new Map();
+    candidates.forEach((candidate) => {
+      candidateByElement.set(candidate.element, candidate);
+      candidate.element.style.opacity = '0';
+      candidate.element.style.transform = reducedMotion.matches
         ? 'translate3d(0, 3px, 0)'
-        : 'translate3d(0, 10px, 0)';
+        : candidate.type === 'intro'
+          ? 'translate3d(0, 14px, 0)'
+          : 'translate3d(0, 8px, 0)';
     });
 
     revealObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
 
-        const candidate = candidates.find(({ element }) => element === entry.target);
+        const candidate = candidateByElement.get(entry.target);
         if (!candidate) return;
 
         observer.unobserve(entry.target);
         const isIntro = candidate.type === 'intro';
-        const duration = reducedMotion.matches
-          ? 150
-          : isIntro
-            ? 360
-            : 280;
-        const distance = reducedMotion.matches ? 3 : isIntro ? 14 : 10;
+        const duration = reducedMotion.matches ? 150 : isIntro ? 360 : 260;
+        const distance = reducedMotion.matches ? 3 : isIntro ? 14 : 8;
 
         animateOnce(entry.target, [
           { opacity: 0, transform: `translate3d(0, ${distance}px, 0)` },
           { opacity: 1, transform: 'translate3d(0, 0, 0)' }
         ], {
           duration,
+          delay: candidate.delay,
           easing: easeOut
         });
       });
     }, {
-      rootMargin: '0px 0px -12% 0px',
+      rootMargin: '0px 0px -10% 0px',
       threshold: .08
     });
 
