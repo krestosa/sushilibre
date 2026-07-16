@@ -24,11 +24,6 @@
     return remaining;
   };
 
-  const video = document.querySelector('.hero__video');
-  if (video) {
-    video.play().catch(() => undefined);
-  }
-
   if (renderCountdown() > 0) {
     const timerId = window.setInterval(() => {
       if (renderCountdown() === 0) {
@@ -36,4 +31,84 @@
       }
     }, 1_000);
   }
+
+  const videos = Array.from(document.querySelectorAll('[data-loop-video]'));
+  if (videos.length < 2) {
+    videos[0]?.play().catch(() => undefined);
+    return;
+  }
+
+  const fadeDuration = 720;
+  const fadeLead = .9;
+  let activeIndex = 0;
+  let transitionInProgress = false;
+  let animationFrameId = 0;
+
+  videos.forEach((video, index) => {
+    video.loop = false;
+    video.muted = true;
+    video.playsInline = true;
+    video.classList.toggle('is-active', index === activeIndex);
+  });
+
+  const crossfade = async () => {
+    if (transitionInProgress) return;
+    transitionInProgress = true;
+
+    const outgoing = videos[activeIndex];
+    const nextIndex = (activeIndex + 1) % videos.length;
+    const incoming = videos[nextIndex];
+
+    try {
+      incoming.pause();
+      incoming.currentTime = 0;
+      await incoming.play();
+
+      window.requestAnimationFrame(() => {
+        incoming.classList.add('is-active');
+        outgoing.classList.remove('is-active');
+      });
+
+      window.setTimeout(() => {
+        outgoing.pause();
+        outgoing.currentTime = 0;
+        activeIndex = nextIndex;
+        transitionInProgress = false;
+      }, fadeDuration + 60);
+    } catch {
+      transitionInProgress = false;
+    }
+  };
+
+  const monitorLoop = () => {
+    const activeVideo = videos[activeIndex];
+    const duration = activeVideo.duration;
+
+    if (
+      !transitionInProgress &&
+      Number.isFinite(duration) &&
+      duration > 0 &&
+      duration - activeVideo.currentTime <= fadeLead
+    ) {
+      crossfade();
+    }
+
+    animationFrameId = window.requestAnimationFrame(monitorLoop);
+  };
+
+  videos[activeIndex].play().catch(() => undefined);
+  animationFrameId = window.requestAnimationFrame(monitorLoop);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+
+    const activeVideo = videos[activeIndex];
+    if (activeVideo.paused && !transitionInProgress) {
+      activeVideo.play().catch(() => undefined);
+    }
+  });
+
+  window.addEventListener('pagehide', () => {
+    window.cancelAnimationFrame(animationFrameId);
+  }, { once: true });
 })();
