@@ -1,12 +1,12 @@
 :root {
-  --white: #f4f1e9;
-  --muted: rgba(244, 241, 233, .72);
-  --rule: rgba(244, 241, 233, .34);
-  --accent: #ec6c22;
-  --page-x: clamp(22px, 2.35vw, 48px);
-  --grid-gap: clamp(12px, 1.1vw, 24px);
-  --motion-ease-out: cubic-bezier(.22, 1, .36, 1);
-  --motion-ease-soft: cubic-bezier(.33, 1, .68, 1);
+  --white: #f7f5ef;
+  --orange: #dd6f2b;
+  --page-x: clamp(24px, 2.2vw, 44px);
+  --grid-gap: clamp(12px, 1.05vw, 22px);
+  --dock-height: 108px;
+  --dock-bottom: clamp(18px, 2.4vh, 30px);
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-soft: cubic-bezier(.33, 1, .68, 1);
 }
 
 * {
@@ -17,56 +17,76 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  background: #111;
+  background: #050505;
 }
 
 body {
-  font-family: "Inter", Arial, sans-serif;
   color: var(--white);
-  overflow: hidden;
+  font-family: "Inter", Arial, sans-serif;
   font-synthesis: none;
   text-rendering: geometricPrecision;
+}
+
+img,
+video {
+  display: block;
+}
+
+.page {
+  min-height: 100svh;
 }
 
 .hero {
   position: relative;
   isolation: isolate;
-  width: 100vw;
-  height: 100svh;
   min-height: 720px;
+  height: 100svh;
   overflow: hidden;
-  background: #17130d;
+  background: #050505;
 }
 
-.background,
-.color-grade,
-.grain {
+.hero__video,
+.hero__black-filter,
+.hero__gradient,
+.hero__grain {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 
-.background {
+.hero__video {
   z-index: -4;
-  background: url("https://tmhmedia.themodernhouse.com/uploads/2021/07/Timberyard_04-1200x1800.jpg") center 17% / cover no-repeat;
-  transform: scale(1.015);
-  filter: saturate(.7) contrast(.95) brightness(.94) sepia(.1);
+  object-fit: cover;
+  object-position: center center;
 }
 
-.color-grade {
+.hero__black-filter {
   z-index: -3;
-  background:
-    linear-gradient(90deg, rgba(16, 35, 39, .3) 0%, rgba(53, 35, 18, .03) 30%, rgba(150, 88, 29, .24) 68%, rgba(24, 36, 36, .2) 100%),
-    linear-gradient(180deg, rgba(7, 7, 6, .28) 0%, rgba(7, 7, 6, .02) 28%, rgba(12, 9, 7, .08) 52%, rgba(8, 7, 6, .74) 100%),
-    radial-gradient(ellipse at 50% 48%, transparent 31%, rgba(5, 5, 4, .42) 100%);
+  background: rgba(0, 0, 0, .43);
 }
 
-.grain {
-  z-index: 5;
-  opacity: .18;
+.hero__gradient {
+  z-index: -2;
+  background:
+    linear-gradient(
+      180deg,
+      #000 0%,
+      rgba(0, 0, 0, .92) 15%,
+      rgba(0, 0, 0, .58) 35%,
+      rgba(0, 0, 0, .18) 53%,
+      rgba(0, 0, 0, 0) 62%
+    ),
+    linear-gradient(180deg, transparent 68%, rgba(0, 0, 0, .62) 100%);
+}
+
+.hero__grain {
+  z-index: 8;
+  opacity: .15;
   background-image:
-    radial-gradient(circle, rgba(255,255,255,.13) 0 .45px, transparent .58px),
-    radial-gradient(circle, rgba(0,0,0,.17) 0 .45px, transparent .6px);
+    radial-gradient(circle, rgba(255,255,255,.11) 0 .42px, transparent .56px),
+    radial-gradient(circle, rgba(0,0,0,.18) 0 .42px, transparent .58px);
   background-position: 0 0, 1.5px 1.5px;
   background-size: 3px 3px;
   mix-blend-mode: soft-light;
@@ -74,39 +94,48 @@ body {
 
 .masthead {
   position: absolute;
-  z-index: 2;
-  top: clamp(24px, 3.4vh, 42px);
+  z-index: 3;
+  top: clamp(28px, 3.35vh, 42px);
   left: var(--page-x);
   right: var(--page-x);
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--grid-gap);
   align-items: start;
-  pointer-events: none;
   text-transform: uppercase;
-  font-size: clamp(10px, .76vw, 15px);
-  font-weight: 500;
-  line-height: .98;
-  letter-spacing: -.035em;
-  text-shadow: 0 1px 10px rgba(0,0,0,.45);
+  font-size: clamp(10px, .72vw, 14px);
+  font-weight: 650;
+  line-height: .92;
+  letter-spacing: -.055em;
 }
 
 .masthead p {
-  position: static;
   margin: 0;
 }
 
-.masthead__left {
+.masthead__venue {
   grid-column: 1 / span 2;
 }
 
-.masthead__date {
+.masthead__brands {
   grid-column: 5 / span 4;
-  justify-self: center;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(26px, 2.5vw, 50px);
 }
 
-.masthead__credit {
+.masthead__sushiclub {
+  width: clamp(120px, 9vw, 176px);
+  height: auto;
+}
+
+.masthead__anniversary {
+  width: clamp(58px, 4.2vw, 82px);
+  height: auto;
+}
+
+.masthead__reservation {
   grid-column: 11 / span 2;
   justify-self: end;
   text-align: right;
@@ -114,549 +143,422 @@ body {
 
 .title-lockup {
   position: absolute;
-  z-index: 2;
-  top: 35.5%;
+  z-index: 3;
+  top: 38.8%;
   left: var(--page-x);
   right: var(--page-x);
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--grid-gap);
-  align-items: end;
+  align-items: center;
   white-space: nowrap;
-  color: #fffef8;
-  text-shadow: 0 0 2px rgba(255,255,255,.78), 0 0 12px rgba(255,245,224,.18);
 }
 
 .title-word {
-  display: block;
-  font-size: clamp(102px, 13.25vw, 270px);
-  font-weight: 220;
-  line-height: .76;
-  letter-spacing: -.085em;
-}
-
-.title-word--chef {
-  grid-column: 1 / span 5;
-  margin-left: -.018em;
-}
-
-.title-word--experience {
-  grid-column: 8 / span 5;
-  justify-self: end;
-  margin-right: -.025em;
-  transform: scaleX(1.035);
-  transform-origin: right bottom;
-}
-
-.title-note {
-  position: relative;
-  grid-column: 6 / span 2;
-  align-self: end;
-  justify-self: center;
-  width: min(100%, 210px);
-  height: clamp(78px, 8vw, 154px);
-  margin-bottom: .55vw;
-  font-style: italic;
-  font-weight: 300;
-  text-shadow: 0 0 2px rgba(255,255,255,.48);
-}
-
-.title-note__stack {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: clamp(13px, 1.12vw, 23px);
-  font-weight: 440;
-  line-height: .92;
-  letter-spacing: .02em;
-}
-
-.title-note__script {
-  position: absolute;
-  left: 50%;
-  bottom: .2vw;
-  font-size: clamp(22px, 1.9vw, 38px);
-  font-weight: 260;
-  letter-spacing: -.085em;
-  transform: translateX(-50%) rotate(-4deg) skewX(-7deg);
-  transform-origin: center;
-}
-
-.footer-copy {
-  position: absolute;
-  z-index: 2;
-  left: var(--page-x);
-  right: var(--page-x);
-  bottom: clamp(20px, 3vh, 38px);
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  grid-template-areas: none;
-  column-gap: var(--grid-gap);
-  row-gap: clamp(10px, 1.15vw, 20px);
-  align-items: end;
-  padding: clamp(15px, 1.25vw, 24px) 0 clamp(8px, .6vw, 12px);
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
-  text-transform: uppercase;
-  font-size: clamp(8px, .61vw, 12px);
-  font-weight: 470;
-  line-height: 1.08;
-  letter-spacing: -.03em;
-  text-shadow: 0 1px 8px rgba(0,0,0,.62);
-}
-
-.footer-copy p {
   margin: 0;
+  color: #fff;
+  font-size: clamp(110px, 10.6vw, 204px);
+  font-weight: 300;
+  line-height: .78;
+  letter-spacing: -.075em;
+  text-shadow: 0 0 3px rgba(255,255,255,.68), 0 0 17px rgba(255,255,255,.2);
 }
 
-.footer-copy__item--left {
-  grid-column: 1 / span 4;
-  grid-row: 1;
-  text-align: left;
+.title-word--sushi {
+  grid-column: 2 / span 4;
+  justify-self: start;
+  margin-left: -.035em;
 }
 
-.footer-copy__item--center {
-  grid-column: 5 / span 4;
-  grid-row: 1;
-  text-align: center;
-}
-
-.footer-copy__item--right {
-  grid-column: 10 / span 3;
-  grid-row: 1;
-  text-align: right;
-}
-
-.footer-copy__eyebrow,
-.price__label {
-  display: block;
-  margin-bottom: .6em;
-  color: var(--muted);
-  font-size: .76em;
-  font-weight: 560;
-  letter-spacing: .11em;
-}
-
-.included-copy {
-  max-width: 34em;
-  font-size: 1.08em;
-  font-weight: 550;
-  line-height: 1.18;
-}
-
-.voucher {
-  margin-top: clamp(10px, .9vw, 17px);
-  padding-top: clamp(9px, .7vw, 13px);
-  border-top: 1px solid rgba(244, 241, 233, .2);
-}
-
-.voucher__title {
-  font-size: clamp(14px, 1.05vw, 21px);
-  font-weight: 330;
-  letter-spacing: -.055em;
-}
-
-.voucher__title strong {
-  font-weight: 670;
-}
-
-.voucher__note {
-  margin-top: .42em !important;
-  max-width: 40em;
-  color: var(--muted);
-  font-size: .71em;
-  font-style: italic;
-  font-weight: 430;
-  line-height: 1.16;
-}
-
-.price-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(12px, 1vw, 20px);
-  align-items: end;
-}
-
-.price {
-  min-width: 0;
-  padding-top: clamp(9px, .72vw, 14px);
-  border-top: 1px solid rgba(236, 108, 34, .92);
-}
-
-.price__amount {
-  display: block;
-  font-size: clamp(25px, 2vw, 40px);
-  font-weight: 520;
-  line-height: .9;
-  letter-spacing: -.06em;
-}
-
-.payment-logo {
-  display: block;
-  width: min(100%, 304px);
-  height: auto;
-  margin: clamp(8px, .6vw, 12px) auto 0;
-}
-
-.reservation__title {
-  font-size: clamp(15px, 1.3vw, 26px);
-  font-weight: 310;
-  line-height: .98;
-  letter-spacing: .13em;
-}
-
-.reservation__url {
-  margin-top: .68em !important;
-  font-size: clamp(8px, .68vw, 13px);
-  font-weight: 650;
-  letter-spacing: .14em;
-  white-space: nowrap;
-}
-
-.brand-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: clamp(12px, 1.05vw, 21px);
-  margin-top: clamp(10px, .78vw, 15px);
-}
-
-.brand-row__sushiclub {
-  width: clamp(96px, 8.8vw, 176px);
-  height: auto;
-}
-
-.brand-row__anniversary {
-  width: clamp(48px, 4.5vw, 90px);
-  height: auto;
-}
-
-.legal {
-  grid-column: 1 / -1;
-  grid-row: 2;
-  max-width: 1560px;
+.title-kicker {
+  grid-column: 6 / span 3;
   justify-self: center;
+  margin: .05em 0 0;
+  font-size: clamp(18px, 1.65vw, 32px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.055em;
   text-align: center;
-  color: rgba(244, 241, 233, .62);
-  font-size: clamp(6px, .4vw, 8px);
-  font-weight: 450;
-  line-height: 1.2;
+}
+
+.title-word--libre {
+  grid-column: 9 / span 4;
+  justify-self: end;
+  margin-right: -.02em;
+}
+
+.hero-copy {
+  position: absolute;
+  z-index: 3;
+  top: 63.2%;
+  left: 50%;
+  width: min(790px, 66vw);
+  transform: translateX(-50%);
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(0,0,0,.68);
+}
+
+.hero-copy h2 {
+  margin: 0;
+  font-size: clamp(14px, 1vw, 20px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -.035em;
+}
+
+.hero-copy p {
+  margin: clamp(12px, 1.2vh, 18px) 0 0;
+  font-size: clamp(10px, .73vw, 14px);
+  font-weight: 500;
+  line-height: 1.18;
   letter-spacing: -.018em;
 }
 
-@media (max-width: 1180px), (max-aspect-ratio: 4/3) {
-  body {
-    overflow-y: auto;
-  }
+.booking-dock {
+  position: sticky;
+  z-index: 20;
+  top: calc(100svh - var(--dock-height) - var(--dock-bottom));
+  width: min(930px, calc(100vw - 48px));
+  height: var(--dock-height);
+  margin: 0 auto calc(-1 * var(--dock-height));
+  display: grid;
+  grid-template-columns: minmax(150px, 1.25fr) minmax(150px, 1.15fr) minmax(0, 2.6fr) 108px;
+  align-items: stretch;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px;
+  background: rgba(10, 8, 7, .82);
+  box-shadow: 0 18px 46px rgba(0,0,0,.38);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+}
 
-  .hero {
-    min-height: 1020px;
-  }
+.booking-dock__meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 0 8px;
+}
 
-  .background {
-    background-position: 50% 17%;
-  }
+.booking-dock__label {
+  margin-bottom: 7px;
+  color: rgba(255,255,255,.72);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+}
 
-  .masthead__left {
-    grid-column: 1 / span 3;
-  }
+.booking-dock__meta strong {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.045em;
+}
 
-  .masthead__date {
-    grid-column: 4 / span 6;
-  }
+.countdown {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
 
-  .masthead__credit {
-    grid-column: 10 / span 3;
-  }
+.countdown__unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  border-radius: 6px;
+  background: rgba(5,5,5,.72);
+}
 
-  .title-lockup {
-    top: 22%;
-    grid-template-rows: auto auto;
-    row-gap: clamp(14px, 2vh, 24px);
-  }
+.countdown__unit strong {
+  font-size: clamp(28px, 2.2vw, 42px);
+  font-weight: 300;
+  line-height: .86;
+  letter-spacing: -.07em;
+  font-variant-numeric: tabular-nums;
+}
 
-  .title-word {
-    font-size: clamp(88px, 20vw, 188px);
-    line-height: .78;
-  }
+.countdown__unit span {
+  margin-top: 9px;
+  font-size: 6px;
+  font-weight: 600;
+  line-height: 1;
+}
 
-  .title-word--chef {
-    grid-column: 1 / span 7;
-    grid-row: 1;
-  }
+.booking-dock__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--orange);
+  color: #090706;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: .92;
+  letter-spacing: -.04em;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 150ms ease-out, filter 150ms ease-out;
+}
 
-  .title-note {
-    grid-column: 9 / span 4;
-    grid-row: 1;
-    justify-self: end;
-    width: clamp(150px, 25vw, 250px);
-    height: clamp(92px, 15vw, 150px);
-    margin: 0 1vw -.5vw 0;
-  }
-
-  .title-note__stack {
-    font-size: clamp(14px, 2.35vw, 24px);
-  }
-
-  .title-note__script {
-    font-size: clamp(22px, 3.6vw, 36px);
-  }
-
-  .title-word--experience {
-    grid-column: 3 / span 10;
-    grid-row: 2;
-    justify-self: start;
-    margin: 0;
-    transform: none;
-  }
-
-  .footer-copy {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    row-gap: 18px;
-    font-size: clamp(8px, 1.05vw, 11px);
-  }
-
-  .footer-copy__item--left {
-    grid-column: 1 / span 6;
-    grid-row: 1;
-  }
-
-  .footer-copy__item--center {
-    grid-column: 7 / span 6;
-    grid-row: 1;
-  }
-
-  .footer-copy__item--right {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "title brands"
-      "url brands";
-    align-items: center;
-    column-gap: 20px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(244, 241, 233, .2);
-    text-align: left;
-  }
-
-  .reservation__title {
-    grid-area: title;
-  }
-
-  .reservation__url {
-    grid-area: url;
-  }
-
-  .brand-row {
-    grid-area: brands;
-    margin-top: 0;
-  }
-
-  .legal {
-    grid-row: 3;
+@media (hover: hover) and (pointer: fine) {
+  .booking-dock__cta:hover {
+    filter: brightness(1.06);
   }
 }
 
-@media (max-width: 620px) {
-  .hero {
-    min-height: 1180px;
-    height: 100svh;
+.booking-dock__cta:active {
+  transform: scale(.975);
+}
+
+@media (max-width: 1100px) {
+  :root {
+    --dock-height: 104px;
   }
 
-  .background {
-    background-size: auto 188%;
-    background-position: 50% 18%;
+  .title-lockup {
+    top: 35%;
+  }
+
+  .title-word {
+    font-size: clamp(92px, 14vw, 154px);
+  }
+
+  .title-word--sushi {
+    grid-column: 1 / span 5;
+  }
+
+  .title-kicker {
+    grid-column: 5 / span 4;
+    font-size: clamp(16px, 2.2vw, 24px);
+  }
+
+  .title-word--libre {
+    grid-column: 9 / span 4;
+  }
+
+  .hero-copy {
+    top: 61%;
+    width: min(740px, 80vw);
+  }
+
+  .booking-dock {
+    width: min(920px, calc(100vw - 32px));
+    grid-template-columns: 1fr 1fr 2.45fr 104px;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --dock-height: 174px;
+    --dock-bottom: 14px;
+  }
+
+  .hero {
+    min-height: 820px;
+  }
+
+  .hero__video {
+    object-position: 53% center;
   }
 
   .masthead {
     top: 22px;
     font-size: 8px;
-    line-height: 1;
   }
 
-  .masthead__left {
-    grid-column: 1 / span 4;
+  .masthead__venue {
+    grid-column: 1 / span 3;
   }
 
-  .masthead__date {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-self: center;
-    margin-top: 30px;
+  .masthead__brands {
+    grid-column: 4 / span 6;
+    gap: 18px;
   }
 
-  .masthead__credit {
-    grid-column: 9 / span 4;
+  .masthead__sushiclub {
+    width: 112px;
+  }
+
+  .masthead__anniversary {
+    width: 52px;
+  }
+
+  .masthead__reservation {
+    grid-column: 10 / span 3;
   }
 
   .title-lockup {
-    top: 17.5%;
-    left: 4vw;
-    right: 4vw;
-    row-gap: 12px;
+    top: 28%;
+    grid-template-rows: auto auto auto;
+    row-gap: 8px;
   }
 
   .title-word {
-    font-size: 22.5vw;
-    line-height: .76;
+    font-size: 23.5vw;
   }
 
-  .title-word--chef {
+  .title-word--sushi {
     grid-column: 1 / span 9;
-  }
-
-  .title-note {
-    grid-column: 7 / span 6;
-    width: 42vw;
-    height: 23vw;
-    margin-right: 2vw;
-  }
-
-  .title-note__stack {
-    font-size: 3.75vw;
-  }
-
-  .title-note__script {
-    font-size: 5.15vw;
-  }
-
-  .title-word--experience {
-    grid-column: 2 / span 11;
-  }
-
-  .footer-copy {
-    left: 5vw;
-    right: 5vw;
-    bottom: 24px;
-    grid-template-columns: 1fr;
-    row-gap: 20px;
-    padding-top: 18px;
-    font-size: 9px;
-  }
-
-  .footer-copy__item--left,
-  .footer-copy__item--center,
-  .footer-copy__item--right,
-  .legal {
-    grid-column: 1;
-  }
-
-  .footer-copy__item--left {
     grid-row: 1;
   }
 
-  .footer-copy__item--center {
+  .title-kicker {
+    grid-column: 4 / span 9;
     grid-row: 2;
-    padding-top: 16px;
-    border-top: 1px solid rgba(244, 241, 233, .2);
-    text-align: left;
+    justify-self: end;
+    font-size: 4.6vw;
   }
 
-  .footer-copy__item--right {
+  .title-word--libre {
+    grid-column: 3 / span 10;
     grid-row: 3;
-    display: block;
-    padding-top: 16px;
-    text-align: left;
+    justify-self: end;
   }
 
-  .legal {
-    grid-row: 4;
-    text-align: left;
-    font-size: 6.5px;
+  .hero-copy {
+    top: 59%;
+    width: 88vw;
   }
 
-  .price-grid {
-    gap: 16px;
+  .hero-copy h2 {
+    font-size: 13px;
   }
 
-  .payment-logo {
-    width: min(100%, 286px);
-    margin-left: 0;
+  .hero-copy p {
+    font-size: 9px;
+    line-height: 1.26;
   }
 
-  .reservation__url {
-    white-space: normal;
+  .desktop-only {
+    display: none;
   }
 
-  .brand-row {
-    justify-content: flex-start;
-    margin-top: 12px;
+  .booking-dock {
+    width: calc(100vw - 24px);
+    grid-template-columns: 1fr 1fr 104px;
+    grid-template-rows: 48px 96px;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .booking-dock__meta {
+    padding: 0 6px;
+  }
+
+  .booking-dock__label {
+    margin-bottom: 4px;
+    font-size: 9px;
+  }
+
+  .booking-dock__meta strong {
+    font-size: 12px;
+  }
+
+  .countdown {
+    grid-column: 1 / span 2;
+    grid-row: 2;
+    gap: 6px;
+  }
+
+  .booking-dock__cta {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    font-size: 14px;
+  }
+
+  .countdown__unit strong {
+    font-size: 27px;
+  }
+
+  .countdown__unit span {
+    margin-top: 7px;
+    font-size: 5px;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .background {
-    animation: background-settle 1200ms var(--motion-ease-soft) both;
+  .hero__video {
+    animation: video-settle 1200ms var(--ease-soft) both;
   }
 
-  .color-grade {
-    animation: grade-fade 800ms ease-out 80ms both;
+  .hero__black-filter,
+  .hero__gradient {
+    animation: shade-fade 850ms ease-out 60ms both;
   }
 
   .masthead {
-    animation: motion-rise 480ms var(--motion-ease-out) 80ms both;
+    animation: rise-in 480ms var(--ease-out) 80ms both;
   }
 
-  .title-word--chef {
-    animation: motion-rise 760ms var(--motion-ease-out) 130ms both;
+  .title-word--sushi {
+    animation: rise-in 760ms var(--ease-out) 130ms both;
   }
 
-  .title-word--experience {
-    animation: motion-rise 820ms var(--motion-ease-out) 210ms both;
+  .title-kicker {
+    animation: rise-in 560ms var(--ease-out) 250ms both;
   }
 
-  .title-note {
-    animation: motion-rise 620ms var(--motion-ease-out) 300ms both;
+  .title-word--libre {
+    animation: rise-in 820ms var(--ease-out) 210ms both;
   }
 
-  .footer-copy__item,
-  .legal {
-    animation: motion-rise 520ms var(--motion-ease-out) both;
+  .hero-copy {
+    animation: copy-in 620ms var(--ease-out) 390ms both;
   }
 
-  .footer-copy__item--left {
-    animation-delay: 460ms;
-  }
-
-  .footer-copy__item--center {
-    animation-delay: 520ms;
-  }
-
-  .footer-copy__item--right {
-    animation-delay: 580ms;
-  }
-
-  .legal {
-    animation-delay: 640ms;
+  .booking-dock {
+    animation: dock-in 620ms var(--ease-out) 520ms both;
   }
 }
 
-@keyframes background-settle {
+@keyframes video-settle {
   from {
-    opacity: .86;
-    transform: scale(1.035);
+    opacity: .84;
+    scale: 1.025;
   }
-
   to {
     opacity: 1;
-    transform: scale(1.015);
+    scale: 1;
   }
 }
 
-@keyframes grade-fade {
-  from { opacity: .72; }
+@keyframes shade-fade {
+  from { opacity: .7; }
   to { opacity: 1; }
 }
 
-@keyframes motion-rise {
+@keyframes rise-in {
   from {
     opacity: 0;
     translate: 0 10px;
   }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
 
+@keyframes copy-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes dock-in {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
   to {
     opacity: 1;
     translate: 0 0;
@@ -666,9 +568,9 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .masthead,
   .title-word,
-  .title-note,
-  .footer-copy__item,
-  .legal {
+  .title-kicker,
+  .hero-copy,
+  .booking-dock {
     animation: quiet-fade 220ms ease-out both;
   }
 }
