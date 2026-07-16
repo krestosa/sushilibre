@@ -34,7 +34,27 @@
 
   const videos = Array.from(document.querySelectorAll('[data-loop-video]'));
   if (videos.length < 2) {
-    videos[0]?.play().catch(() => undefined);
+    const video = videos[0];
+    let suspendedTime = 0;
+
+    video?.play().catch(() => undefined);
+
+    document.addEventListener('visibilitychange', () => {
+      if (!video) return;
+
+      if (document.hidden) {
+        suspendedTime = video.currentTime;
+        video.pause();
+        return;
+      }
+
+      try {
+        video.currentTime = suspendedTime;
+      } catch {
+        // Metadata may still be loading; playback will resume at the retained position.
+      }
+      video.play().catch(() => undefined);
+    });
     return;
   }
 
@@ -43,6 +63,9 @@
   let activeIndex = 0;
   let transitionInProgress = false;
   let animationFrameId = 0;
+  let mixTimeoutId = 0;
+  let mixGeneration = 0;
+  let suspendedState = null;
 
   videos.forEach((video, index) => {
     video.loop = false;
@@ -51,46 +74,58 @@
     video.classList.toggle('is-active', index === activeIndex);
   });
 
-  const mixLoopBoundary = async () => {
-    if (transitionInProgress) return;
-    transitionInProgress = true;
-
-    const outgoing = videos[activeIndex];
-    const nextIndex = (activeIndex + 1) % videos.length;
-    const incoming = videos[nextIndex];
-
-    try {
-      incoming.pause();
-      incoming.currentTime = 0;
-      incoming.classList.remove('is-active');
-      incoming.classList.add('is-mixing-in');
-      await incoming.play();
-
-      // Force the initial transparent frame to be committed before starting the mix.
-      incoming.getBoundingClientRect();
-
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => {
-          // Keep the outgoing layer fully opaque underneath while the first frame
-          // of the incoming copy dissolves over it. This maintains constant luminance.
-          incoming.classList.add('is-active');
-        });
-      });
-
-      window.setTimeout(() => {
-        // Incoming is now fully opaque, so removing the covered outgoing layer is invisible.
-        outgoing.classList.remove('is-active');
-        outgoing.pause();
-        outgoing.currentTime = 0;
-
-        incoming.classList.remove('is-mixing-in');
-        activeIndex = nextIndex;
-        transitionInProgress = false;
-      }, mixDuration + 80);
-    } catch {
-      incoming.classList.remove('is-mixing-in');
-      transitionInProgress = false;
+  const stopMonitor = () => {
+    if (animationFrameId) {
+      window.cancelAnimationFrame(animationFrameId);
+      animationFrameId = 0;
     }
+  };
+
+  const clearMixTimer = () => {
+    if (mixTimeoutId) {
+      window.clearTimeout(mixTimeoutId);
+      mixTimeoutId = 0;
+    }
+  };
+
+  const setCurrentTimeSafely = (video, requestedTime) => {
+    const applyTime = () => {
+      const duration = video.duration;
+      const maximum = Number.isFinite(duration) && duration > 0
+        ? Math.max(0, duration - 0.05)
+        : Math.max(0, requestedTime);
+      const nextTime = Math.min(Math.max(0, requestedTime), maximum);
+
+      try {
+        video.currentTime = nextTime;
+      } catch {
+        // Some browsers reject seeking until metadata is available.
+      }
+    };
+
+    if (video.readyState >= 1) {
+      applyTime();
+    } else {
+      video.addEventListener('loadedmetadata', applyTime, { once: true });
+    }
+  };
+
+  const activateSingleVideo = (index, time) => {
+    clearMixTimer();
+    mixGeneration += 1;
+    transitionInProgress = false;
+
+    videos.forEach((video) => {
+      video.pause();
+      video.classList.remove('is-active', 'is-mixing-in');
+    });
+
+    activeIndex = index;
+    const activeVideo = videos[activeIndex];
+    activeVideo.classList.add('is-active');
+    setCurrentTimeSafely(activeVideo, time);
+
+    return activeVideo;
   };
 
   const monitorLoop = () => {
@@ -98,6 +133,7 @@
     const duration = activeVideo.duration;
 
     if (
+      !document.hidden &&
       !transitionInProgress &&
       Number.isFinite(duration) &&
       duration > 0 &&
@@ -109,19 +145,112 @@
     animationFrameId = window.requestAnimationFrame(monitorLoop);
   };
 
+  const startMonitor = () => {
+    stopMonitor();
+    animationFrameId = window.requestAnimationFrame(monitorLoop);
+  };
+
+  const mixLoopBoundary = async () => {
+    if (transitionInProgress || document.hidden) return;
+
+    transitionInProgress = true;
+    const generation = ++mixGeneration;
+    const outgoing = videos[activeIndex];
+    const nextIndex = (activeIndex + 1) % videos.length;
+    const incoming = videos[nextIndex];
+
+    try {
+      incoming.pause();
+      setCurrentTimeSafely(incoming, 0);
+      incoming.classList.remove('is-active');
+      incoming.classList.add('is-mixing-in');
+      await incoming.play();
+
+      if (generation !== mixGeneration || document.hidden) {
+        incoming.pause();
+        incoming.classList.remove('is-mixing-in');
+        return;
+      }
+
+      incoming.getBoundingClientRect();
+
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          if (generation !== mixGeneration || document.hidden) return;
+          incoming.classList.add('is-active');
+        });
+      });
+
+      mixTimeoutId = window.setTimeout(() => {
+        if (generation !== mixGeneration || document.hidden) return;
+
+        outgoing.classList.remove('is-active');
+        outgoing.pause();
+        setCurrentTimeSafely(outgoing, 0);
+
+        incoming.classList.remove('is-mixing-in');
+        activeIndex = nextIndex;
+        transitionInProgress = false;
+        mixTimeoutId = 0;
+      }, mixDuration + 80);
+    } catch {
+      if (generation === mixGeneration) {
+        incoming.classList.remove('is-active', 'is-mixing-in');
+        transitionInProgress = false;
+      }
+    }
+  };
+
+  const suspendPlayback = () => {
+    if (suspendedState) return;
+
+    const incomingIndex = videos.findIndex((video) =>
+      video.classList.contains('is-active') && video.classList.contains('is-mixing-in')
+    );
+    const visibleIndex = incomingIndex >= 0 ? incomingIndex : activeIndex;
+    const visibleVideo = videos[visibleIndex];
+
+    suspendedState = {
+      index: visibleIndex,
+      time: Number.isFinite(visibleVideo.currentTime) ? visibleVideo.currentTime : 0
+    };
+
+    stopMonitor();
+    activateSingleVideo(suspendedState.index, suspendedState.time);
+  };
+
+  const resumePlayback = () => {
+    const state = suspendedState ?? {
+      index: activeIndex,
+      time: Number.isFinite(videos[activeIndex].currentTime)
+        ? videos[activeIndex].currentTime
+        : 0
+    };
+
+    suspendedState = null;
+    const activeVideo = activateSingleVideo(state.index, state.time);
+    activeVideo.play().catch(() => undefined);
+    startMonitor();
+  };
+
   videos[activeIndex].play().catch(() => undefined);
-  animationFrameId = window.requestAnimationFrame(monitorLoop);
+  startMonitor();
 
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) return;
-
-    const activeVideo = videos[activeIndex];
-    if (activeVideo.paused && !transitionInProgress) {
-      activeVideo.play().catch(() => undefined);
+    if (document.hidden) {
+      suspendPlayback();
+    } else {
+      resumePlayback();
     }
   });
 
-  window.addEventListener('pagehide', () => {
-    window.cancelAnimationFrame(animationFrameId);
-  }, { once: true });
+  window.addEventListener('pagehide', suspendPlayback);
+  window.addEventListener('pageshow', () => {
+    if (!document.hidden) resumePlayback();
+  });
+
+  document.addEventListener('freeze', suspendPlayback);
+  document.addEventListener('resume', () => {
+    if (!document.hidden) resumePlayback();
+  });
 })();
