@@ -113,7 +113,215 @@
     document.fonts?.ready.then(scheduleSync).catch(() => undefined);
   };
 
+  const setupBookingCtaSheen = () => {
+    const cta = document.querySelector('.booking-dock__cta');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    if (!cta || reducedMotion.matches || typeof cta.animate !== 'function') return;
+
+    // Disable the legacy CSS loop and brightness hover. The sheen is now scheduled
+    // explicitly so hover can reset its timer without leaving a permanent hover state.
+    cta.style.filter = 'none';
+    const runtimeStyle = document.createElement('style');
+    runtimeStyle.textContent = '.booking-dock__cta::before{animation:none!important;opacity:0!important;}';
+    document.head.append(runtimeStyle);
+
+    const sheen = document.createElement('i');
+    sheen.setAttribute('aria-hidden', 'true');
+    Object.assign(sheen.style, {
+      position: 'absolute',
+      zIndex: '1',
+      top: '-42%',
+      bottom: '-42%',
+      left: '0',
+      width: '72%',
+      opacity: '0',
+      pointerEvents: 'none',
+      transform: 'translate3d(-135%, 0, 0) skewX(-18deg)',
+      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,.04) 12%, rgba(255,255,255,.14) 26%, rgba(255,255,255,.36) 42%, rgba(255,255,255,.58) 50%, rgba(255,255,255,.36) 58%, rgba(255,255,255,.14) 74%, rgba(255,255,255,.04) 88%, transparent 100%)',
+      filter: 'blur(5px)',
+      willChange: 'transform, opacity'
+    });
+    cta.prepend(sheen);
+
+    const initialDelay = 2_350;
+    const regularDelay = 4_700;
+    const duration = 1_050;
+    let timerId = 0;
+    let activeAnimation = null;
+    let interactionArmed = true;
+    let initialPending = true;
+
+    const clearTimer = () => {
+      if (!timerId) return;
+      window.clearTimeout(timerId);
+      timerId = 0;
+    };
+
+    const scheduleRegularLoop = (delay = regularDelay) => {
+      clearTimer();
+      timerId = window.setTimeout(() => {
+        timerId = 0;
+        runSheen();
+      }, delay);
+    };
+
+    const runSheen = () => {
+      clearTimer();
+      activeAnimation?.cancel();
+
+      activeAnimation = sheen.animate(
+        [
+          {
+            transform: 'translate3d(-135%, 0, 0) skewX(-18deg)',
+            opacity: 0
+          },
+          {
+            transform: 'translate3d(-112%, 0, 0) skewX(-18deg)',
+            opacity: 0,
+            offset: 0.08
+          },
+          {
+            transform: 'translate3d(-72%, 0, 0) skewX(-18deg)',
+            opacity: 0.68,
+            offset: 0.24
+          },
+          {
+            transform: 'translate3d(170%, 0, 0) skewX(-18deg)',
+            opacity: 0.46,
+            offset: 0.82
+          },
+          {
+            transform: 'translate3d(205%, 0, 0) skewX(-18deg)',
+            opacity: 0
+          }
+        ],
+        {
+          duration,
+          easing: 'cubic-bezier(.22, 1, .36, 1)',
+          fill: 'none'
+        }
+      );
+
+      activeAnimation.addEventListener('finish', () => {
+        activeAnimation = null;
+        scheduleRegularLoop();
+      }, { once: true });
+    };
+
+    const triggerInteractionSheen = () => {
+      if (!interactionArmed || document.hidden) return;
+
+      interactionArmed = false;
+      initialPending = false;
+      runSheen();
+    };
+
+    timerId = window.setTimeout(() => {
+      timerId = 0;
+      initialPending = false;
+      runSheen();
+    }, initialDelay);
+
+    cta.addEventListener('pointerenter', triggerInteractionSheen, { passive: true });
+    cta.addEventListener('pointerleave', () => {
+      interactionArmed = true;
+    }, { passive: true });
+
+    cta.addEventListener('focus', triggerInteractionSheen);
+    cta.addEventListener('blur', () => {
+      interactionArmed = true;
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        clearTimer();
+        activeAnimation?.cancel();
+        activeAnimation = null;
+        return;
+      }
+
+      scheduleRegularLoop(initialPending ? 650 : regularDelay);
+    });
+  };
+
+  const setupEfficientSmoothScroll = () => {
+    const root = document.documentElement;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+    if (reducedMotion.matches) return;
+
+    // Native smooth behavior covers anchors and scripted navigation at zero runtime cost.
+    root.style.scrollBehavior = 'smooth';
+
+    // Trackpads and touch retain native scrolling. Only coarse mouse-wheel steps are
+    // interpolated, using a single compositor-friendly requestAnimationFrame loop.
+    if (!finePointer.matches) return;
+
+    let targetY = window.scrollY;
+    let frameId = 0;
+
+    const maximumScroll = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const clamp = (value, minimum, maximum) => Math.min(Math.max(value, minimum), maximum);
+
+    const stop = () => {
+      if (frameId) window.cancelAnimationFrame(frameId);
+      frameId = 0;
+      targetY = window.scrollY;
+      root.style.scrollBehavior = 'smooth';
+    };
+
+    const step = () => {
+      const currentY = window.scrollY;
+      const distance = targetY - currentY;
+
+      if (Math.abs(distance) < 0.6) {
+        window.scrollTo(0, targetY);
+        frameId = 0;
+        root.style.scrollBehavior = 'smooth';
+        return;
+      }
+
+      window.scrollTo(0, currentY + distance * 0.24);
+      frameId = window.requestAnimationFrame(step);
+    };
+
+    const onWheel = (event) => {
+      if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+
+      const isCoarseWheel = event.deltaMode !== 0 || Math.abs(event.deltaY) >= 50;
+      if (!isCoarseWheel) return;
+
+      event.preventDefault();
+      root.style.scrollBehavior = 'auto';
+
+      if (!frameId) targetY = window.scrollY;
+
+      const unit = event.deltaMode === 1
+        ? 16
+        : event.deltaMode === 2
+          ? window.innerHeight
+          : 1;
+      const delta = clamp(event.deltaY * unit, -240, 240);
+      targetY = clamp(targetY + delta * 0.9, 0, maximumScroll());
+
+      if (!frameId) frameId = window.requestAnimationFrame(step);
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('pointerdown', stop, { passive: true });
+    window.addEventListener('resize', () => {
+      targetY = clamp(targetY, 0, maximumScroll());
+    }, { passive: true });
+    window.addEventListener('scroll', () => {
+      if (!frameId) targetY = window.scrollY;
+    }, { passive: true });
+  };
+
   setupBookingDockLayout();
+  setupBookingCtaSheen();
+  setupEfficientSmoothScroll();
 
   const videos = Array.from(document.querySelectorAll('[data-loop-video]'));
   if (videos.length < 2) {
