@@ -38,8 +38,8 @@
     return;
   }
 
-  const fadeDuration = 720;
-  const fadeLead = .9;
+  const mixDuration = 1_000;
+  const mixLead = 1.2;
   let activeIndex = 0;
   let transitionInProgress = false;
   let animationFrameId = 0;
@@ -51,7 +51,7 @@
     video.classList.toggle('is-active', index === activeIndex);
   });
 
-  const crossfade = async () => {
+  const mixLoopBoundary = async () => {
     if (transitionInProgress) return;
     transitionInProgress = true;
 
@@ -62,20 +62,33 @@
     try {
       incoming.pause();
       incoming.currentTime = 0;
+      incoming.classList.remove('is-active');
+      incoming.classList.add('is-mixing-in');
       await incoming.play();
 
+      // Force the initial transparent frame to be committed before starting the mix.
+      incoming.getBoundingClientRect();
+
       window.requestAnimationFrame(() => {
-        incoming.classList.add('is-active');
-        outgoing.classList.remove('is-active');
+        window.requestAnimationFrame(() => {
+          // Keep the outgoing layer fully opaque underneath while the first frame
+          // of the incoming copy dissolves over it. This maintains constant luminance.
+          incoming.classList.add('is-active');
+        });
       });
 
       window.setTimeout(() => {
+        // Incoming is now fully opaque, so removing the covered outgoing layer is invisible.
+        outgoing.classList.remove('is-active');
         outgoing.pause();
         outgoing.currentTime = 0;
+
+        incoming.classList.remove('is-mixing-in');
         activeIndex = nextIndex;
         transitionInProgress = false;
-      }, fadeDuration + 60);
+      }, mixDuration + 80);
     } catch {
+      incoming.classList.remove('is-mixing-in');
       transitionInProgress = false;
     }
   };
@@ -88,9 +101,9 @@
       !transitionInProgress &&
       Number.isFinite(duration) &&
       duration > 0 &&
-      duration - activeVideo.currentTime <= fadeLead
+      duration - activeVideo.currentTime <= mixLead
     ) {
-      crossfade();
+      mixLoopBoundary();
     }
 
     animationFrameId = window.requestAnimationFrame(monitorLoop);
