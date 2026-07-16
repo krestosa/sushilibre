@@ -1,48 +1,37 @@
 :root {
-  --white: #f7f5ef;
-  --orange: #dd6f2b;
-  --page-x: clamp(24px, 2.2vw, 44px);
+  --white: #f7f5f0;
+  --orange: #dc702d;
+  --page-x: clamp(24px, 1.55vw, 32px);
   --grid-gap: clamp(12px, 1.05vw, 22px);
   --dock-height: 108px;
-  --dock-bottom: clamp(18px, 2.4vh, 30px);
+  --dock-bottom: clamp(18px, 2.4vh, 28px);
   --ease-out: cubic-bezier(.22, 1, .36, 1);
   --ease-soft: cubic-bezier(.33, 1, .68, 1);
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  min-height: 100%;
-  background: #050505;
-}
-
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; background: #000; }
 body {
   color: var(--white);
   font-family: "Inter", Arial, sans-serif;
   font-synthesis: none;
   text-rendering: geometricPrecision;
 }
-
-img,
-video {
-  display: block;
-}
+img, video { display: block; }
 
 .page {
+  position: relative;
   min-height: 100svh;
 }
 
 .hero {
   position: relative;
   isolation: isolate;
-  min-height: 720px;
+  width: 100%;
   height: 100svh;
+  min-height: 720px;
   overflow: hidden;
-  background: #050505;
+  background: #000;
 }
 
 .hero__video,
@@ -59,7 +48,7 @@ video {
 .hero__video {
   z-index: -4;
   object-fit: cover;
-  object-position: center center;
+  object-position: 50% 50%;
 }
 
 .hero__black-filter {
@@ -69,21 +58,19 @@ video {
 
 .hero__gradient {
   z-index: -2;
-  background:
-    linear-gradient(
-      180deg,
-      #000 0%,
-      rgba(0, 0, 0, .92) 15%,
-      rgba(0, 0, 0, .58) 35%,
-      rgba(0, 0, 0, .18) 53%,
-      rgba(0, 0, 0, 0) 62%
-    ),
-    linear-gradient(180deg, transparent 68%, rgba(0, 0, 0, .62) 100%);
+  background: linear-gradient(
+    180deg,
+    #000 0%,
+    rgba(0, 0, 0, .88) 17%,
+    rgba(0, 0, 0, .48) 38%,
+    rgba(0, 0, 0, .14) 54%,
+    rgba(0, 0, 0, 0) 64%
+  );
 }
 
 .hero__grain {
   z-index: 8;
-  opacity: .15;
+  opacity: .13;
   background-image:
     radial-gradient(circle, rgba(255,255,255,.11) 0 .42px, transparent .56px),
     radial-gradient(circle, rgba(0,0,0,.18) 0 .42px, transparent .58px);
@@ -92,15 +79,19 @@ video {
   mix-blend-mode: soft-light;
 }
 
-.masthead {
+.masthead,
+.title-lockup {
   position: absolute;
   z-index: 3;
-  top: clamp(28px, 3.35vh, 42px);
   left: var(--page-x);
   right: var(--page-x);
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--grid-gap);
+}
+
+.masthead {
+  top: clamp(28px, 3.45vh, 42px);
   align-items: start;
   text-transform: uppercase;
   font-size: clamp(10px, .72vw, 14px);
@@ -108,15 +99,8 @@ video {
   line-height: .92;
   letter-spacing: -.055em;
 }
-
-.masthead p {
-  margin: 0;
-}
-
-.masthead__venue {
-  grid-column: 1 / span 2;
-}
-
+.masthead p { margin: 0; }
+.masthead__venue { grid-column: 1 / span 2; }
 .masthead__brands {
   grid-column: 5 / span 4;
   display: flex;
@@ -124,17 +108,8 @@ video {
   justify-content: center;
   gap: clamp(26px, 2.5vw, 50px);
 }
-
-.masthead__sushiclub {
-  width: clamp(120px, 9vw, 176px);
-  height: auto;
-}
-
-.masthead__anniversary {
-  width: clamp(58px, 4.2vw, 82px);
-  height: auto;
-}
-
+.masthead__sushiclub { width: clamp(122px, 9vw, 174px); height: auto; }
+.masthead__anniversary { width: clamp(58px, 4.2vw, 82px); height: auto; }
 .masthead__reservation {
   grid-column: 11 / span 2;
   justify-self: end;
@@ -142,45 +117,34 @@ video {
 }
 
 .title-lockup {
-  position: absolute;
-  z-index: 3;
-  top: 38.8%;
-  left: var(--page-x);
-  right: var(--page-x);
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: var(--grid-gap);
+  top: 39.2%;
   align-items: center;
   white-space: nowrap;
 }
-
 .title-word {
   margin: 0;
   color: #fff;
-  font-size: clamp(110px, 10.6vw, 204px);
+  font-size: clamp(110px, 10.55vw, 204px);
   font-weight: 300;
   line-height: .78;
   letter-spacing: -.075em;
-  text-shadow: 0 0 3px rgba(255,255,255,.68), 0 0 17px rgba(255,255,255,.2);
+  text-shadow: 0 0 3px rgba(255,255,255,.65), 0 0 18px rgba(255,255,255,.18);
 }
-
 .title-word--sushi {
   grid-column: 2 / span 4;
   justify-self: start;
   margin-left: -.035em;
 }
-
 .title-kicker {
   grid-column: 6 / span 3;
   justify-self: center;
-  margin: .05em 0 0;
-  font-size: clamp(18px, 1.65vw, 32px);
+  margin: .06em 0 0;
+  font-size: clamp(18px, 1.58vw, 31px);
   font-weight: 500;
   line-height: 1;
-  letter-spacing: -.055em;
+  letter-spacing: -.052em;
   text-align: center;
 }
-
 .title-word--libre {
   grid-column: 9 / span 4;
   justify-self: end;
@@ -190,28 +154,26 @@ video {
 .hero-copy {
   position: absolute;
   z-index: 3;
-  top: 63.2%;
+  top: 64.4%;
   left: 50%;
   width: min(790px, 66vw);
   transform: translateX(-50%);
   text-align: center;
   text-transform: uppercase;
-  text-shadow: 0 1px 8px rgba(0,0,0,.68);
+  text-shadow: 0 1px 9px rgba(0,0,0,.72);
 }
-
 .hero-copy h2 {
   margin: 0;
-  font-size: clamp(14px, 1vw, 20px);
+  font-size: clamp(14px, .98vw, 19px);
   font-weight: 700;
   line-height: 1.05;
   letter-spacing: -.035em;
 }
-
 .hero-copy p {
-  margin: clamp(12px, 1.2vh, 18px) 0 0;
-  font-size: clamp(10px, .73vw, 14px);
+  margin: clamp(12px, 1.2vh, 17px) 0 0;
+  font-size: clamp(10px, .72vw, 14px);
   font-weight: 500;
-  line-height: 1.18;
+  line-height: 1.2;
   letter-spacing: -.018em;
 }
 
@@ -223,18 +185,17 @@ video {
   height: var(--dock-height);
   margin: 0 auto calc(-1 * var(--dock-height));
   display: grid;
-  grid-template-columns: minmax(150px, 1.25fr) minmax(150px, 1.15fr) minmax(0, 2.6fr) 108px;
+  grid-template-columns: minmax(150px, 1.22fr) minmax(150px, 1.12fr) minmax(0, 2.65fr) 108px;
   align-items: stretch;
   gap: 10px;
   padding: 10px;
-  border: 1px solid rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.075);
   border-radius: 12px;
   background: rgba(10, 8, 7, .82);
-  box-shadow: 0 18px 46px rgba(0,0,0,.38);
-  backdrop-filter: blur(18px) saturate(120%);
-  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  box-shadow: 0 18px 46px rgba(0,0,0,.4);
+  backdrop-filter: blur(18px) saturate(118%);
+  -webkit-backdrop-filter: blur(18px) saturate(118%);
 }
-
 .booking-dock__meta {
   display: flex;
   flex-direction: column;
@@ -242,7 +203,6 @@ video {
   min-width: 0;
   padding: 0 8px;
 }
-
 .booking-dock__label {
   margin-bottom: 7px;
   color: rgba(255,255,255,.72);
@@ -250,30 +210,27 @@ video {
   font-weight: 400;
   line-height: 1;
 }
-
 .booking-dock__meta strong {
   font-size: 16px;
   font-weight: 500;
   line-height: 1;
   letter-spacing: -.045em;
 }
-
 .countdown {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
-
 .countdown__unit {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-width: 0;
+  border: 1px solid rgba(255,255,255,.02);
   border-radius: 6px;
-  background: rgba(5,5,5,.72);
+  background: rgba(4,4,4,.76);
 }
-
 .countdown__unit strong {
   font-size: clamp(28px, 2.2vw, 42px);
   font-weight: 300;
@@ -281,14 +238,12 @@ video {
   letter-spacing: -.07em;
   font-variant-numeric: tabular-nums;
 }
-
 .countdown__unit span {
   margin-top: 9px;
   font-size: 6px;
   font-weight: 600;
   line-height: 1;
 }
-
 .booking-dock__cta {
   display: flex;
   align-items: center;
@@ -304,48 +259,19 @@ video {
   text-decoration: none;
   transition: transform 150ms ease-out, filter 150ms ease-out;
 }
-
 @media (hover: hover) and (pointer: fine) {
-  .booking-dock__cta:hover {
-    filter: brightness(1.06);
-  }
+  .booking-dock__cta:hover { filter: brightness(1.06); }
 }
-
-.booking-dock__cta:active {
-  transform: scale(.975);
-}
+.booking-dock__cta:active { transform: scale(.975); }
 
 @media (max-width: 1100px) {
-  :root {
-    --dock-height: 104px;
-  }
-
-  .title-lockup {
-    top: 35%;
-  }
-
-  .title-word {
-    font-size: clamp(92px, 14vw, 154px);
-  }
-
-  .title-word--sushi {
-    grid-column: 1 / span 5;
-  }
-
-  .title-kicker {
-    grid-column: 5 / span 4;
-    font-size: clamp(16px, 2.2vw, 24px);
-  }
-
-  .title-word--libre {
-    grid-column: 9 / span 4;
-  }
-
-  .hero-copy {
-    top: 61%;
-    width: min(740px, 80vw);
-  }
-
+  :root { --dock-height: 104px; }
+  .title-lockup { top: 35.5%; }
+  .title-word { font-size: clamp(92px, 14vw, 154px); }
+  .title-word--sushi { grid-column: 1 / span 5; }
+  .title-kicker { grid-column: 5 / span 4; font-size: clamp(16px, 2.2vw, 24px); }
+  .title-word--libre { grid-column: 9 / span 4; }
+  .hero-copy { top: 61.5%; width: min(740px, 80vw); }
   .booking-dock {
     width: min(920px, calc(100vw - 32px));
     grid-template-columns: 1fr 1fr 2.45fr 104px;
@@ -353,91 +279,33 @@ video {
 }
 
 @media (max-width: 760px) {
-  :root {
-    --dock-height: 174px;
-    --dock-bottom: 14px;
-  }
-
-  .hero {
-    min-height: 820px;
-  }
-
-  .hero__video {
-    object-position: 53% center;
-  }
-
-  .masthead {
-    top: 22px;
-    font-size: 8px;
-  }
-
-  .masthead__venue {
-    grid-column: 1 / span 3;
-  }
-
-  .masthead__brands {
-    grid-column: 4 / span 6;
-    gap: 18px;
-  }
-
-  .masthead__sushiclub {
-    width: 112px;
-  }
-
-  .masthead__anniversary {
-    width: 52px;
-  }
-
-  .masthead__reservation {
-    grid-column: 10 / span 3;
-  }
-
-  .title-lockup {
-    top: 28%;
-    grid-template-rows: auto auto auto;
-    row-gap: 8px;
-  }
-
-  .title-word {
-    font-size: 23.5vw;
-  }
-
-  .title-word--sushi {
-    grid-column: 1 / span 9;
-    grid-row: 1;
-  }
-
+  :root { --dock-height: 174px; --dock-bottom: 14px; }
+  .hero { min-height: 820px; }
+  .hero__video { object-position: 53% center; }
+  .masthead { top: 22px; font-size: 8px; }
+  .masthead__venue { grid-column: 1 / span 3; }
+  .masthead__brands { grid-column: 4 / span 6; gap: 18px; }
+  .masthead__sushiclub { width: 112px; }
+  .masthead__anniversary { width: 52px; }
+  .masthead__reservation { grid-column: 10 / span 3; }
+  .title-lockup { top: 27.5%; grid-template-rows: auto auto auto; row-gap: 8px; }
+  .title-word { font-size: 23.5vw; }
+  .title-word--sushi { grid-column: 1 / span 9; grid-row: 1; }
   .title-kicker {
     grid-column: 4 / span 9;
     grid-row: 2;
     justify-self: end;
     font-size: 4.6vw;
   }
-
   .title-word--libre {
     grid-column: 3 / span 10;
     grid-row: 3;
     justify-self: end;
   }
-
-  .hero-copy {
-    top: 59%;
-    width: 88vw;
-  }
-
-  .hero-copy h2 {
-    font-size: 13px;
-  }
-
-  .hero-copy p {
-    font-size: 9px;
-    line-height: 1.26;
-  }
-
-  .desktop-only {
-    display: none;
-  }
-
+  .hero-copy { top: 59%; width: 88vw; }
+  .hero-copy h2 { font-size: 13px; }
+  .hero-copy p { font-size: 9px; line-height: 1.26; }
+  .desktop-only { display: none; }
   .booking-dock {
     width: calc(100vw - 24px);
     grid-template-columns: 1fr 1fr 104px;
@@ -445,137 +313,31 @@ video {
     gap: 8px;
     padding: 8px;
   }
-
-  .booking-dock__meta {
-    padding: 0 6px;
-  }
-
-  .booking-dock__label {
-    margin-bottom: 4px;
-    font-size: 9px;
-  }
-
-  .booking-dock__meta strong {
-    font-size: 12px;
-  }
-
-  .countdown {
-    grid-column: 1 / span 2;
-    grid-row: 2;
-    gap: 6px;
-  }
-
-  .booking-dock__cta {
-    grid-column: 3;
-    grid-row: 1 / span 2;
-    font-size: 14px;
-  }
-
-  .countdown__unit strong {
-    font-size: 27px;
-  }
-
-  .countdown__unit span {
-    margin-top: 7px;
-    font-size: 5px;
-  }
+  .booking-dock__meta { padding: 0 6px; }
+  .booking-dock__label { margin-bottom: 4px; font-size: 9px; }
+  .booking-dock__meta strong { font-size: 12px; }
+  .countdown { grid-column: 1 / span 2; grid-row: 2; gap: 6px; }
+  .booking-dock__cta { grid-column: 3; grid-row: 1 / span 2; font-size: 14px; }
+  .countdown__unit strong { font-size: 27px; }
+  .countdown__unit span { margin-top: 7px; font-size: 5px; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .hero__video {
-    animation: video-settle 1200ms var(--ease-soft) both;
-  }
-
-  .hero__black-filter,
-  .hero__gradient {
-    animation: shade-fade 850ms ease-out 60ms both;
-  }
-
-  .masthead {
-    animation: rise-in 480ms var(--ease-out) 80ms both;
-  }
-
-  .title-word--sushi {
-    animation: rise-in 760ms var(--ease-out) 130ms both;
-  }
-
-  .title-kicker {
-    animation: rise-in 560ms var(--ease-out) 250ms both;
-  }
-
-  .title-word--libre {
-    animation: rise-in 820ms var(--ease-out) 210ms both;
-  }
-
-  .hero-copy {
-    animation: copy-in 620ms var(--ease-out) 390ms both;
-  }
-
-  .booking-dock {
-    animation: dock-in 620ms var(--ease-out) 520ms both;
-  }
+  .hero__video { animation: video-settle 1200ms var(--ease-soft) both; }
+  .hero__black-filter, .hero__gradient { animation: shade-fade 850ms ease-out 60ms both; }
+  .masthead { animation: rise-in 480ms var(--ease-out) 80ms both; }
+  .title-word--sushi { animation: rise-in 760ms var(--ease-out) 130ms both; }
+  .title-kicker { animation: rise-in 560ms var(--ease-out) 250ms both; }
+  .title-word--libre { animation: rise-in 820ms var(--ease-out) 210ms both; }
+  .hero-copy { animation: copy-in 620ms var(--ease-out) 390ms both; }
+  .booking-dock { animation: dock-in 620ms var(--ease-out) 520ms both; }
 }
-
-@keyframes video-settle {
-  from {
-    opacity: .84;
-    scale: 1.025;
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-  }
-}
-
-@keyframes shade-fade {
-  from { opacity: .7; }
-  to { opacity: 1; }
-}
-
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    translate: 0 10px;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
-}
-
-@keyframes copy-in {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 10px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-}
-
-@keyframes dock-in {
-  from {
-    opacity: 0;
-    translate: 0 14px;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
-}
-
+@keyframes video-settle { from { opacity: .84; scale: 1.025; } to { opacity: 1; scale: 1; } }
+@keyframes shade-fade { from { opacity: .7; } to { opacity: 1; } }
+@keyframes rise-in { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }
+@keyframes copy-in { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes dock-in { from { opacity: 0; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .masthead,
-  .title-word,
-  .title-kicker,
-  .hero-copy,
-  .booking-dock {
-    animation: quiet-fade 220ms ease-out both;
-  }
+  .masthead, .title-word, .title-kicker, .hero-copy, .booking-dock { animation: quiet-fade 220ms ease-out both; }
 }
-
-@keyframes quiet-fade {
-  from { opacity: .82; }
-  to { opacity: 1; }
-}
+@keyframes quiet-fade { from { opacity: .82; } to { opacity: 1; } }
