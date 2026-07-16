@@ -122,41 +122,41 @@
   }
 
   .hero__video-stack {
-    animation: video-settle 1000ms var(--ease-soft) both;
+    animation: video-settle 850ms var(--ease-soft) both;
   }
 
   /* 2. Black filter and gradient arrive quickly and progressively. */
   .hero__black-filter,
   .hero__gradient {
-    animation: stage-overlay-in 430ms ease-out 720ms both;
+    animation: stage-overlay-in 340ms ease-out 560ms both;
   }
 
   /* 3. Main title appears, then the central descriptor. */
   .title-word--sushi {
-    animation: stage-title-in 660ms var(--ease-out) 1040ms both;
+    animation: stage-title-in 520ms var(--ease-out) 800ms both;
   }
 
   .title-word--libre {
-    animation: stage-title-in 700ms var(--ease-out) 1110ms both;
+    animation: stage-title-in 540ms var(--ease-out) 850ms both;
   }
 
   .title-kicker {
-    animation: stage-copy-in 480ms var(--ease-out) 1300ms both;
+    animation: stage-copy-in 380ms var(--ease-out) 1020ms both;
   }
 
   /* 4. Supporting center copy enters after the title. */
   .hero-copy {
-    animation: stage-copy-centered-in 560ms var(--ease-out) 1450ms both;
+    animation: stage-copy-centered-in 440ms var(--ease-out) 1150ms both;
   }
 
   /* 5. Sticky booking dock loads next. */
   .booking-dock {
-    animation: stage-dock-in 580ms var(--ease-out) 1760ms both;
+    animation: stage-dock-in 460ms var(--ease-out) 1390ms both;
   }
 
   /* 6. Header brand bar and corner labels appear last. */
   .masthead {
-    animation: stage-masthead-in 500ms var(--ease-out) 2110ms both;
+    animation: stage-masthead-in 400ms var(--ease-out) 1660ms both;
   }
 }
 
