@@ -156,7 +156,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .booking-dock__cta::before {
-    animation: cta-sheen 6.8s ease-in-out 3.2s infinite;
+    animation: cta-sheen 5.9s ease-in-out 2.35s infinite;
   }
 
   /* 1. Video settles first. */
@@ -204,26 +204,25 @@
 }
 
 @keyframes cta-sheen {
-  0%,
-  72% {
+  0% {
     left: -92%;
     opacity: 0;
   }
 
-  76% {
+  3% {
     opacity: 0;
   }
 
-  80% {
+  7% {
     opacity: .68;
   }
 
-  92% {
+  22% {
     left: 138%;
     opacity: .46;
   }
 
-  96%,
+  28%,
   100% {
     left: 138%;
     opacity: 0;
