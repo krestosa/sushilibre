@@ -10,6 +10,26 @@
   const style = document.createElement('style');
   style.dataset.menuStyles = '';
   style.textContent = `
+    .hero__gradient {
+      background:
+        linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0) 72%,
+          rgba(0, 0, 0, .16) 78%,
+          rgba(0, 0, 0, .52) 88%,
+          rgba(0, 0, 0, .88) 96%,
+          #000 100%
+        ),
+        linear-gradient(
+          180deg,
+          #000 0%,
+          rgba(0, 0, 0, .93) 16%,
+          rgba(0, 0, 0, .59) 39%,
+          rgba(0, 0, 0, .20) 58%,
+          rgba(0, 0, 0, 0) 69.5%
+        );
+    }
+
     .menu-section {
       position: relative;
       isolation: isolate;
@@ -47,10 +67,11 @@
         linear-gradient(
           180deg,
           #000 0%,
-          rgba(0, 0, 0, .93) 9%,
-          rgba(0, 0, 0, .59) 24%,
-          rgba(0, 0, 0, .20) 39%,
-          rgba(0, 0, 0, 0) 52%
+          #000 6%,
+          rgba(0, 0, 0, .96) 13%,
+          rgba(0, 0, 0, .76) 25%,
+          rgba(0, 0, 0, .38) 39%,
+          rgba(0, 0, 0, 0) 54%
         ),
         linear-gradient(
           90deg,
@@ -234,10 +255,11 @@
           linear-gradient(
             180deg,
             #000 0%,
-            rgba(0, 0, 0, .93) 10%,
-            rgba(0, 0, 0, .59) 26%,
-            rgba(0, 0, 0, .20) 42%,
-            rgba(0, 0, 0, 0) 56%
+            #000 7%,
+            rgba(0, 0, 0, .96) 15%,
+            rgba(0, 0, 0, .76) 28%,
+            rgba(0, 0, 0, .38) 43%,
+            rgba(0, 0, 0, 0) 58%
           ),
           rgba(0, 0, 0, .54);
       }
