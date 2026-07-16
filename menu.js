@@ -12,22 +12,8 @@
   style.textContent = `
     .hero__gradient {
       background:
-        linear-gradient(
-          180deg,
-          rgba(0, 0, 0, 0) 72%,
-          rgba(0, 0, 0, .16) 78%,
-          rgba(0, 0, 0, .52) 88%,
-          rgba(0, 0, 0, .88) 96%,
-          #000 100%
-        ),
-        linear-gradient(
-          180deg,
-          #000 0%,
-          rgba(0, 0, 0, .93) 16%,
-          rgba(0, 0, 0, .59) 39%,
-          rgba(0, 0, 0, .20) 58%,
-          rgba(0, 0, 0, 0) 69.5%
-        );
+        linear-gradient(180deg, rgba(0,0,0,0) 72%, rgba(0,0,0,.16) 78%, rgba(0,0,0,.52) 88%, rgba(0,0,0,.88) 96%, #000 100%),
+        linear-gradient(180deg, #000 0%, rgba(0,0,0,.93) 16%, rgba(0,0,0,.59) 39%, rgba(0,0,0,.20) 58%, rgba(0,0,0,0) 69.5%);
     }
 
     .menu-section {
@@ -49,9 +35,10 @@
       overflow: hidden;
       background-image: var(--menu-background-image);
       background-repeat: no-repeat;
-      background-position: center center;
+      background-position: center;
       background-size: cover;
       pointer-events: none;
+      contain: paint;
     }
 
     .menu-section__background::before,
@@ -64,29 +51,16 @@
 
     .menu-section__background::before {
       background:
-        linear-gradient(
-          180deg,
-          #000 0%,
-          #000 6%,
-          rgba(0, 0, 0, .96) 13%,
-          rgba(0, 0, 0, .76) 25%,
-          rgba(0, 0, 0, .38) 39%,
-          rgba(0, 0, 0, 0) 54%
-        ),
-        linear-gradient(
-          90deg,
-          rgba(0, 0, 0, .78) 0%,
-          rgba(0, 0, 0, .46) 47%,
-          rgba(0, 0, 0, .66) 100%
-        ),
-        rgba(0, 0, 0, .18);
+        linear-gradient(180deg, #000 0%, #000 6%, rgba(0,0,0,.96) 13%, rgba(0,0,0,.76) 25%, rgba(0,0,0,.38) 39%, rgba(0,0,0,0) 54%),
+        linear-gradient(90deg, rgba(0,0,0,.78) 0%, rgba(0,0,0,.46) 47%, rgba(0,0,0,.66) 100%),
+        rgba(0,0,0,.18);
     }
 
     .menu-section__background::after {
       opacity: .12;
       background-image:
-        radial-gradient(circle, rgba(255, 255, 255, .10) 0 .42px, transparent .56px),
-        radial-gradient(circle, rgba(0, 0, 0, .18) 0 .42px, transparent .58px);
+        radial-gradient(circle, rgba(255,255,255,.10) 0 .42px, transparent .56px),
+        radial-gradient(circle, rgba(0,0,0,.18) 0 .42px, transparent .58px);
       background-position: 0 0, 1.5px 1.5px;
       background-size: 3px 3px;
       mix-blend-mode: soft-light;
@@ -114,9 +88,7 @@
       line-height: .76;
       letter-spacing: -.075em;
       text-transform: uppercase;
-      text-shadow:
-        0 0 3px rgba(255, 255, 255, .58),
-        0 0 18px rgba(255, 255, 255, .15);
+      text-shadow: 0 0 3px rgba(255,255,255,.58), 0 0 18px rgba(255,255,255,.15);
     }
 
     .menu-section__groups {
@@ -128,7 +100,7 @@
       display: grid;
       grid-template-columns: minmax(280px, .9fr) minmax(430px, 1fr);
       column-gap: clamp(56px, 9vw, 164px);
-      min-height: max(58vh, calc(26vh + var(--menu-item-count, 1) * 14vh));
+      min-height: max(58vh, calc(22vh + var(--menu-item-count, 1) * 12vh));
       padding: 8vh 0 10vh;
       scroll-margin-top: 8vh;
     }
@@ -166,13 +138,11 @@
       line-height: .78;
       letter-spacing: -.072em;
       text-transform: uppercase;
-      text-shadow:
-        0 0 3px rgba(255, 255, 255, .55),
-        0 0 15px rgba(255, 255, 255, .13);
+      text-shadow: 0 0 3px rgba(255,255,255,.55), 0 0 15px rgba(255,255,255,.13);
     }
 
     .menu-group__quantity {
-      color: rgba(255, 255, 255, .82);
+      color: rgba(255,255,255,.82);
       font-size: clamp(20px, 2.15vw, 42px);
       font-weight: 500;
       line-height: 1;
@@ -192,14 +162,23 @@
     .menu-item {
       padding: 0 0 clamp(28px, 4vh, 52px);
       margin: 0 0 clamp(28px, 4vh, 52px);
-      border-bottom: 1px solid rgba(255, 255, 255, .44);
+      border-bottom: 1px solid rgba(255,255,255,.44);
     }
 
     .menu-item:last-child {
       margin-bottom: 0;
     }
 
+    .menu-item__header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 18px;
+      min-width: 0;
+    }
+
     .menu-item__name {
+      min-width: 0;
       margin: 0;
       color: #fff;
       font-size: clamp(24px, 2vw, 38px);
@@ -207,6 +186,45 @@
       line-height: 1;
       letter-spacing: -.045em;
       text-transform: uppercase;
+    }
+
+    .menu-item__badges {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+
+    .menu-item__badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 25px;
+      padding: 5px 8px 4px;
+      border: 1px solid rgba(255,255,255,.42);
+      border-radius: 999px;
+      background: rgba(0,0,0,.28);
+      color: rgba(255,255,255,.9);
+      font-size: clamp(9px, .68vw, 12px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: .045em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .menu-item__badge--diet {
+      border-color: rgba(221,112,45,.72);
+      background: rgba(221,112,45,.12);
+      color: #ef8a4b;
+    }
+
+    .menu-item__badge--pieces {
+      border-color: rgba(255,255,255,.62);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      font-variant-numeric: tabular-nums;
     }
 
     .menu-item__description {
@@ -220,10 +238,15 @@
       text-transform: uppercase;
     }
 
+    .menu-item--simple .menu-item__name {
+      max-width: 24ch;
+      line-height: 1.08;
+    }
+
     .menu-section__status {
       margin: 0;
       padding: 12vh 0 20vh;
-      color: rgba(255, 255, 255, .66);
+      color: rgba(255,255,255,.66);
       font-size: 13px;
       font-weight: 600;
       letter-spacing: .08em;
@@ -242,7 +265,7 @@
       .menu-group {
         grid-template-columns: minmax(220px, .78fr) minmax(360px, 1fr);
         column-gap: clamp(36px, 6vw, 72px);
-        min-height: max(52vh, calc(24vh + var(--menu-item-count, 1) * 13vh));
+        min-height: max(52vh, calc(20vh + var(--menu-item-count, 1) * 12vh));
       }
 
       .menu-group__title {
@@ -257,16 +280,8 @@
 
       .menu-section__background::before {
         background:
-          linear-gradient(
-            180deg,
-            #000 0%,
-            #000 7%,
-            rgba(0, 0, 0, .96) 15%,
-            rgba(0, 0, 0, .76) 28%,
-            rgba(0, 0, 0, .38) 43%,
-            rgba(0, 0, 0, 0) 58%
-          ),
-          rgba(0, 0, 0, .54);
+          linear-gradient(180deg, #000 0%, #000 7%, rgba(0,0,0,.96) 15%, rgba(0,0,0,.76) 28%, rgba(0,0,0,.38) 43%, rgba(0,0,0,0) 58%),
+          rgba(0,0,0,.54);
       }
 
       .menu-section__shell {
@@ -312,14 +327,7 @@
         left: -16px;
         opacity: 0;
         pointer-events: none;
-        background: linear-gradient(
-          180deg,
-          rgba(0, 0, 0, .97) 0%,
-          rgba(0, 0, 0, .93) 48%,
-          rgba(0, 0, 0, .72) 68%,
-          rgba(0, 0, 0, .34) 84%,
-          rgba(0, 0, 0, 0) 100%
-        );
+        background: linear-gradient(180deg, rgba(0,0,0,.97) 0%, rgba(0,0,0,.93) 48%, rgba(0,0,0,.72) 68%, rgba(0,0,0,.34) 84%, rgba(0,0,0,0) 100%);
         transition: opacity 170ms ease-out;
       }
 
@@ -358,14 +366,43 @@
         margin-bottom: 30px;
       }
 
+      .menu-item__header {
+        align-items: flex-start;
+        gap: 12px;
+      }
+
       .menu-item__name {
         font-size: clamp(23px, 6.2vw, 31px);
+        line-height: 1.04;
+      }
+
+      .menu-item__badges {
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+
+      .menu-item__badge {
+        min-height: 22px;
+        padding: 4px 7px 3px;
+        font-size: 9px;
       }
 
       .menu-item__description {
         max-width: none;
         font-size: clamp(15px, 4.25vw, 20px);
         line-height: 1.22;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .menu-item__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .menu-item__badges {
+        justify-content: flex-start;
       }
     }
 
@@ -388,7 +425,6 @@
 
   const readEmbeddedData = () => {
     if (!embeddedData?.textContent) return null;
-
     try {
       return JSON.parse(embeddedData.textContent);
     } catch (error) {
@@ -417,15 +453,10 @@
   };
 
   const setMenuBackground = (requestedPath) => {
-    const candidates = Array.from(new Set([
-      requestedPath,
-      'assets/menu_bg.png',
-      'menu_bg.png'
-    ].filter(Boolean)));
+    const candidates = Array.from(new Set([requestedPath, 'assets/menu_bg.png', 'menu_bg.png'].filter(Boolean)));
 
     const tryCandidate = (index) => {
       if (index >= candidates.length) return;
-
       const path = candidates[index];
       const image = new Image();
       image.onload = () => {
@@ -439,6 +470,16 @@
     tryCandidate(0);
   };
 
+  const parseSectionPieces = (quantity) => {
+    const value = Number.parseInt(String(quantity || ''), 10);
+    return Number.isFinite(value) ? value : null;
+  };
+
+  const createBadge = (label, modifier) => {
+    const badge = createTextElement('span', `menu-item__badge menu-item__badge--${modifier}`, label);
+    return badge;
+  };
+
   const configureMobileOverlapShadows = (groups) => {
     const mobileQuery = window.matchMedia('(max-width: 720px)');
     let observers = [];
@@ -447,9 +488,7 @@
     const disconnectObservers = () => {
       observers.forEach((observer) => observer.disconnect());
       observers = [];
-      groups.forEach((group) => {
-        group.querySelector('.menu-group__heading')?.classList.remove('is-overlapping');
-      });
+      groups.forEach((group) => group.querySelector('.menu-group__heading')?.classList.remove('is-overlapping'));
     };
 
     const configure = () => {
@@ -463,11 +502,9 @@
 
         const headingHeight = Math.ceil(heading.getBoundingClientRect().height);
         const observer = new IntersectionObserver(([entry]) => {
-          const overlaps =
-            !entry.isIntersecting && entry.boundingClientRect.top <= headingHeight;
+          const overlaps = !entry.isIntersecting && entry.boundingClientRect.top <= headingHeight;
           heading.classList.toggle('is-overlapping', overlaps);
         }, {
-          root: null,
           rootMargin: `-${headingHeight}px 0px 0px 0px`,
           threshold: 0
         });
@@ -505,10 +542,8 @@
     data.sections.forEach((section, sectionIndex) => {
       if (!section || !Array.isArray(section.items)) return;
 
-      const validItems = section.items.filter(
-        (entry) => entry && typeof entry.name === 'string'
-      );
-
+      const validItems = section.items.filter((entry) => entry && typeof entry.name === 'string');
+      const sectionPieces = parseSectionPieces(section.quantity);
       const group = document.createElement('article');
       group.className = 'menu-group';
       group.id = `menu-${section.id || sectionIndex + 1}`;
@@ -518,29 +553,41 @@
 
       const heading = document.createElement('h3');
       heading.className = 'menu-group__heading';
-
       const titleLine = document.createElement('span');
       titleLine.className = 'menu-group__title-line';
       titleLine.append(createTextElement('span', 'menu-group__title', section.title || ''));
-
-      if (section.quantity) {
-        titleLine.append(createTextElement('span', 'menu-group__quantity', section.quantity));
-      }
-
+      if (section.quantity) titleLine.append(createTextElement('span', 'menu-group__quantity', section.quantity));
       heading.append(titleLine);
 
       const items = document.createElement('div');
       items.className = 'menu-group__items';
-
-      const overlapSentinel = document.createElement('span');
-      overlapSentinel.className = 'menu-group__overlap-sentinel';
-      overlapSentinel.setAttribute('aria-hidden', 'true');
-      items.append(overlapSentinel);
+      const sentinel = document.createElement('span');
+      sentinel.className = 'menu-group__overlap-sentinel';
+      sentinel.setAttribute('aria-hidden', 'true');
+      items.append(sentinel);
 
       validItems.forEach((entry) => {
         const item = document.createElement('article');
-        item.className = 'menu-item';
-        item.append(createTextElement('h4', 'menu-item__name', entry.name));
+        item.className = `menu-item${entry.description ? '' : ' menu-item--simple'}`;
+
+        const itemHeader = document.createElement('div');
+        itemHeader.className = 'menu-item__header';
+        itemHeader.append(createTextElement('h4', 'menu-item__name', entry.name));
+
+        const badges = document.createElement('div');
+        badges.className = 'menu-item__badges';
+
+        if (entry.diet === 'veggie' || entry.diet === 'vegan') {
+          badges.append(createBadge(entry.diet, 'diet'));
+        }
+
+        const itemPieces = Number(entry.pieces);
+        if (Number.isFinite(itemPieces) && itemPieces > 0 && itemPieces !== sectionPieces) {
+          badges.append(createBadge(`${itemPieces}U`, 'pieces'));
+        }
+
+        if (badges.childElementCount) itemHeader.append(badges);
+        item.append(itemHeader);
 
         if (entry.description) {
           item.append(createTextElement('p', 'menu-item__description', entry.description));
@@ -566,7 +613,6 @@
     if (!('IntersectionObserver' in window)) return;
 
     const visibility = new Map(groups.map((group) => [group, 0]));
-
     const updateActiveGroup = () => {
       let activeGroup = groups[0];
       let activeRatio = -1;
@@ -578,16 +624,12 @@
         }
       });
 
-      groups.forEach((group) => {
-        group.classList.toggle('is-active', group === activeGroup);
-      });
+      groups.forEach((group) => group.classList.toggle('is-active', group === activeGroup));
       menuRoot.dataset.activeMenu = activeGroup.dataset.menuGroup;
     };
 
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        visibility.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
-      });
+      entries.forEach((entry) => visibility.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0));
       updateActiveGroup();
     }, {
       rootMargin: '-18% 0px -42% 0px',
