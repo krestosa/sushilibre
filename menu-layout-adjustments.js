@@ -196,32 +196,37 @@
     disconnectExitObservers(groups);
     if (!mobileQuery.matches || !('IntersectionObserver' in window)) return;
 
-    groups.forEach((group) => {
-      const heading = group.querySelector('.menu-group__heading');
-      const items = group.querySelector('.menu-group__items');
-      if (!heading || !items) return;
+    const triggerRatio = .70;
+    const rootMarginBottom = Math.round((1 - triggerRatio) * 100);
 
-      let sentinel = group.querySelector('.menu-group__exit-sentinel');
-      if (!sentinel) {
-        sentinel = document.createElement('span');
-        sentinel.className = 'menu-group__exit-sentinel';
-        sentinel.setAttribute('aria-hidden', 'true');
-        group.append(sentinel);
+    groups.forEach((group, index) => {
+      const heading = group.querySelector('.menu-group__heading');
+      if (!heading) return;
+
+      const nextGroup = groups[index + 1];
+      let trigger = nextGroup?.querySelector('.menu-group__heading') || null;
+
+      if (!trigger) {
+        trigger = group.querySelector('.menu-group__exit-sentinel');
+        if (!trigger) {
+          trigger = document.createElement('span');
+          trigger.className = 'menu-group__exit-sentinel';
+          trigger.setAttribute('aria-hidden', 'true');
+          group.append(trigger);
+        }
       }
 
-      const headingHeight = Math.ceil(heading.getBoundingClientRect().height);
-      const exitLead = reducedMotion.matches ? 8 : 24;
       const observer = new IntersectionObserver(([entry]) => {
-        const leaving =
-          !entry.isIntersecting &&
-          entry.boundingClientRect.top <= headingHeight + exitLead;
+        const triggerLine = window.innerHeight * triggerRatio;
+        const leaving = entry.boundingClientRect.top <= triggerLine;
         heading.classList.toggle('is-leaving', leaving);
       }, {
-        rootMargin: `-${headingHeight + exitLead}px 0px 0px 0px`,
+        root: null,
+        rootMargin: `0px 0px -${rootMarginBottom}% 0px`,
         threshold: 0
       });
 
-      observer.observe(sentinel);
+      observer.observe(trigger);
       exitObservers.push(observer);
     });
   };
