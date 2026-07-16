@@ -103,3 +103,34 @@
     width: min(690px, 86vw);
   }
 }
+
+/* Mobile: lift the photographic focal point and place the copy below the flame/nigiri. */
+@media (max-width: 620px) {
+  .hero__video {
+    transform: translate3d(0, -7.5%, 0) scale(1.08);
+    transform-origin: 50% 50%;
+  }
+
+  .title-lockup {
+    top: 29%;
+  }
+
+  .hero-copy {
+    top: 64%;
+  }
+}
+
+/* Short mobile screens need a slightly tighter vertical shift to preserve dock clearance. */
+@media (max-width: 620px) and (max-height: 780px) {
+  .hero__video {
+    transform: translate3d(0, -6%, 0) scale(1.065);
+  }
+
+  .title-lockup {
+    top: 27.5%;
+  }
+
+  .hero-copy {
+    top: 61.5%;
+  }
+}
