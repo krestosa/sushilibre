@@ -1,4 +1,4 @@
-/* Optical centering and seamless crossfade refinements. */
+/* Optical centering and seamless loop-mix refinements. */
 .hero__video-stack {
   position: absolute;
   z-index: -4;
@@ -12,12 +12,20 @@
 .hero__video {
   z-index: 0;
   opacity: 0;
-  transition: opacity 720ms linear;
+  transition: opacity 1000ms linear;
   will-change: opacity;
 }
 
 .hero__video.is-active {
+  z-index: 1;
   opacity: 1;
+}
+
+/* The incoming video is composited above a fully opaque outgoing frame.
+   This produces a true dissolve: incoming * progress + outgoing * (1 - progress),
+   without the dark dip caused by fading both layers toward the black background. */
+.hero__video.is-mixing-in {
+  z-index: 2;
 }
 
 .title-lockup {
@@ -121,7 +129,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hero__video {
-    transition-duration: 240ms;
+    transition-duration: 360ms;
   }
 
   .hero__video-stack {
