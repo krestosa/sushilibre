@@ -3,6 +3,7 @@
   const menuHeading = document.querySelector('[data-menu-heading]');
   const menuGroups = document.querySelector('[data-menu-groups]');
   const menuStatus = document.querySelector('[data-menu-status]');
+  const embeddedData = document.querySelector('#menu-data');
 
   if (!menuRoot || !menuHeading || !menuGroups || !menuStatus) return;
 
@@ -15,6 +16,7 @@
       min-height: 100svh;
       background: #000;
       color: var(--white);
+      --menu-background-image: url("assets/menu_bg.png");
     }
 
     .menu-section__background {
@@ -25,7 +27,7 @@
       height: 100svh;
       margin-bottom: -100svh;
       overflow: hidden;
-      background-image: url("assets/menu_bg.svg");
+      background-image: var(--menu-background-image);
       background-repeat: no-repeat;
       background-position: center center;
       background-size: cover;
@@ -81,7 +83,6 @@
       min-height: 35vh;
       display: flex;
       align-items: flex-start;
-      justify-content: flex-start;
     }
 
     .menu-section__intro h2 {
@@ -326,12 +327,66 @@
     return element;
   };
 
+  const readEmbeddedData = () => {
+    if (!embeddedData?.textContent) return null;
+
+    try {
+      return JSON.parse(embeddedData.textContent);
+    } catch (error) {
+      console.error('Embedded menu JSON is invalid.', error);
+      return null;
+    }
+  };
+
+  const loadMenuData = async () => {
+    const fallback = readEmbeddedData();
+    const canRequestFile = ['http:', 'https:'].includes(window.location.protocol);
+
+    if (!canRequestFile || typeof window.fetch !== 'function') {
+      if (fallback) return fallback;
+      throw new Error('No menu data source is available.');
+    }
+
+    try {
+      const response = await window.fetch('menu.json', { cache: 'no-cache' });
+      if (!response.ok) throw new Error(`Menu request failed with ${response.status}.`);
+      return await response.json();
+    } catch (error) {
+      if (fallback) return fallback;
+      throw error;
+    }
+  };
+
+  const setMenuBackground = (requestedPath) => {
+    const candidates = Array.from(new Set([
+      requestedPath,
+      'assets/menu_bg.png',
+      'menu_bg.png'
+    ].filter(Boolean)));
+
+    const tryCandidate = (index) => {
+      if (index >= candidates.length) return;
+
+      const path = candidates[index];
+      const image = new Image();
+      image.onload = () => {
+        const safePath = path.replace(/["\\]/g, '\\$&');
+        menuRoot.style.setProperty('--menu-background-image', `url("${safePath}")`);
+      };
+      image.onerror = () => tryCandidate(index + 1);
+      image.src = path;
+    };
+
+    tryCandidate(0);
+  };
+
   const renderMenu = (data) => {
     if (!data || typeof data.title !== 'string' || !Array.isArray(data.sections)) {
       throw new TypeError('Invalid menu data.');
     }
 
     menuHeading.textContent = data.title;
+    setMenuBackground(data.background);
     menuGroups.replaceChildren();
 
     const fragment = document.createDocumentFragment();
@@ -421,11 +476,7 @@
     groups.forEach((group) => observer.observe(group));
   };
 
-  fetch('menu.json', { cache: 'no-cache' })
-    .then((response) => {
-      if (!response.ok) throw new Error(`Menu request failed with ${response.status}.`);
-      return response.json();
-    })
+  loadMenuData()
     .then(renderMenu)
     .catch((error) => {
       menuStatus.textContent = 'NO SE PUDO CARGAR EL MENÚ.';
