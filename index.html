@@ -15,12 +15,12 @@
 <body>
   <main class="page">
     <aside class="booking-dock" aria-label="Información y reserva del evento">
-      <div class="booking-dock__meta">
+      <div class="booking-dock__meta booking-dock__meta--venue">
         <span class="booking-dock__label">Restó</span>
         <strong>PUERTO MADERO</strong>
       </div>
 
-      <div class="booking-dock__meta">
+      <div class="booking-dock__meta booking-dock__meta--date">
         <span class="booking-dock__label">Fecha</span>
         <strong>JUEVES 30/07</strong>
       </div>
@@ -50,17 +50,21 @@
     </aside>
 
     <section class="hero" aria-labelledby="hero-title">
-      <video class="hero__video" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+      <video class="hero__video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+        <source src="assets/hero_bg.webm" type="video/webm">
+      </video>
       <div class="hero__black-filter" aria-hidden="true"></div>
       <div class="hero__gradient" aria-hidden="true"></div>
       <div class="hero__grain" aria-hidden="true"></div>
 
       <header class="masthead">
         <p class="masthead__venue">PUERTO<br>MADERO</p>
+
         <div class="masthead__brands" aria-label="SushiClub 25 aniversario">
           <img class="masthead__sushiclub" src="assets/sushiclub.svg" alt="SushiClub">
           <img class="masthead__anniversary" src="assets/anniversary-25.svg" alt="25 Anniversary Edition">
         </div>
+
         <p class="masthead__reservation">RESERVA<br>ANTICIPADA</p>
       </header>
 
