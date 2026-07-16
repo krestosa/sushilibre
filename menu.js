@@ -51,9 +51,9 @@
 
     .menu-section__background::before {
       background:
-        linear-gradient(180deg, #000 0%, #000 6%, rgba(0,0,0,.96) 13%, rgba(0,0,0,.76) 25%, rgba(0,0,0,.38) 39%, rgba(0,0,0,0) 54%),
-        linear-gradient(90deg, rgba(0,0,0,.78) 0%, rgba(0,0,0,.46) 47%, rgba(0,0,0,.66) 100%),
-        rgba(0,0,0,.18);
+        linear-gradient(180deg, #000 0%, #000 6%, rgba(0,0,0,.97) 13%, rgba(0,0,0,.82) 25%, rgba(0,0,0,.48) 39%, rgba(0,0,0,.12) 54%),
+        linear-gradient(90deg, rgba(0,0,0,.86) 0%, rgba(0,0,0,.58) 47%, rgba(0,0,0,.76) 100%),
+        rgba(0,0,0,.34);
     }
 
     .menu-section__background::after {
@@ -171,13 +171,16 @@
 
     .menu-item__header {
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 18px;
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      column-gap: 10px;
+      row-gap: 8px;
       min-width: 0;
     }
 
     .menu-item__name {
+      flex: 0 1 auto;
       min-width: 0;
       margin: 0;
       color: #fff;
@@ -192,7 +195,7 @@
       display: flex;
       flex: 0 0 auto;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-start;
       gap: 7px;
     }
 
@@ -280,8 +283,8 @@
 
       .menu-section__background::before {
         background:
-          linear-gradient(180deg, #000 0%, #000 7%, rgba(0,0,0,.96) 15%, rgba(0,0,0,.76) 28%, rgba(0,0,0,.38) 43%, rgba(0,0,0,0) 58%),
-          rgba(0,0,0,.54);
+          linear-gradient(180deg, #000 0%, #000 7%, rgba(0,0,0,.98) 15%, rgba(0,0,0,.86) 28%, rgba(0,0,0,.58) 43%, rgba(0,0,0,.18) 58%),
+          rgba(0,0,0,.68);
       }
 
       .menu-section__shell {
@@ -367,8 +370,9 @@
       }
 
       .menu-item__header {
-        align-items: flex-start;
-        gap: 12px;
+        align-items: center;
+        column-gap: 8px;
+        row-gap: 7px;
       }
 
       .menu-item__name {
@@ -378,6 +382,7 @@
 
       .menu-item__badges {
         flex-wrap: wrap;
+        justify-content: flex-start;
         gap: 5px;
       }
 
@@ -391,18 +396,6 @@
         max-width: none;
         font-size: clamp(15px, 4.25vw, 20px);
         line-height: 1.22;
-      }
-    }
-
-    @media (max-width: 420px) {
-      .menu-item__header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-
-      .menu-item__badges {
-        justify-content: flex-start;
       }
     }
 
