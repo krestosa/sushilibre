@@ -3,73 +3,78 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#15130f">
-  <meta name="description" content="Sushi Libre en SushiClub Puerto Madero. Reserva previa.">
+  <meta name="theme-color" content="#050505">
+  <meta name="description" content="Sushi Libre — una experiencia exclusiva en SushiClub Puerto Madero.">
   <title>Sushi Libre — SushiClub Puerto Madero</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <main class="hero" aria-labelledby="hero-title">
-    <div class="background" aria-hidden="true"></div>
-    <div class="color-grade" aria-hidden="true"></div>
-    <div class="grain" aria-hidden="true"></div>
+  <main class="page">
+    <aside class="booking-dock" aria-label="Información y reserva del evento">
+      <div class="booking-dock__meta booking-dock__meta--venue">
+        <span class="booking-dock__label">Restó</span>
+        <strong>PUERTO MADERO</strong>
+      </div>
 
-    <header class="masthead" aria-label="Datos del evento">
-      <p class="masthead__left">PUERTO<br>MADERO</p>
-      <p class="masthead__date">JUE 30/07 · A PARTIR 20.00HS</p>
-      <p class="masthead__credit">INCLUYE<br>CUBIERTO</p>
-    </header>
+      <div class="booking-dock__meta booking-dock__meta--date">
+        <span class="booking-dock__label">Fecha</span>
+        <strong>JUEVES 30/07</strong>
+      </div>
 
-    <section class="title-lockup" id="hero-title" aria-label="Sushi Libre Exclusive Experience">
-      <span class="title-word title-word--chef">Sushi</span>
-      <span class="title-note" aria-hidden="true">
-        <span class="title-note__stack">EXCLUSIVE</span>
-        <span class="title-note__script">experience</span>
-      </span>
-      <span class="title-word title-word--experience">Libre</span>
+      <div class="countdown" aria-label="Cuenta regresiva hasta el 30 de julio a las 20 horas">
+        <div class="countdown__unit">
+          <strong data-countdown="days">00</strong>
+          <span>DÍAS</span>
+        </div>
+        <div class="countdown__unit">
+          <strong data-countdown="hours">00</strong>
+          <span>HORAS</span>
+        </div>
+        <div class="countdown__unit">
+          <strong data-countdown="minutes">00</strong>
+          <span>MINUTOS</span>
+        </div>
+        <div class="countdown__unit">
+          <strong data-countdown="seconds">00</strong>
+          <span>SEGUNDOS</span>
+        </div>
+      </div>
+
+      <a class="booking-dock__cta" href="https://sushiclub.com.ar/sushilibre">RESERVA<br>AHORA</a>
+    </aside>
+
+    <section class="hero" aria-labelledby="hero-title">
+      <video class="hero__video" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+      <div class="hero__black-filter" aria-hidden="true"></div>
+      <div class="hero__gradient" aria-hidden="true"></div>
+      <div class="hero__grain" aria-hidden="true"></div>
+
+      <header class="masthead">
+        <p class="masthead__venue">PUERTO<br>MADERO</p>
+
+        <div class="masthead__brands" aria-label="SushiClub 25 aniversario">
+          <img class="masthead__sushiclub" src="assets/sushiclub.svg" alt="SushiClub">
+          <img class="masthead__anniversary" src="assets/anniversary-25.svg" alt="25 Anniversary Edition">
+        </div>
+
+        <p class="masthead__reservation">RESERVA<br>ANTICIPADA</p>
+      </header>
+
+      <div class="title-lockup" id="hero-title">
+        <h1 class="title-word title-word--sushi">SUSHI</h1>
+        <p class="title-kicker">EXCLUSIVE EXPERIENCE</p>
+        <p class="title-word title-word--libre">LIBRE</p>
+      </div>
+
+      <div class="hero-copy">
+        <h2>UNA NOCHE PARA DISFRUTAR SIN LÍMITES</h2>
+        <p>DESCUBRÍ UNA SELECCIÓN PREPARADA PARA RECORRER LOS SABORES MÁS<br class="desktop-only"> REPRESENTATIVOS DE SUSHICLUB. NIGUIRIS, ROLLS Y SASHIMIS SERVIDOS DURANTE<br class="desktop-only"> TODA LA NOCHE EN UN ENTORNO PENSADO PARA DISFRUTAR SIN APURO.</p>
+      </div>
     </section>
-
-    <footer class="footer-copy" aria-label="Información, precios y reserva">
-      <section class="footer-copy__item footer-copy__item--left">
-        <p class="footer-copy__eyebrow">INCLUYE</p>
-        <p class="included-copy">+ AGUA &amp; LIMONADA CLÁSICA LIBRE<br>+ CAFÉ POR PERSONA</p>
-
-        <div class="voucher">
-          <p class="voucher__title">+ VOUCHER <strong>$15.000</strong></p>
-          <p class="voucher__note">EN TU PRÓXIMO SUSHI LIBRE, POR CONSUMO RESPONSABLE</p>
-        </div>
-      </section>
-
-      <section class="footer-copy__item footer-copy__item--center">
-        <div class="price-grid">
-          <p class="price">
-            <span class="price__label">VALOR GENERAL</span>
-            <strong class="price__amount">$110.000</strong>
-          </p>
-          <p class="price">
-            <span class="price__label">CON 25% DE REINTEGRO</span>
-            <strong class="price__amount">$82.500</strong>
-          </p>
-        </div>
-        <img class="payment-logo" src="assets/galicia-eminent-visa.svg" alt="Galicia Éminent exclusivo Visa Signature">
-      </section>
-
-      <section class="footer-copy__item footer-copy__item--right">
-        <p class="reservation__title">RESERVA PREVIA</p>
-        <p class="reservation__url">SUSHICLUB.COM.AR/SUSHILIBRE</p>
-        <div class="brand-row">
-          <img class="brand-row__sushiclub" src="assets/sushiclub.svg" alt="SushiClub">
-          <img class="brand-row__anniversary" src="assets/anniversary-25.svg" alt="25 Anniversary Edition">
-        </div>
-      </section>
-
-      <p class="legal">
-        BASES, CONDICIONES Y LOCALES ADHERIDOS EN SUSHICLUB.COM.AR/BENEFICIOS. 25% DE REINTEGRO ÚNICAMENTE CON GALICIA ÉMINENT VISA SIGNATURE. PARA PAGOS EN EL LOCAL ÚNICAMENTE A TRAVÉS DE BILLETERAS VIRTUALES APPLE PAY Y GOOGLE PAY UTILIZANDO NFC (SIN CONTACTO).
-      </p>
-    </footer>
   </main>
 </body>
 </html>
