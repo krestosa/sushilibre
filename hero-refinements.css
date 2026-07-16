@@ -115,7 +115,46 @@
   }
 }
 
+/* Periodic CTA highlight: brief enough to attract attention without becoming ambient motion. */
+.booking-dock__cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.booking-dock__cta span {
+  position: relative;
+  z-index: 2;
+}
+
+.booking-dock__cta::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: -35%;
+  bottom: -35%;
+  left: -65%;
+  width: 42%;
+  opacity: 0;
+  pointer-events: none;
+  transform: skewX(-20deg);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,.12) 25%,
+    rgba(255,255,255,.58) 50%,
+    rgba(255,255,255,.12) 75%,
+    transparent 100%
+  );
+  filter: blur(1px);
+  will-change: left, opacity;
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  .booking-dock__cta::before {
+    animation: cta-sheen 6.8s ease-in-out 3.2s infinite;
+  }
+
   /* 1. Video settles first. */
   .hero__video {
     animation: none;
@@ -157,6 +196,33 @@
   /* 6. Header brand bar and corner labels appear last. */
   .masthead {
     animation: stage-masthead-in 400ms var(--ease-out) 1660ms both;
+  }
+}
+
+@keyframes cta-sheen {
+  0%,
+  72% {
+    left: -65%;
+    opacity: 0;
+  }
+
+  76% {
+    opacity: 0;
+  }
+
+  79% {
+    opacity: .82;
+  }
+
+  89% {
+    left: 125%;
+    opacity: .58;
+  }
+
+  92%,
+  100% {
+    left: 125%;
+    opacity: 0;
   }
 }
 
@@ -227,6 +293,10 @@
 @media (prefers-reduced-motion: reduce) {
   .hero__video {
     transition-duration: 240ms;
+  }
+
+  .booking-dock__cta::before {
+    display: none;
   }
 
   .hero__video-stack,
