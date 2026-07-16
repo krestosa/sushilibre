@@ -56,12 +56,14 @@
         opacity: 1 !important;
       }
 
-      .menu-group__heading.is-leaving {
+      .menu-group__heading.is-leaving,
+      .menu-group.is-active .menu-group__heading.is-leaving {
         opacity: 0 !important;
         transform: translate3d(0, -6px, 0) !important;
       }
 
-      .menu-group__heading.is-leaving::before {
+      .menu-group__heading.is-leaving::before,
+      .menu-group.is-active .menu-group__heading.is-overlapping.is-leaving::before {
         opacity: 0 !important;
       }
 
@@ -79,7 +81,8 @@
         transition-duration: 100ms !important;
       }
 
-      .menu-group__heading.is-leaving {
+      .menu-group__heading.is-leaving,
+      .menu-group.is-active .menu-group__heading.is-leaving {
         transform: translate3d(0, -2px, 0) !important;
       }
     }
