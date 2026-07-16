@@ -26,6 +26,27 @@
       .menu-group + .menu-group {
         margin-top: 5vh !important;
       }
+
+      /* The outgoing category can lose .is-active before its sticky range ends.
+         Keep its mask active whenever content is physically passing underneath. */
+      .menu-group__heading.is-overlapping {
+        z-index: 8;
+        opacity: 1 !important;
+      }
+
+      .menu-group__heading.is-overlapping::before {
+        bottom: -58px;
+        opacity: 1 !important;
+        background: linear-gradient(
+          180deg,
+          #000 0%,
+          rgba(0, 0, 0, .99) 46%,
+          rgba(0, 0, 0, .92) 62%,
+          rgba(0, 0, 0, .68) 78%,
+          rgba(0, 0, 0, .28) 91%,
+          rgba(0, 0, 0, 0) 100%
+        );
+      }
     }
   `;
   document.head.append(style);
