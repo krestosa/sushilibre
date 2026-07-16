@@ -115,7 +115,7 @@
   }
 }
 
-/* Periodic CTA highlight: brief enough to attract attention without becoming ambient motion. */
+/* Periodic CTA highlight: broad, soft and brief enough to attract without distracting. */
 .booking-dock__cta {
   position: relative;
   isolation: isolate;
@@ -131,22 +131,26 @@
   content: "";
   position: absolute;
   z-index: 1;
-  top: -35%;
-  bottom: -35%;
-  left: -65%;
-  width: 42%;
+  top: -42%;
+  bottom: -42%;
+  left: -92%;
+  width: 72%;
   opacity: 0;
   pointer-events: none;
-  transform: skewX(-20deg);
+  transform: skewX(-18deg);
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255,255,255,.12) 25%,
+    rgba(255,255,255,.04) 12%,
+    rgba(255,255,255,.14) 26%,
+    rgba(255,255,255,.36) 42%,
     rgba(255,255,255,.58) 50%,
-    rgba(255,255,255,.12) 75%,
+    rgba(255,255,255,.36) 58%,
+    rgba(255,255,255,.14) 74%,
+    rgba(255,255,255,.04) 88%,
     transparent 100%
   );
-  filter: blur(1px);
+  filter: blur(5px);
   will-change: left, opacity;
 }
 
@@ -202,7 +206,7 @@
 @keyframes cta-sheen {
   0%,
   72% {
-    left: -65%;
+    left: -92%;
     opacity: 0;
   }
 
@@ -210,18 +214,18 @@
     opacity: 0;
   }
 
-  79% {
-    opacity: .82;
+  80% {
+    opacity: .68;
   }
 
-  89% {
-    left: 125%;
-    opacity: .58;
+  92% {
+    left: 138%;
+    opacity: .46;
   }
 
-  92%,
+  96%,
   100% {
-    left: 125%;
+    left: 138%;
     opacity: 0;
   }
 }
