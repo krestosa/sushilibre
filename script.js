@@ -32,6 +32,89 @@
     }, 1_000);
   }
 
+  const setupBookingDockLayout = () => {
+    const dock = document.querySelector('.booking-dock');
+    const metadata = Array.from(document.querySelectorAll('.booking-dock__meta'));
+    const countdown = document.querySelector('.countdown');
+    const cta = document.querySelector('.booking-dock__cta');
+
+    if (!dock || metadata.length < 2 || !countdown || !cta) return;
+
+    let stacked = null;
+    let scheduledFrame = 0;
+
+    const clearResponsiveStyles = () => {
+      dock.style.gridTemplateColumns = '';
+      dock.style.gridTemplateRows = '';
+      dock.style.rowGap = '';
+
+      metadata.forEach((item) => {
+        item.style.gridColumn = '';
+        item.style.gridRow = '';
+        item.style.padding = '';
+      });
+
+      countdown.style.gridColumn = '';
+      countdown.style.gridRow = '';
+      cta.style.gridColumn = '';
+      cta.style.gridRow = '';
+    };
+
+    const applyStackedLayout = () => {
+      dock.style.gridTemplateColumns = 'minmax(148px, 1.25fr) minmax(0, 2.4fr) 104px';
+      dock.style.gridTemplateRows = 'repeat(2, minmax(0, 1fr))';
+      dock.style.rowGap = '0';
+
+      metadata[0].style.gridColumn = '1';
+      metadata[0].style.gridRow = '1';
+      metadata[1].style.gridColumn = '1';
+      metadata[1].style.gridRow = '2';
+
+      metadata.forEach((item) => {
+        item.style.padding = '0 8px';
+      });
+
+      countdown.style.gridColumn = '2';
+      countdown.style.gridRow = '1 / span 2';
+      cta.style.gridColumn = '3';
+      cta.style.gridRow = '1 / span 2';
+    };
+
+    const syncLayout = () => {
+      const isDesktopDock = window.matchMedia('(min-width: 621px)').matches;
+      const shouldStack = isDesktopDock && dock.getBoundingClientRect().width < 760;
+
+      if (shouldStack === stacked) return;
+      stacked = shouldStack;
+
+      if (shouldStack) {
+        applyStackedLayout();
+      } else {
+        clearResponsiveStyles();
+      }
+    };
+
+    const scheduleSync = () => {
+      if (scheduledFrame) window.cancelAnimationFrame(scheduledFrame);
+      scheduledFrame = window.requestAnimationFrame(() => {
+        scheduledFrame = 0;
+        syncLayout();
+      });
+    };
+
+    syncLayout();
+    window.addEventListener('resize', scheduleSync, { passive: true });
+
+    if ('ResizeObserver' in window) {
+      const observer = new ResizeObserver(scheduleSync);
+      observer.observe(dock);
+    }
+
+    document.fonts?.ready.then(scheduleSync).catch(() => undefined);
+  };
+
+  setupBookingDockLayout();
+
   const videos = Array.from(document.querySelectorAll('[data-loop-video]'));
   if (videos.length < 2) {
     const video = videos[0];
