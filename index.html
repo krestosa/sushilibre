@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="script.js" defer></script>
+  <script src="menu.js" defer></script>
 </head>
 <body>
   <main class="page">
@@ -82,6 +83,19 @@
       <div class="hero-copy">
         <h2>UNA NOCHE PARA DISFRUTAR SIN LÍMITES</h2>
         <p>DESCUBRÍ UNA SELECCIÓN PREPARADA PARA RECORRER LOS SABORES MÁS<br class="desktop-only"> REPRESENTATIVOS DE SUSHICLUB. NIGUIRIS, ROLLS Y SASHIMIS SERVIDOS DURANTE<br class="desktop-only"> TODA LA NOCHE EN UN ENTORNO PENSADO PARA DISFRUTAR SIN APURO.</p>
+      </div>
+    </section>
+
+    <section class="menu-section" id="menu" data-menu-root aria-labelledby="menu-heading">
+      <div class="menu-section__background" aria-hidden="true"></div>
+
+      <div class="menu-section__shell">
+        <header class="menu-section__intro">
+          <h2 id="menu-heading" data-menu-heading>MENÚ</h2>
+        </header>
+
+        <div class="menu-section__groups" data-menu-groups></div>
+        <p class="menu-section__status" data-menu-status role="status">CARGANDO MENÚ…</p>
       </div>
     </section>
   </main>
