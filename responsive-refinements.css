@@ -1,8 +1,11 @@
 /* Responsive title corrections applied after the base and hero refinement layers. */
 
-/* Compact desktop and landscape tablet: preserve the desktop one-line lockup. */
-@media (min-width: 621px) and (max-width: 1280px) and (orientation: landscape),
-       (min-width: 901px) and (max-width: 1280px) {
+/*
+ * One continuous horizontal lockup for every desktop width and landscape tablet.
+ * This overrides the base 4:3 query so no intermediate hybrid layout can appear.
+ */
+@media (min-width: 621px) and (orientation: landscape),
+       (min-width: 901px) {
   .hero {
     min-height: 720px;
   }
@@ -12,20 +15,20 @@
   }
 
   .title-lockup {
-    top: clamp(34%, 38.5vh, 39.5%);
+    top: clamp(34%, 38.5vh, 39.8%);
     left: 50%;
     right: auto;
-    width: min(1180px, calc(100vw - clamp(48px, 6vw, 92px)));
+    width: min(1600px, calc(100vw - clamp(48px, 6vw, 160px)));
     transform: translateX(-50%);
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     grid-template-rows: auto;
-    column-gap: clamp(18px, 2vw, 32px);
+    column-gap: clamp(18px, 2vw, 44px);
     row-gap: 0;
     align-items: center;
   }
 
   .title-word {
-    font-size: clamp(76px, 9.15vw, 118px);
+    font-size: clamp(76px, 10.55vw, 204px);
   }
 
   .title-word--sushi {
@@ -40,7 +43,7 @@
     align-self: center;
     justify-self: center;
     margin: .06em 0 0;
-    font-size: clamp(14px, 1.55vw, 20px);
+    font-size: clamp(14px, 1.58vw, 31px);
   }
 
   .title-word--libre {
@@ -50,8 +53,8 @@
   }
 
   .hero-copy {
-    top: 63.5%;
-    width: min(720px, 72vw);
+    top: clamp(63.5%, 64.5vh, 65.3%);
+    width: min(790px, 72vw);
   }
 }
 
