@@ -24,7 +24,7 @@
 
   const loadBackgroundVideo = async () => {
     const video = document.querySelector('.hero__video');
-    const parts = Array.from({ length: 8 }, (_, index) =>
+    const parts = Array.from({ length: 6 }, (_, index) =>
       `assets/bg2.${String(index + 1).padStart(2, "0")}.b64`
     );
 
