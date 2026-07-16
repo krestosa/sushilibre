@@ -1,4 +1,4 @@
-/* Optical centering and seamless loop-mix refinements. */
+/* Optical centering, seamless loop mix and staged hero entrance. */
 .hero__video-stack {
   position: absolute;
   z-index: -4;
@@ -21,9 +21,7 @@
   opacity: 1;
 }
 
-/* The incoming video is composited above a fully opaque outgoing frame.
-   This produces a true dissolve: incoming * progress + outgoing * (1 - progress),
-   without the dark dip caused by fading both layers toward the black background. */
+/* Incoming first frame dissolves over a fully opaque outgoing frame. */
 .hero__video.is-mixing-in {
   z-index: 2;
 }
@@ -118,21 +116,127 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* 1. Video settles first. */
   .hero__video {
     animation: none;
   }
 
   .hero__video-stack {
-    animation: video-settle 1200ms var(--ease-soft) both;
+    animation: video-settle 1000ms var(--ease-soft) both;
+  }
+
+  /* 2. Black filter and gradient arrive quickly and progressively. */
+  .hero__black-filter,
+  .hero__gradient {
+    animation: stage-overlay-in 430ms ease-out 720ms both;
+  }
+
+  /* 3. Main title appears, then the central descriptor. */
+  .title-word--sushi {
+    animation: stage-title-in 660ms var(--ease-out) 1040ms both;
+  }
+
+  .title-word--libre {
+    animation: stage-title-in 700ms var(--ease-out) 1110ms both;
+  }
+
+  .title-kicker {
+    animation: stage-copy-in 480ms var(--ease-out) 1300ms both;
+  }
+
+  /* 4. Supporting center copy enters after the title. */
+  .hero-copy {
+    animation: stage-copy-centered-in 560ms var(--ease-out) 1450ms both;
+  }
+
+  /* 5. Sticky booking dock loads next. */
+  .booking-dock {
+    animation: stage-dock-in 580ms var(--ease-out) 1760ms both;
+  }
+
+  /* 6. Header brand bar and corner labels appear last. */
+  .masthead {
+    animation: stage-masthead-in 500ms var(--ease-out) 2110ms both;
+  }
+}
+
+@keyframes stage-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes stage-title-in {
+  from {
+    opacity: 0;
+    translate: 0 15px;
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes stage-copy-in {
+  from {
+    opacity: 0;
+    translate: 0 9px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes stage-copy-centered-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes stage-dock-in {
+  from {
+    opacity: 0;
+    translate: 0 15px;
+    scale: .985;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes stage-masthead-in {
+  from {
+    opacity: 0;
+    translate: 0 -8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero__video {
-    transition-duration: 360ms;
+    transition-duration: 240ms;
   }
 
-  .hero__video-stack {
+  .hero__video-stack,
+  .hero__black-filter,
+  .hero__gradient,
+  .title-word,
+  .title-kicker,
+  .hero-copy,
+  .booking-dock,
+  .masthead {
     animation: quiet-fade 220ms ease-out both;
   }
 }
