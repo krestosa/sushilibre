@@ -113,15 +113,15 @@
       <div class="hero__gradient" aria-hidden="true"></div>
       <div class="hero__grain" aria-hidden="true"></div>
 
-      <header class="masthead">
-        <p class="masthead__venue">PUERTO<br>MADERO</p>
+      <header class="masthead" style="left:50%;right:auto;width:calc(100% - (2 * var(--page-x)));transform:translateX(-50%);grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);">
+        <p class="masthead__venue" style="grid-column:1;justify-self:start;">PUERTO<br>MADERO</p>
 
-        <div class="masthead__brands" aria-label="SushiClub 25 aniversario">
+        <div class="masthead__brands" style="grid-column:2;justify-self:center;" aria-label="SushiClub 25 aniversario">
           <img class="masthead__sushiclub" src="assets/sushiclub.svg" alt="SushiClub">
           <img class="masthead__anniversary" src="assets/anniversary-25.svg" alt="25 Anniversary Edition">
         </div>
 
-        <p class="masthead__reservation">RESERVA<br>ANTICIPADA</p>
+        <p class="masthead__reservation" style="grid-column:3;justify-self:end;">RESERVA<br>ANTICIPADA</p>
       </header>
 
       <div class="title-lockup" id="hero-title">
