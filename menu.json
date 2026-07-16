@@ -1,0 +1,89 @@
+{
+  "title": "MENÚ",
+  "sections": [
+    {
+      "id": "piezas",
+      "title": "PIEZAS",
+      "quantity": "4U",
+      "items": [
+        {
+          "name": "BUENOS AIRES",
+          "description": "SALMÓN, LANGOSTINOS, PALTA, QUESO CREMA Y SALSA DE SÉSAMO."
+        },
+        {
+          "name": "CELERITY",
+          "description": "LANGOSTINOS Y PALTA, SALMÓN CON CRIOLLA DE ROCOTO Y MAYONESA DE APIO."
+        },
+        {
+          "name": "FEEL",
+          "description": "SALMÓN, QUESO CREMA Y VERDEO, ENVUELTO EN LÁMINAS DE TAMAGO."
+        },
+        {
+          "name": "SOUL",
+          "description": "PALMITO, SALMÓN, TAMAGO, RECUBIERTO CON QUESO Y ALMENDRAS CARAMELIZADAS."
+        },
+        {
+          "name": "PLACER REAL",
+          "description": "PALTA, PALMITO, QUESO CREMA, TAMAGO Y SALMÓN CON SALSA DE MARACUYÁ."
+        }
+      ]
+    },
+    {
+      "id": "niguiris",
+      "title": "NIGUIRIS",
+      "quantity": "3U",
+      "items": [
+        {
+          "name": "CRISPY WHITE",
+          "description": "PESCADO BLANCO CON PANKO, CREMA DE PALTA Y CRIOLLA DE ROCOTO SOBRE ARROZ."
+        },
+        {
+          "name": "ANTICUCHERO",
+          "description": "SALMÓN CON SALSA ANTICUCHO, FLAMEADO CON EMULSIÓN ALIMONADA SOBRE ARROZ."
+        },
+        {
+          "name": "FUEGO THAI",
+          "description": "SALMÓN CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE."
+        },
+        {
+          "name": "LANGOSTINO FUEGO THAI",
+          "description": "LANGOSTINO CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE."
+        },
+        {
+          "name": "PALTA THAI",
+          "description": "VEGAN. PALTA CON SALSA TAILANDESA A BASE DE PASTA DE MANÍ, FLAMBEADA Y CON SALSA AGRIPICANTE."
+        }
+      ]
+    },
+    {
+      "id": "geisha",
+      "title": "GEISHA",
+      "quantity": "3U",
+      "items": [
+        {
+          "name": "SALMÓN",
+          "description": "QUESO CREMA Y PALTA, ENVUELTOS EN SALMÓN."
+        }
+      ]
+    },
+    {
+      "id": "bebidas",
+      "title": "BEBIDAS",
+      "quantity": "",
+      "items": [
+        {
+          "name": "AGUA CON/SIN GAS LIBRE",
+          "description": "SERVICIO LIBRE DURANTE TODA LA EXPERIENCIA."
+        },
+        {
+          "name": "LIMONADA CLÁSICA LIBRE",
+          "description": "LIMONADA CLÁSICA SERVIDA LIBRE DURANTE TODA LA EXPERIENCIA."
+        },
+        {
+          "name": "CAFÉ NESPRESSO",
+          "description": "UN CAFÉ NESPRESSO POR PERSONA."
+        }
+      ]
+    }
+  ]
+}
