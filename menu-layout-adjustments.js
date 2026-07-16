@@ -1,4 +1,7 @@
 (() => {
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const easeOut = 'cubic-bezier(.22, 1, .36, 1)';
+
   const style = document.createElement('style');
   style.dataset.menuLayoutAdjustments = '';
   style.textContent = `
@@ -10,10 +13,6 @@
 
     .menu-group + .menu-group {
       margin-top: 5vh !important;
-    }
-
-    .menu-mobile-sticky {
-      display: none;
     }
 
     @media (max-width: 980px) {
@@ -31,9 +30,8 @@
         margin-top: 5vh !important;
       }
 
-      /* A single sticky proxy spans the full menu list. Individual category
-         headings stay in flow only as layout placeholders, so they cannot be
-         pushed downward by the end boundary of their own section. */
+      /* One proxy spans the complete menu, avoiding the end-of-section push
+         that affected individual sticky headings. */
       .menu-mobile-sticky {
         position: sticky;
         z-index: 10;
@@ -130,7 +128,7 @@
     @media (prefers-reduced-motion: reduce) {
       .menu-mobile-sticky__inner,
       .menu-mobile-sticky__inner::before {
-        transition: none;
+        transition-duration: 100ms;
       }
     }
   `;
@@ -138,15 +136,20 @@
 
   const menuRoot = document.querySelector('[data-menu-root]');
   const menuGroups = document.querySelector('[data-menu-groups]');
+  const menuIntroHeading = document.querySelector('.menu-section__intro h2');
   if (!menuRoot || !menuGroups) return;
 
   let proxy = null;
+  let proxyInner = null;
   let proxyTitle = null;
   let proxyQuantity = null;
   let stateObserver = null;
   let contentObserver = null;
+  let revealObserver = null;
+  let swapAnimation = null;
+  let swapGeneration = 0;
 
-  const disconnect = () => {
+  const disconnectStateObservers = () => {
     stateObserver?.disconnect();
     contentObserver?.disconnect();
     stateObserver = null;
@@ -162,8 +165,8 @@
     proxy.className = 'menu-mobile-sticky';
     proxy.setAttribute('aria-hidden', 'true');
 
-    const inner = document.createElement('div');
-    inner.className = 'menu-mobile-sticky__inner';
+    proxyInner = document.createElement('div');
+    proxyInner.className = 'menu-mobile-sticky__inner';
 
     proxyTitle = document.createElement('span');
     proxyTitle.className = 'menu-mobile-sticky__title';
@@ -171,9 +174,70 @@
     proxyQuantity = document.createElement('span');
     proxyQuantity.className = 'menu-mobile-sticky__quantity';
 
-    inner.append(proxyTitle, proxyQuantity);
-    proxy.append(inner);
+    proxyInner.append(proxyTitle, proxyQuantity);
+    proxy.append(proxyInner);
     menuGroups.prepend(proxy);
+  };
+
+  const setProxyText = (title, quantity) => {
+    proxyTitle.textContent = title;
+    proxyQuantity.textContent = quantity;
+  };
+
+  const animateProxySwap = (title, quantity) => {
+    const currentTitle = proxyTitle.textContent;
+    const currentQuantity = proxyQuantity.textContent;
+    if (currentTitle === title && currentQuantity === quantity) return;
+
+    const firstRender = !proxy.classList.contains('is-ready') || !currentTitle;
+    if (
+      firstRender ||
+      typeof proxyInner.animate !== 'function'
+    ) {
+      swapAnimation?.cancel();
+      setProxyText(title, quantity);
+      return;
+    }
+
+    swapAnimation?.cancel();
+    const generation = ++swapGeneration;
+    const outDuration = reducedMotion.matches ? 60 : 80;
+    const inDuration = reducedMotion.matches ? 90 : 130;
+    const travel = reducedMotion.matches ? 3 : 6;
+
+    const outgoing = proxyInner.animate([
+      { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+      { opacity: 0, transform: `translate3d(0, -${travel}px, 0)` }
+    ], {
+      duration: outDuration,
+      easing: 'ease-out',
+      fill: 'forwards'
+    });
+    swapAnimation = outgoing;
+
+    outgoing.finished
+      .then(() => {
+        if (generation !== swapGeneration) return;
+        setProxyText(title, quantity);
+
+        const incoming = proxyInner.animate([
+          { opacity: 0, transform: `translate3d(0, ${travel}px, 0)` },
+          { opacity: 1, transform: 'translate3d(0, 0, 0)' }
+        ], {
+          duration: inDuration,
+          easing: easeOut,
+          fill: 'forwards'
+        });
+        swapAnimation = incoming;
+        return incoming.finished;
+      })
+      .then(() => {
+        if (generation !== swapGeneration) return;
+        swapAnimation = null;
+        proxyInner.style.opacity = '';
+        proxyInner.style.transform = '';
+      })
+      .catch(() => undefined);
   };
 
   const syncProxy = () => {
@@ -186,11 +250,84 @@
     const title = heading?.querySelector('.menu-group__title')?.textContent?.trim() || '';
     const quantity = heading?.querySelector('.menu-group__quantity')?.textContent?.trim() || '';
 
-    if (proxyTitle.textContent !== title) proxyTitle.textContent = title;
-    if (proxyQuantity.textContent !== quantity) proxyQuantity.textContent = quantity;
-
+    animateProxySwap(title, quantity);
     proxy.classList.toggle('is-overlapping', Boolean(heading?.classList.contains('is-overlapping')));
     proxy.classList.toggle('is-ready', Boolean(title));
+  };
+
+  const animateOnce = (element, keyframes, options) => {
+    if (!element || typeof element.animate !== 'function') return;
+
+    const animation = element.animate(keyframes, {
+      fill: 'both',
+      ...options
+    });
+
+    animation.addEventListener('finish', () => {
+      element.style.opacity = '1';
+      element.style.transform = 'translate3d(0, 0, 0)';
+      animation.cancel();
+    }, { once: true });
+  };
+
+  const setupScrollReveals = (groups) => {
+    revealObserver?.disconnect();
+    revealObserver = null;
+
+    if (!('IntersectionObserver' in window)) return;
+
+    const candidates = [];
+    if (menuIntroHeading && !menuIntroHeading.dataset.motionReady) {
+      menuIntroHeading.dataset.motionReady = 'true';
+      candidates.push({ element: menuIntroHeading, type: 'intro' });
+    }
+
+    groups.forEach((group) => {
+      const items = group.querySelector('.menu-group__items');
+      if (!items || items.dataset.motionReady) return;
+      items.dataset.motionReady = 'true';
+      candidates.push({ element: items, type: 'group' });
+    });
+
+    if (!candidates.length) return;
+
+    candidates.forEach(({ element }) => {
+      element.style.opacity = '0';
+      element.style.transform = reducedMotion.matches
+        ? 'translate3d(0, 3px, 0)'
+        : 'translate3d(0, 10px, 0)';
+    });
+
+    revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        const candidate = candidates.find(({ element }) => element === entry.target);
+        if (!candidate) return;
+
+        observer.unobserve(entry.target);
+        const isIntro = candidate.type === 'intro';
+        const duration = reducedMotion.matches
+          ? 150
+          : isIntro
+            ? 360
+            : 280;
+        const distance = reducedMotion.matches ? 3 : isIntro ? 14 : 10;
+
+        animateOnce(entry.target, [
+          { opacity: 0, transform: `translate3d(0, ${distance}px, 0)` },
+          { opacity: 1, transform: 'translate3d(0, 0, 0)' }
+        ], {
+          duration,
+          easing: easeOut
+        });
+      });
+    }, {
+      rootMargin: '0px 0px -12% 0px',
+      threshold: .08
+    });
+
+    candidates.forEach(({ element }) => revealObserver.observe(element));
   };
 
   const install = () => {
@@ -198,7 +335,7 @@
     if (!groups.length) return false;
 
     ensureProxy();
-    disconnect();
+    disconnectStateObservers();
 
     stateObserver = new MutationObserver(syncProxy);
     stateObserver.observe(menuRoot, {
@@ -216,6 +353,7 @@
       }
     });
 
+    setupScrollReveals(groups);
     syncProxy();
     return true;
   };
