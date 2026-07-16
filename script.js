@@ -8,7 +8,6 @@
   };
 
   const pad = (value) => String(value).padStart(2, "0");
-  let timerId;
 
   const renderCountdown = () => {
     const remaining = Math.max(0, target - Date.now());
@@ -22,19 +21,19 @@
     nodes.minutes.textContent = pad(minutes);
     nodes.seconds.textContent = pad(seconds);
 
-    if (remaining === 0 && timerId) {
-      window.clearInterval(timerId);
-    }
+    return remaining;
   };
 
   const video = document.querySelector('.hero__video');
   if (video) {
-    video.addEventListener('canplay', () => video.classList.add('is-ready'), { once: true });
-    video.play().catch(() => {
-      video.classList.add('is-paused');
-    });
+    video.play().catch(() => undefined);
   }
 
-  renderCountdown();
-  timerId = window.setInterval(renderCountdown, 1_000);
+  if (renderCountdown() > 0) {
+    const timerId = window.setInterval(() => {
+      if (renderCountdown() === 0) {
+        window.clearInterval(timerId);
+      }
+    }, 1_000);
+  }
 })();
