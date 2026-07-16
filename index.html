@@ -25,7 +25,21 @@
           { "name": "CELERITY", "description": "LANGOSTINOS Y PALTA, SALMÓN CON CRIOLLA DE ROCOTO Y MAYONESA DE APIO." },
           { "name": "FEEL", "description": "SALMÓN, QUESO CREMA Y VERDEO, ENVUELTO EN LÁMINAS DE TAMAGO." },
           { "name": "SOUL", "description": "PALMITO, SALMÓN, TAMAGO, RECUBIERTO CON QUESO Y ALMENDRAS CARAMELIZADAS." },
-          { "name": "PLACER REAL", "description": "PALTA, PALMITO, QUESO CREMA, TAMAGO Y SALMÓN CON SALSA DE MARACUYÁ." }
+          { "name": "PLACER REAL", "description": "PALTA, PALMITO, QUESO CREMA, TAMAGO Y SALMÓN CON SALSA DE MARACUYÁ." },
+          { "name": "FUTURAMA 2", "description": "LANGOSTINOS REBOZADOS, QUESO SABORIZADO, PANKO Y SALSA DE MIEL Y MOSTAZA." },
+          { "name": "SWEET", "description": "LANGOSTINOS, TAMAGO, PALTA Y QUESO SABORIZADO, SALMÓN CON SALSA DE MANGO." },
+          { "name": "SPF", "description": "SALMÓN, PALTA Y QUESO CREMA, CON SÉSAMO." },
+          { "name": "HONEY", "description": "SALMÓN COCIDO SABORIZADO CON REDUCCIÓN DE MIEL Y JENGIBRE." },
+          { "name": "PHILADELPHIA", "description": "SALMÓN Y QUESO CREMA, CON SÉSAMO." },
+          { "name": "PINK FLOYD", "description": "LANGOSTINO RELLENO CON PASTA DE SALMÓN, PANKO, ENVUELTO EN SALMÓN, CON SALSA THAI, LECHE DE TIGRE Y SALSA DE ANANÁ.", "pieces": 3 },
+          { "name": "TIGER", "description": "LANGOSTINOS APANADOS, PALTA, SALMÓN, CROCANTE DE PAPA Y LECHE DE TIGRE." },
+          { "name": "MERKEN", "description": "SALMÓN AHUMADO, PALTA, TATAKI DE SALMÓN CON MERKEN Y SALSA PICANTE." },
+          { "name": "EVOLUTION", "description": "SALMÓN, PALTA, QUESO CREMA Y NEGUI, SALMÓN CON PANKO Y SALSA DE ANANÁ." },
+          { "name": "BOOM!", "description": "CORTES DE SALMÓN, CON QUESO CREMA SABORIZADO, CUBIERTOS DE MASA TEMPURA.", "pieces": 6 },
+          { "name": "CRISPY GREEN", "description": "TOMATES CONFITADOS, ESPINACA, QUESO SABORIZADO Y PANKO CON SALSA AGRIPICANTE.", "diet": "veggie" },
+          { "name": "FRESH FUSION", "description": "QUESO CAMEMBERT Y PALTA, ENVUELTO CON ZANAHORIA, ROCOTO Y SALSA DE APIO.", "diet": "veggie" },
+          { "name": "CAMEMBERT", "description": "TOMATES CONFITADOS, ESPINACA, PALTA, QUESO CAMEMBERT Y SALSA DE MANGO.", "diet": "veggie" },
+          { "name": "SWEET TREEE", "description": "VEGETALES SALTEADOS, PALTA, CEVICHE DE PALTA Y MANGO CON MAÍZ CANCHA FRITO.", "diet": "vegan" }
         ]
       },
       {
@@ -37,13 +51,27 @@
           { "name": "ANTICUCHERO", "description": "SALMÓN CON SALSA ANTICUCHO, FLAMEADO CON EMULSIÓN ALIMONADA SOBRE ARROZ." },
           { "name": "FUEGO THAI", "description": "SALMÓN CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE." },
           { "name": "LANGOSTINO FUEGO THAI", "description": "LANGOSTINO CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE." },
-          { "name": "PALTA THAI", "description": "VEGAN. PALTA CON SALSA TAILANDESA A BASE DE PASTA DE MANÍ, FLAMBEADA Y CON SALSA AGRIPICANTE." }
+          { "name": "PULPO", "description": "FINAS FETAS DE PULPO SOBRE BOCADITOS DE ARROZ." },
+          { "name": "ATÚN ROJO", "description": "FINAS FETAS DE ATÚN ROJO SOBRE BOCADITOS DE ARROZ." },
+          { "name": "SALMÓN AHUMADO", "description": "FINAS FETAS DE SALMÓN AHUMADO SOBRE BOCADITOS DE ARROZ." },
+          { "name": "PALTA THAI", "description": "CON SALSA TAILANDESA A BASE DE PASTA DE MANÍ, FLAMBEADA Y SALSA AGRIPICANTE.", "diet": "vegan" }
+        ]
+      },
+      {
+        "id": "sashimis",
+        "title": "SASHIMIS",
+        "quantity": "5U",
+        "items": [
+          { "name": "SALMÓN", "description": "FINAS FETAS DE SALMÓN." },
+          { "name": "SALMÓN AHUMADO", "description": "FINAS FETAS DE SALMÓN AHUMADO." },
+          { "name": "PULPO", "description": "FINAS FETAS DE PULPO." },
+          { "name": "ATÚN ROJO", "description": "FINAS FETAS DE ATÚN ROJO." }
         ]
       },
       {
         "id": "geisha",
         "title": "GEISHA",
-        "quantity": "3U",
+        "quantity": "4U",
         "items": [
           { "name": "SALMÓN", "description": "QUESO CREMA Y PALTA, ENVUELTOS EN SALMÓN." }
         ]
@@ -53,9 +81,9 @@
         "title": "BEBIDAS",
         "quantity": "",
         "items": [
-          { "name": "AGUA CON/SIN GAS LIBRE", "description": "SERVICIO LIBRE DURANTE TODA LA EXPERIENCIA." },
-          { "name": "LIMONADA CLÁSICA LIBRE", "description": "LIMONADA CLÁSICA SERVIDA LIBRE DURANTE TODA LA EXPERIENCIA." },
-          { "name": "CAFÉ NESPRESSO", "description": "UN CAFÉ NESPRESSO POR PERSONA." }
+          { "name": "AGUA CON/SIN GAS LIBRE" },
+          { "name": "& LIMONADA CLÁSICA LIBRE" },
+          { "name": "+ CAFÉ NESPRESSO" }
         ]
       }
     ]
@@ -77,37 +105,19 @@
       </div>
 
       <div class="countdown" aria-label="Cuenta regresiva hasta el 30 de julio de 2026 a las 20 horas">
-        <div class="countdown__unit">
-          <strong data-countdown="days">00</strong>
-          <span>DÍAS</span>
-        </div>
-        <div class="countdown__unit">
-          <strong data-countdown="hours">00</strong>
-          <span>HORAS</span>
-        </div>
-        <div class="countdown__unit">
-          <strong data-countdown="minutes">00</strong>
-          <span>MINUTOS</span>
-        </div>
-        <div class="countdown__unit">
-          <strong data-countdown="seconds">00</strong>
-          <span>SEGUNDOS</span>
-        </div>
+        <div class="countdown__unit"><strong data-countdown="days">00</strong><span>DÍAS</span></div>
+        <div class="countdown__unit"><strong data-countdown="hours">00</strong><span>HORAS</span></div>
+        <div class="countdown__unit"><strong data-countdown="minutes">00</strong><span>MINUTOS</span></div>
+        <div class="countdown__unit"><strong data-countdown="seconds">00</strong><span>SEGUNDOS</span></div>
       </div>
 
-      <a class="booking-dock__cta" href="https://sushiclub.com.ar/sushilibre">
-        <span>RESERVÁ<br>AHORA</span>
-      </a>
+      <a class="booking-dock__cta" href="https://sushiclub.com.ar/sushilibre"><span>RESERVÁ<br>AHORA</span></a>
     </aside>
 
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero__video-stack" aria-hidden="true">
-        <video class="hero__video is-active" data-loop-video autoplay muted playsinline preload="auto">
-          <source src="assets/hero_bg.webm" type="video/webm">
-        </video>
-        <video class="hero__video" data-loop-video muted playsinline preload="metadata">
-          <source src="assets/hero_bg.webm" type="video/webm">
-        </video>
+        <video class="hero__video is-active" data-loop-video autoplay muted playsinline preload="auto"><source src="assets/hero_bg.webm" type="video/webm"></video>
+        <video class="hero__video" data-loop-video muted playsinline preload="metadata"><source src="assets/hero_bg.webm" type="video/webm"></video>
       </div>
       <div class="hero__black-filter" aria-hidden="true"></div>
       <div class="hero__gradient" aria-hidden="true"></div>
@@ -115,12 +125,10 @@
 
       <header class="masthead" style="left:50%;right:auto;width:calc(100% - (2 * var(--page-x)));transform:translateX(-50%);grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);">
         <p class="masthead__venue" style="grid-column:1;justify-self:start;">PUERTO<br>MADERO</p>
-
         <div class="masthead__brands" style="grid-column:2;justify-self:center;" aria-label="SushiClub 25 aniversario">
           <img class="masthead__sushiclub" src="assets/sushiclub.svg" alt="SushiClub">
           <img class="masthead__anniversary" src="assets/anniversary-25.svg" alt="25 Anniversary Edition">
         </div>
-
         <p class="masthead__reservation" style="grid-column:3;justify-self:end;">RESERVA<br>ANTICIPADA</p>
       </header>
 
@@ -138,12 +146,8 @@
 
     <section class="menu-section" id="menu" data-menu-root aria-labelledby="menu-heading">
       <div class="menu-section__background" aria-hidden="true"></div>
-
       <div class="menu-section__shell">
-        <header class="menu-section__intro">
-          <h2 id="menu-heading" data-menu-heading>MENÚ</h2>
-        </header>
-
+        <header class="menu-section__intro"><h2 id="menu-heading" data-menu-heading>MENÚ</h2></header>
         <div class="menu-section__groups" data-menu-groups></div>
         <p class="menu-section__status" data-menu-status role="status">CARGANDO MENÚ…</p>
       </div>
