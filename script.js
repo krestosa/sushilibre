@@ -24,8 +24,8 @@
 
   const loadBackgroundVideo = async () => {
     const video = document.querySelector('.hero__video');
-    const parts = Array.from({ length: 3 }, (_, index) =>
-      `assets/bg2.${String(index + 1).padStart(2, "0")}.b64`
+    const parts = Array.from({ length: 13 }, (_, index) =>
+      `assets/bg2.webm.${String(index + 1).padStart(2, "0")}.b64`
     );
 
     try {
@@ -44,13 +44,13 @@
         bytes[index] = binary.charCodeAt(index);
       }
 
-      const source = URL.createObjectURL(new Blob([bytes], { type: 'video/mp4' }));
+      const source = URL.createObjectURL(new Blob([bytes], { type: 'video/webm' }));
       video.src = source;
       video.addEventListener('loadeddata', () => video.classList.add('is-ready'), { once: true });
       await video.play();
     } catch (error) {
       video.classList.add('is-unavailable');
-      console.error('Background video could not be loaded.', error);
+      console.error('Background WebM could not be loaded.', error);
     }
   };
 
