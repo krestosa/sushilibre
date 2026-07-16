@@ -15,12 +15,12 @@
 <body>
   <main class="page">
     <aside class="booking-dock" aria-label="Información y reserva del evento">
-      <div class="booking-dock__meta booking-dock__meta--venue">
+      <div class="booking-dock__meta">
         <span class="booking-dock__label">Restó</span>
         <strong>PUERTO MADERO</strong>
       </div>
 
-      <div class="booking-dock__meta booking-dock__meta--date">
+      <div class="booking-dock__meta">
         <span class="booking-dock__label">Fecha</span>
         <strong>JUEVES 30/07</strong>
       </div>
@@ -50,9 +50,14 @@
     </aside>
 
     <section class="hero" aria-labelledby="hero-title">
-      <video class="hero__video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
-        <source src="assets/hero_bg.webm" type="video/webm">
-      </video>
+      <div class="hero__video-stack" aria-hidden="true">
+        <video class="hero__video is-active" data-loop-video autoplay muted playsinline preload="auto">
+          <source src="assets/hero_bg.webm" type="video/webm">
+        </video>
+        <video class="hero__video" data-loop-video muted playsinline preload="auto">
+          <source src="assets/hero_bg.webm" type="video/webm">
+        </video>
+      </div>
       <div class="hero__black-filter" aria-hidden="true"></div>
       <div class="hero__gradient" aria-hidden="true"></div>
       <div class="hero__grain" aria-hidden="true"></div>
