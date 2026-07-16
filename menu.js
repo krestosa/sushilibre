@@ -128,8 +128,8 @@
       display: grid;
       grid-template-columns: minmax(280px, .9fr) minmax(430px, 1fr);
       column-gap: clamp(56px, 9vw, 164px);
-      min-height: 94vh;
-      padding: 10vh 0 16vh;
+      min-height: max(58vh, calc(26vh + var(--menu-item-count, 1) * 14vh));
+      padding: 8vh 0 10vh;
       scroll-margin-top: 8vh;
     }
 
@@ -238,6 +238,7 @@
       .menu-group {
         grid-template-columns: minmax(220px, .78fr) minmax(360px, 1fr);
         column-gap: clamp(36px, 6vw, 72px);
+        min-height: max(52vh, calc(24vh + var(--menu-item-count, 1) * 13vh));
       }
 
       .menu-group__title {
@@ -281,7 +282,7 @@
       .menu-group {
         display: block;
         min-height: auto;
-        padding: 12vh 0 18vh;
+        padding: 8vh 0 8vh;
       }
 
       .menu-group + .menu-group {
@@ -291,13 +292,8 @@
       .menu-group__heading {
         z-index: 4;
         top: 0;
-        padding: 20px 0 34px;
-        background: linear-gradient(
-          180deg,
-          rgba(0, 0, 0, .96) 0%,
-          rgba(0, 0, 0, .84) 60%,
-          rgba(0, 0, 0, 0) 100%
-        );
+        padding: 16px 0 22px;
+        background: transparent;
         opacity: .62;
       }
 
@@ -314,7 +310,7 @@
       }
 
       .menu-group__items {
-        padding-top: 7vh;
+        padding-top: 5vh;
       }
 
       .menu-item {
@@ -416,10 +412,16 @@
     data.sections.forEach((section, sectionIndex) => {
       if (!section || !Array.isArray(section.items)) return;
 
+      const validItems = section.items.filter(
+        (entry) => entry && typeof entry.name === 'string'
+      );
+
       const group = document.createElement('article');
       group.className = 'menu-group';
       group.id = `menu-${section.id || sectionIndex + 1}`;
       group.dataset.menuGroup = section.id || String(sectionIndex + 1);
+      group.dataset.itemCount = String(validItems.length);
+      group.style.setProperty('--menu-item-count', String(Math.max(1, validItems.length)));
 
       const heading = document.createElement('h3');
       heading.className = 'menu-group__heading';
@@ -437,9 +439,7 @@
       const items = document.createElement('div');
       items.className = 'menu-group__items';
 
-      section.items.forEach((entry) => {
-        if (!entry || typeof entry.name !== 'string') return;
-
+      validItems.forEach((entry) => {
         const item = document.createElement('article');
         item.className = 'menu-item';
         item.append(createTextElement('h4', 'menu-item__name', entry.name));
