@@ -4,6 +4,23 @@ import test from 'node:test';
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
+const countMatches = (source, expression) => source.match(expression)?.length ?? 0;
+
+const assertIndividualCommercialTargets = (html) => {
+  assert.equal(
+    countMatches(html, /<article class="proposal__price[^\"]*proposal-reveal--prices[^\"]*"[^>]*data-proposal-reveal/g),
+    2,
+    'each price card must reveal from its own viewport position'
+  );
+  assert.equal(
+    countMatches(html, /<article class="proposal__condition[^\"]*proposal-reveal--conditions[^\"]*"[^>]*data-proposal-reveal/g),
+    2,
+    'each condition card must reveal from its own viewport position'
+  );
+  assert.doesNotMatch(html, /<div class="proposal__prices[^\"]*"[^>]*data-proposal-reveal/);
+  assert.doesNotMatch(html, /<div class="proposal__conditions[^\"]*"[^>]*data-proposal-reveal/);
+};
+
 test('proposal reveal is restrained, prepaint-safe and one-time', async () => {
   const [feature, application, styles, template] = await Promise.all([
     readSource('src/ts/features/proposal-reveal.ts'),
@@ -22,6 +39,7 @@ test('proposal reveal is restrained, prepaint-safe and one-time', async () => {
   assert.match(template, /proposal-reveal--prices/);
   assert.match(template, /proposal-reveal--conditions/);
   assert.match(template, /proposal-reveal--legal/);
+  assertIndividualCommercialTargets(template);
   assert.doesNotMatch(template, /proposal__amount[^>]*data-proposal-reveal/);
   assert.doesNotMatch(template, /proposal__payment-logo[^>]*data-proposal-reveal/);
   assert.doesNotMatch(template, /<li[^>]*data-proposal-reveal/);
@@ -32,6 +50,10 @@ test('proposal reveal is restrained, prepaint-safe and one-time', async () => {
   assert.match(feature, /isInitiallyVisible/);
   assert.match(feature, /requestAnimationFrame/);
   assert.match(feature, /setAttribute\('data-proposal-reveal-ready'/);
+  assert.match(feature, /REVEAL_ROOT_MARGIN = '0px 0px -18% 0px'/);
+  assert.match(feature, /REVEAL_THRESHOLD = 0\.08/);
+  assert.match(feature, /INITIAL_VIEWPORT_RATIO = 0\.84/);
+  assert.match(feature, /entry\.intersectionRatio < REVEAL_THRESHOLD/);
 
   assert.match(styles, /html\.has-proposal-reveal \.proposal-reveal/);
   assert.match(styles, /proposal-reveal--heading[\s\S]*?560ms/);
@@ -58,8 +80,9 @@ test('compiled distribution includes proposal motion hooks', async () => {
 
   assert.match(script, /data-proposal-reveal/);
   assert.match(script, /data-proposal-reveal-ready/);
+  assert.match(script, /-18%/);
   assert.match(styles, /html\.has-proposal-reveal \.proposal-reveal/);
   assert.match(styles, /@keyframes proposal-reveal-in/);
   assert.match(html, /data-proposal-root/);
-  assert.match(html, /proposal-reveal--prices/);
+  assertIndividualCommercialTargets(html);
 });
