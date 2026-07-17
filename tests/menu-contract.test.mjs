@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { parseMenuSource, renderStaticHtml } from '../scripts/menu-html.mjs';
 
-const EXPECTED_MENU_HASH = 'ebf71e1b6fd04c2eb19f219fc201631a51c6fa1683f2be50d3e59fbdf01d9695';
+const EXPECTED_MENU_HASH = '199aa4f9c9ea8f757fa5f854a18a62d04cb9cbdd06e5abe5c8a07def4d1bab0f';
 
 const sortValue = (value) => {
   if (Array.isArray(value)) return value.map(sortValue);
@@ -32,7 +32,7 @@ const assertStaticMenuMarkup = (html) => {
   assert.equal(countMatches(html, /class="menu-group__exit-sentinel"/g), 5);
   assert.match(html, /<h4 class="menu-item__name">BUENOS AIRES<\/h4>/);
   assert.match(html, /<h4 class="menu-item__name">PALTA THAI<\/h4>/);
-  assert.match(html, /<h4 class="menu-item__name">\+ CAFÉ NESPRESSO<\/h4>/);
+  assert.match(html, /<h4 class="menu-item__name">\+ CAFÉ NESPRESSO X PERSONA<\/h4>/);
 };
 
 test('menu values and categories remain unchanged', async () => {
