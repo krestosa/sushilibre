@@ -1110,6 +1110,56 @@
     window.requestAnimationFrame(prioritizeWhenNeeded);
   }
 
+  // src/ts/features/menu-reveal.ts
+  var REVEAL_ROOT_MARGIN = "0px 0px -12% 0px";
+  var REVEAL_THRESHOLD = 0.12;
+  var ITEM_STAGGER_MS = 40;
+  var MAX_ITEM_STAGGER_MS = 120;
+  var reveal = (element) => {
+    element.classList.add("is-visible");
+  };
+  var prepareReveal = (element, kind, delay = 0) => {
+    element.classList.add("menu-reveal", `menu-reveal--${kind}`);
+    element.style.setProperty("--menu-reveal-delay", `${delay}ms`);
+  };
+  var setupMenuReveal = (menuRoot2, groups) => {
+    const intro = query(".menu-section__intro h2", menuRoot2);
+    const targets = [];
+    if (intro) {
+      prepareReveal(intro, "intro");
+      targets.push(intro);
+    }
+    groups.forEach((group) => {
+      const title = query(".menu-group__title-line", group);
+      if (title) {
+        prepareReveal(title, "group");
+        targets.push(title);
+      }
+      queryAll(".menu-item", group).forEach((item, index) => {
+        const delay = Math.min(index * ITEM_STAGGER_MS, MAX_ITEM_STAGGER_MS);
+        prepareReveal(item, "item", delay);
+        targets.push(item);
+      });
+    });
+    if (!targets.length) return;
+    if (!("IntersectionObserver" in window)) {
+      targets.forEach(reveal);
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const element = entry.target;
+        reveal(element);
+        observer.unobserve(element);
+      });
+    }, {
+      rootMargin: REVEAL_ROOT_MARGIN,
+      threshold: REVEAL_THRESHOLD
+    });
+    targets.forEach((target2) => observer.observe(target2));
+  };
+
   // src/ts/menu/observers.ts
   var configureMobileOverlapShadows = (groups) => {
     const mobileQuery2 = window.matchMedia("(max-width: 720px)");
@@ -1531,6 +1581,7 @@
   if (menuRoot && menuGroups) {
     const groups = queryAll("[data-menu-group]", menuGroups);
     if (groups.length) {
+      setupMenuReveal(menuRoot, groups);
       observeBalancedMenuDescriptions(menuGroups);
       configureMobileOverlapShadows(groups);
       observeActiveMenuGroup(menuRoot, groups);
