@@ -30,6 +30,37 @@ test('menu reveal motion is prepaint-safe, one-time and viewport driven', async 
   assert.match(motion, /prefers-reduced-motion: reduce/);
 });
 
+test('mobile menu overlap shadow remains stable during continuous resize', async () => {
+  const observers = await readSource('src/ts/menu/observers.ts');
+
+  assert.match(observers, /const overlaps = sentinelBounds\.top <= headingBounds\.bottom/);
+  assert.match(observers, /scheduleResizeSettlement/);
+  assert.match(observers, /window\.setTimeout\([\s\S]*?140/);
+  assert.match(observers, /window\.addEventListener\('scroll', scheduleUpdate/);
+  assert.match(observers, /window\.addEventListener\('resize', scheduleResizeSettlement/);
+  assert.doesNotMatch(observers, /disconnectObservers|observers\.forEach\(\(observer\) => observer\.disconnect/);
+});
+
+test('hero title entrance completes once and cannot replay across breakpoints', async () => {
+  const [feature, application, motion, tablet] = await Promise.all([
+    readSource('src/ts/features/hero-intro-motion.ts'),
+    readSource('src/ts/application.ts'),
+    readSource('src/scss/_motion.scss'),
+    readSource('src/scss/breakpoints/_tablet.scss')
+  ]);
+
+  assert.match(application, /setupHeroIntroMotion\(\)/);
+  assert.match(feature, /hero-intro-complete/);
+  assert.match(feature, /animationend/);
+  assert.match(feature, /animationcancel/);
+  assert.match(feature, /COMPLETION_FALLBACK_MS/);
+  assert.match(motion, /html\.hero-intro-complete/);
+  assert.match(motion, /filter: blur\(var\(--title-intro-blur, 5px\)\)/);
+  assert.match(tablet, /--title-intro-blur: 0px/);
+  assert.doesNotMatch(tablet, /animation-name:\s*stage-title-in-lite/);
+  assert.doesNotMatch(motion, /@keyframes stage-title-in-lite/);
+});
+
 test('booking dock enters as one complete unit', async () => {
   const [feature, motion] = await Promise.all([
     readSource('src/ts/dock-reveal.ts'),
@@ -112,16 +143,20 @@ test('compiled distribution contains synchronized animation and popup hooks', as
   assert.equal(scriptVersion, cssVersion);
   assert.doesNotMatch(html, /__ASSET_VERSION__/);
   assert.match(script, /data-menu-reveal/);
+  assert.match(script, /hero-intro-complete/);
+  assert.match(script, /scheduleResizeSettlement/);
   assert.match(script, /is-closing/);
   assert.match(script, /data-piece-viewer-status-text/);
   assert.match(script, /piece-viewer-scroll-offset/);
   assert.doesNotMatch(script, /revealDockContent|booking-dock__meta.*opacity/);
   assert.match(styles, /html\.has-menu-reveal \.menu-reveal/);
+  assert.match(styles, /html\.hero-intro-complete/);
   assert.match(styles, /@keyframes menu-reveal-in/);
   assert.match(styles, /@keyframes piece-viewer-loader/);
   assert.match(styles, /html\.has-piece-viewer/);
   assert.match(styles, /\.piece-viewer\.is-open/);
   assert.match(styles, /\.piece-viewer\.is-closing/);
+  assert.doesNotMatch(styles, /stage-title-in-lite/);
   assert.match(html, /piece-viewer__loader/);
   assert.match(html, /piece-viewer__close-icon/);
 });
