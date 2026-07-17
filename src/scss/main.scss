@@ -3,6 +3,7 @@
 @use "components/countdown";
 @use "components/booking-button";
 @use "components/chips";
+@use "components/piece-viewer";
 @use "motion";
 
 // Herencia responsive: desktop define la base, tablet la modifica y mobile cierra la cascada.
