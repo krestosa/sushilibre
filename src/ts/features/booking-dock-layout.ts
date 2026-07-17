@@ -1,6 +1,6 @@
 import { query, queryAll } from '../shared/dom';
 
-type DockLayoutMode = 'desktop' | 'compact' | 'stacked' | 'mobile';
+type DockLayoutMode = 'desktop' | 'compact' | 'mobile';
 
 export const setupBookingDockLayout = (): void => {
   const dock = query<HTMLElement>('.booking-dock');
@@ -62,20 +62,6 @@ export const setupBookingDockLayout = (): void => {
     });
   };
 
-  const applyStackedLayout = (): void => {
-    dock.style.width = '';
-    dock.style.gridTemplateColumns = 'minmax(132px, 1.2fr) minmax(108px, 1fr) minmax(70px, 0.68fr) 104px';
-    dock.style.gridTemplateRows = 'repeat(2, minmax(0, 1fr))';
-    dock.style.gap = '8px';
-    dock.style.rowGap = '0';
-
-    placeMetadata({ row: '1', padding: '0 8px' });
-    countdown.style.gridColumn = '1 / span 3';
-    countdown.style.gridRow = '2';
-    cta.style.gridColumn = '4';
-    cta.style.gridRow = '1 / span 2';
-  };
-
   const applyMobileLayout = (): void => {
     dock.style.width = '';
     dock.style.gridTemplateColumns = 'minmax(0, 1.28fr) minmax(0, 1.05fr) minmax(0, 0.72fr) 96px';
@@ -91,8 +77,7 @@ export const setupBookingDockLayout = (): void => {
   };
 
   const resolveMode = (): DockLayoutMode => {
-    if (window.matchMedia('(max-width: 620px)').matches) return 'mobile';
-    if (window.matchMedia('(max-width: 820px)').matches) return 'stacked';
+    if (window.matchMedia('(max-width: 840px)').matches) return 'mobile';
     if (window.matchMedia('(max-width: 1100px)').matches) return 'compact';
     return 'desktop';
   };
@@ -103,7 +88,6 @@ export const setupBookingDockLayout = (): void => {
 
     activeMode = nextMode;
     if (nextMode === 'mobile') applyMobileLayout();
-    else if (nextMode === 'stacked') applyStackedLayout();
     else if (nextMode === 'compact') applyCompactLayout();
     else applyDesktopLayout();
   };
