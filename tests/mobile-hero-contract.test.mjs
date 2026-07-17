@@ -23,7 +23,7 @@ test('phone hero uses a stable viewport and keeps copy above the fixed dock', as
 test('compiled CSS preserves the normalized phone composition', async () => {
   const css = await readSource('dist/app.css');
 
-  assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.hero\s*\{[^}]*height:100svh;[^}]*min-height:640px/);
-  assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.hero-copy\s*\{[^}]*top:auto;[^}]*bottom:calc\(var\(--dock-height\) \+ var\(--dock-bottom\) \+ 22px\)/);
-  assert.doesNotMatch(css, /@media \(max-width: 620px\)[\s\S]{0,300}min-height:820px/);
+  assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.hero\s*\{[^}]*height:\s*100svh;[^}]*min-height:\s*640px/);
+  assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.hero-copy\s*\{[^}]*top:\s*auto;[^}]*bottom:\s*calc\(var\(--dock-height\) \+ var\(--dock-bottom\) \+ 22px\)/);
+  assert.doesNotMatch(css, /@media \(max-width: 620px\)[\s\S]{0,300}min-height:\s*820px/);
 });
