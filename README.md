@@ -6,13 +6,20 @@ La fuente mantenible vive en Sass y TypeScript. `dist/` es la distribución est�
 
 ## Estructura
 
-- `src/scss/`: fuente Sass organizada por componentes y breakpoints.
+- `src/scss/sections/`: secciones específicas de la página, como hero, dock y menú.
+- `src/scss/components/`: unidades reutilizables y acotadas, como botón, countdown y chips.
+- `src/scss/breakpoints/_desktop.scss`: primera capa responsive y base de herencia.
+- `src/scss/breakpoints/_tablet.scss`: modificaciones heredadas para tablet.
+- `src/scss/breakpoints/_mobile.scss`: modificaciones finales para mobile.
 - `src/ts/`: fuente TypeScript organizada por responsabilidades.
 - `src/static/index.html`: plantilla HTML de producción.
 - `menu.json`: fuente de datos del menú.
 - `dist/assets/`: única ubicación de imágenes, videos y archivos gráficos.
 - `dist/`: sitio estático final con HTML, CSS, JavaScript, JSON y assets.
 - `tests/menu-contract.test.mjs`: validación de categorías y valores del menú.
+- `tests/style-contract.test.mjs`: validación integral de selectores y declaraciones compiladas.
+
+`src/scss/main.scss` carga primero los estilos desktop, luego tablet y finalmente mobile. Las reglas de accesibilidad y capacidades del navegador se aplican después sin introducir breakpoints adicionales.
 
 La raíz del repositorio redirige a `dist/`, que es también la ruta publicada por GitHub Pages.
 
@@ -47,4 +54,4 @@ npm run serve
 
 ## Integración continua
 
-`.github/workflows/build.yml` valida TypeScript, compila la distribución, verifica el contrato del menú, publica `dist/` como artifact y actualiza los archivos estáticos versionados de `dist/`. Los assets se conservan únicamente en `dist/assets/`.
+`.github/workflows/build.yml` valida TypeScript, compila la distribución, verifica los contratos del menú y de estilos, publica `dist/` como artifact y actualiza los archivos estáticos versionados de `dist/`. Los assets se conservan únicamente en `dist/assets/`.
