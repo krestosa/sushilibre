@@ -72,9 +72,10 @@ export async function createAssetVersion() {
     .slice(0, 12);
 }
 
-export async function syncStaticFiles(assetVersion = await createAssetVersion()) {
+export async function syncStaticFiles(assetVersion) {
   await mkdir(dist, { recursive: true });
 
+  const resolvedAssetVersion = assetVersion ?? await createAssetVersion();
   const [template, menu] = await Promise.all([
     readFile(staticIndexTemplate, 'utf8'),
     readMenuSource()
@@ -84,7 +85,7 @@ export async function syncStaticFiles(assetVersion = await createAssetVersion())
     throw new Error(`Static template must contain ${ASSET_VERSION_MARKER}.`);
   }
 
-  const versionedTemplate = template.replaceAll(ASSET_VERSION_MARKER, assetVersion);
+  const versionedTemplate = template.replaceAll(ASSET_VERSION_MARKER, resolvedAssetVersion);
   const generatedHtml = renderStaticHtml(versionedTemplate, menu);
 
   const [htmlChanged, noJekyllChanged, staleMenuRemoved] = await Promise.all([
