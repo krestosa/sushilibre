@@ -3,9 +3,9 @@ import { queryAll } from '../shared/dom';
 const DESCRIPTION_SELECTOR = '.menu-item__description';
 const NON_BREAKING_SPACE = '\u00A0';
 const WIDTH_EPSILON = 0.5;
-const MINIMUM_FILL_RATIO = 0.62;
-const MAXIMUM_FILL_RATIO = 0.78;
-const PREFERRED_FILL_RATIO = 0.72;
+const MINIMUM_TARGET_WORDS = 8;
+const MAXIMUM_WORDS_PER_LINE = 10;
+const MINIMUM_WORDS_PER_WRAPPED_LINE = 2;
 
 interface BalancedLine {
   words: string[];
@@ -92,70 +92,74 @@ const createTextMeasure = (element: HTMLElement): TextMeasure => {
   };
 };
 
-const calculateGlobalTargetWidth = (metrics: DescriptionMetrics[]): number => {
-  const commonMaximumWidth = median(metrics.map(({ maxWidth }) => maxWidth));
-  if (commonMaximumWidth <= 0) return 0;
+const calculateGlobalTargetWords = (metrics: DescriptionMetrics[]): number => {
+  const estimatedCapacities = metrics.map(({ words, totalWidth, maxWidth }) => {
+    if (!words.length || totalWidth <= 0 || maxWidth <= 0) return MINIMUM_TARGET_WORDS;
 
-  const individualIdealWidths = metrics.map(({ words, totalWidth, maxWidth }) => {
-    const minimumLineCount = words.length >= 4 ? 2 : 1;
-    const maximumLineCount = Math.max(minimumLineCount, Math.floor(words.length / 2));
-    const estimatedLineCount = clamp(
-      Math.round(totalWidth / Math.max(maxWidth * PREFERRED_FILL_RATIO, 1)),
-      minimumLineCount,
-      maximumLineCount
+    const averageWordAdvance = totalWidth / words.length;
+    return clamp(
+      Math.floor(maxWidth / Math.max(averageWordAdvance, 1)),
+      MINIMUM_WORDS_PER_WRAPPED_LINE,
+      MAXIMUM_WORDS_PER_LINE
     );
-
-    return totalWidth / Math.max(estimatedLineCount, 1);
   });
 
   return clamp(
-    median(individualIdealWidths),
-    commonMaximumWidth * MINIMUM_FILL_RATIO,
-    commonMaximumWidth * MAXIMUM_FILL_RATIO
+    Math.round(median(estimatedCapacities)),
+    MINIMUM_TARGET_WORDS,
+    MAXIMUM_WORDS_PER_LINE
   );
 };
 
 const calculateLayoutCost = (
   lines: BalancedLine[],
   maxWidth: number,
-  targetWidth: number
+  globalTargetWords: number
 ): number => {
   const widths = lines.map((line) => line.width);
-  const mean = widths.reduce((total, width) => total + width, 0) / widths.length;
-  const normalizeByMaximum = (value: number): number => value / Math.max(maxWidth, 1);
-  const normalizeByTarget = (value: number): number => value / Math.max(targetWidth, 1);
+  const wordCounts = lines.map((line) => line.words.length);
+  const meanWidth = widths.reduce((total, width) => total + width, 0) / widths.length;
+  const meanWordCount = wordCounts.reduce((total, count) => total + count, 0) / wordCounts.length;
+  const normalizeWidth = (value: number): number => value / Math.max(maxWidth, 1);
+  const normalizeWords = (value: number): number => value / Math.max(globalTargetWords, 1);
 
-  const localVariance = widths.reduce((total, width) => {
-    const delta = normalizeByMaximum(width - mean);
+  const widthVariance = widths.reduce((total, width) => {
+    const delta = normalizeWidth(width - meanWidth);
     return total + delta * delta;
   }, 0) / widths.length;
 
-  const adjacentDifference = widths.slice(1).reduce((total, width, index) => {
+  const wordCountVariance = wordCounts.reduce((total, count) => {
+    const delta = normalizeWords(count - meanWordCount);
+    return total + delta * delta;
+  }, 0) / wordCounts.length;
+
+  const targetWordDeviation = wordCounts.reduce((total, count) => {
+    const delta = normalizeWords(count - globalTargetWords);
+    return total + delta * delta;
+  }, 0) / wordCounts.length;
+
+  const adjacentWidthDifference = widths.slice(1).reduce((total, width, index) => {
     const previous = widths[index];
     if (previous === undefined) return total;
-    const delta = normalizeByMaximum(previous - width);
+    const delta = normalizeWidth(previous - width);
     return total + delta * delta;
   }, 0) / Math.max(widths.length - 1, 1);
 
-  const targetDeviation = widths.reduce((total, width) => {
-    const delta = normalizeByTarget(width - targetWidth);
-    return total + delta * delta;
-  }, 0) / widths.length;
-
-  const meanTargetDeviation = normalizeByTarget(mean - targetWidth);
   const widest = Math.max(...widths);
   const narrowest = Math.min(...widths);
-  const range = normalizeByMaximum(widest - narrowest);
-  const lastWidth = widths[widths.length - 1] ?? mean;
-  const lastLineShortfall = normalizeByTarget(Math.max(0, targetWidth * 0.82 - lastWidth));
+  const widthRange = normalizeWidth(widest - narrowest);
+  const lastWordCount = wordCounts[wordCounts.length - 1] ?? meanWordCount;
+  const lastLineShortfall = normalizeWords(
+    Math.max(0, Math.min(globalTargetWords, meanWordCount) * 0.78 - lastWordCount)
+  );
 
   return (
-    targetDeviation * 3.2 +
-    meanTargetDeviation * meanTargetDeviation * 2.4 +
-    localVariance * 0.75 +
-    adjacentDifference * 0.4 +
-    range * range * 0.65 +
-    lastLineShortfall * lastLineShortfall * 2.2
+    targetWordDeviation * 2.4 +
+    wordCountVariance * 2 +
+    widthVariance * 1.15 +
+    adjacentWidthDifference * 0.55 +
+    widthRange * widthRange * 0.8 +
+    lastLineShortfall * lastLineShortfall * 3
   );
 };
 
@@ -163,39 +167,58 @@ const findBalancedLayout = (
   words: string[],
   lineCount: number,
   maxWidth: number,
-  targetWidth: number,
+  globalTargetWords: number,
   measure: TextMeasure
 ): BalancedLayout | null => {
   let best: BalancedLayout | null = null;
   const current: BalancedLine[] = [];
-  const minimumWordsPerLine = lineCount > 1 ? 2 : 1;
+  const minimumWordsPerLine = lineCount > 1 ? MINIMUM_WORDS_PER_WRAPPED_LINE : 1;
 
   const visit = (start: number, remainingLines: number): void => {
+    const remainingWords = words.length - start;
+    const minimumRequired = remainingLines * minimumWordsPerLine;
+    const maximumAllowed = remainingLines * MAXIMUM_WORDS_PER_LINE;
+    if (remainingWords < minimumRequired || remainingWords > maximumAllowed) return;
+
     if (remainingLines === 1) {
       const finalWords = words.slice(start);
-      if (finalWords.length < minimumWordsPerLine) return;
+      if (
+        finalWords.length < minimumWordsPerLine ||
+        finalWords.length > MAXIMUM_WORDS_PER_LINE
+      ) {
+        return;
+      }
 
       const value = finalWords.join(' ');
       const width = measure(value);
       if (width > maxWidth + WIDTH_EPSILON) return;
 
       const lines = [...current, { words: finalWords, width }];
-      const cost = calculateLayoutCost(lines, maxWidth, targetWidth);
+      const cost = calculateLayoutCost(lines, maxWidth, globalTargetWords);
       if (!best || cost < best.cost) best = { lines, cost };
       return;
     }
 
-    const minimumWordsForFollowingLines = (remainingLines - 1) * minimumWordsPerLine;
-    const maximumEnd = words.length - minimumWordsForFollowingLines;
+    const followingLines = remainingLines - 1;
+    const minimumWordsForFollowingLines = followingLines * minimumWordsPerLine;
+    const maximumWordsForFollowingLines = followingLines * MAXIMUM_WORDS_PER_LINE;
+    const minimumEnd = Math.max(
+      start + minimumWordsPerLine,
+      words.length - maximumWordsForFollowingLines
+    );
+    const maximumEnd = Math.min(
+      start + MAXIMUM_WORDS_PER_LINE,
+      words.length - minimumWordsForFollowingLines
+    );
 
-    for (let end = start + minimumWordsPerLine; end <= maximumEnd; end += 1) {
+    for (let end = minimumEnd; end <= maximumEnd; end += 1) {
       const lineWords = words.slice(start, end);
       const value = lineWords.join(' ');
       const width = measure(value);
       if (width > maxWidth + WIDTH_EPSILON) break;
 
       current.push({ words: lineWords, width });
-      visit(end, remainingLines - 1);
+      visit(end, followingLines);
       current.pop();
     }
   };
@@ -206,37 +229,33 @@ const findBalancedLayout = (
 
 const calculateBalancedLines = (
   metrics: DescriptionMetrics,
-  globalTargetWidth: number
+  globalTargetWords: number
 ): string[][] => {
-  const { words, maxWidth, totalWidth, measure } = metrics;
+  const { words, maxWidth, measure } = metrics;
   if (words.length <= 1) return [words];
 
-  const targetWidth = Math.min(globalTargetWidth, maxWidth * MAXIMUM_FILL_RATIO);
-  const minimumLineCount = words.length >= 4 ? 2 : 1;
-  const maximumLineCount = Math.max(minimumLineCount, Math.floor(words.length / 2));
-  const preferredLineCount = clamp(
-    Math.round(totalWidth / Math.max(targetWidth, 1)),
+  const minimumLineCount = Math.max(
+    1,
+    Math.ceil(words.length / MAXIMUM_WORDS_PER_LINE)
+  );
+  const maximumLineCount = Math.max(
     minimumLineCount,
-    maximumLineCount
+    Math.floor(words.length / MINIMUM_WORDS_PER_WRAPPED_LINE)
   );
 
-  let best: BalancedLayout | null = null;
-
   for (let lineCount = minimumLineCount; lineCount <= maximumLineCount; lineCount += 1) {
-    const layout = findBalancedLayout(words, lineCount, maxWidth, targetWidth, measure);
-    if (!layout) continue;
+    const layout = findBalancedLayout(
+      words,
+      lineCount,
+      maxWidth,
+      globalTargetWords,
+      measure
+    );
 
-    const lineCountDistance = lineCount - preferredLineCount;
-    const lineCountPenalty = lineCountDistance * lineCountDistance * 0.18;
-    const candidate = {
-      lines: layout.lines,
-      cost: layout.cost + lineCountPenalty
-    };
-
-    if (!best || candidate.cost < best.cost) best = candidate;
+    if (layout) return layout.lines.map((line) => line.words);
   }
 
-  return best ? best.lines.map((line) => line.words) : [words];
+  return [words];
 };
 
 const renderBalancedLines = (element: HTMLElement, lines: string[][]): void => {
@@ -292,11 +311,11 @@ export const observeBalancedMenuDescriptions = (root: ParentNode): void => {
     if (!force && !widthChanged) return;
 
     const metrics = collectMetrics(descriptions);
-    const globalTargetWidth = calculateGlobalTargetWidth(metrics);
-    if (globalTargetWidth <= 0) return;
+    const globalTargetWords = calculateGlobalTargetWords(metrics);
+    if (globalTargetWords <= 0) return;
 
     metrics.forEach((descriptionMetrics) => {
-      const lines = calculateBalancedLines(descriptionMetrics, globalTargetWidth);
+      const lines = calculateBalancedLines(descriptionMetrics, globalTargetWords);
       renderBalancedLines(descriptionMetrics.element, lines);
       descriptionMetrics.element.setAttribute('aria-label', descriptionMetrics.source);
     });
