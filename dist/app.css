@@ -285,27 +285,31 @@ html.has-piece-viewer body {
   opacity: 0;
   scale: 0.97;
   transform-origin: center;
-  transition: opacity 220ms ease-out, scale 260ms var(--ease-out);
+  transition: opacity 180ms ease-in, scale 180ms ease-in;
 }
 .piece-viewer::backdrop {
   background: rgba(0, 0, 0, 0.62);
   opacity: 0;
-  transition: opacity 200ms ease-out;
+  transition: opacity 160ms ease-in;
 }
 .piece-viewer.is-open {
   opacity: 1;
   scale: 1;
+  animation: piece-viewer-open 260ms var(--ease-out) both;
 }
 .piece-viewer.is-open::backdrop {
   opacity: 1;
+  animation: piece-viewer-backdrop-open 220ms ease-out both;
 }
 .piece-viewer.is-closing {
   opacity: 0;
   scale: 0.97;
+  animation: none;
   transition-duration: 180ms;
 }
 .piece-viewer.is-closing::backdrop {
   opacity: 0;
+  animation: none;
   transition-duration: 160ms;
 }
 
@@ -410,7 +414,7 @@ html.has-piece-viewer body {
   border: 2px solid rgba(255, 255, 255, 0.22);
   border-top-color: #fff;
   border-radius: 50%;
-  animation: piece-viewer-loader 720ms linear infinite;
+  animation: piece-viewer-loader 720ms linear infinite, piece-viewer-loader-enter 220ms ease-out both;
 }
 
 .piece-viewer__status-text {
@@ -463,9 +467,35 @@ html.has-piece-viewer body {
   display: block;
 }
 
+@keyframes piece-viewer-open {
+  from {
+    opacity: 0;
+    scale: 0.97;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes piece-viewer-backdrop-open {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 @keyframes piece-viewer-loader {
   to {
     transform: rotate(360deg);
+  }
+}
+@keyframes piece-viewer-loader-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -475,7 +505,16 @@ html.has-piece-viewer body {
   }
   .piece-viewer {
     scale: 1;
-    transition: opacity 120ms linear;
+    transition: opacity 100ms linear;
+  }
+  .piece-viewer.is-open {
+    scale: 1;
+    animation-duration: 120ms;
+    animation-timing-function: linear;
+  }
+  .piece-viewer.is-open::backdrop {
+    animation-duration: 100ms;
+    animation-timing-function: linear;
   }
   .piece-viewer.is-closing {
     scale: 1;
@@ -488,7 +527,7 @@ html.has-piece-viewer body {
     transition-duration: 100ms;
   }
   .piece-viewer__loader {
-    animation-duration: 1.6s;
+    animation-duration: 1.6s, 100ms;
   }
 }
 html.has-menu-reveal .menu-reveal {
