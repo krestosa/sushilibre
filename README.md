@@ -9,19 +9,34 @@ La fuente mantenible vive en Sass y TypeScript. `dist/` es la distribución est�
 - `src/scss/breakpoints/_desktop.scss`: estilos completos de hero, dock y menú; constituye la base heredable.
 - `src/scss/breakpoints/_tablet.scss`: modificaciones heredadas para tablet.
 - `src/scss/breakpoints/_mobile.scss`: modificaciones finales para mobile.
-- `src/scss/components/`: únicamente unidades reutilizables y acotadas, como botón, countdown y chips.
+- `src/scss/components/`: únicamente unidades reutilizables y acotadas, como botón, countdown, chips y visor de piezas.
 - `src/ts/`: comportamiento TypeScript para layout, animaciones e interacción; no genera los campos del menú.
 - `src/static/index.html`: plantilla HTML de producción con el marcador de compilación del menú.
 - `menu.json`: fuente de desarrollo del menú; no se distribuye en producción.
 - `scripts/menu-html.mjs`: valida `menu.json` y lo convierte en elementos HTML normales durante build y desarrollo.
 - `dist/assets/`: única ubicación de imágenes, videos y archivos gráficos.
+- `dist/assets/piezas/`: ubicación de las imágenes WebP abiertas por los botones `VER PIEZA`.
 - `dist/`: sitio estático final con HTML, CSS, JavaScript y assets; no contiene `menu.json`.
-- `tests/menu-contract.test.mjs`: valida categorías, valores, HTML generado y ausencia de renderizado dinámico en producción.
+- `tests/menu-contract.test.mjs`: valida categorías, valores, rutas de imágenes, HTML generado y ausencia de renderizado dinámico en producción.
 - `tests/style-contract.test.mjs`: validación integral de selectores y declaraciones compiladas.
 
 `src/scss/main.scss` carga desktop, luego tablet y finalmente mobile. No existe una capa separada de secciones: toda la estructura visual vive dentro de esos tres breakpoints. Las reglas de accesibilidad y capacidades del navegador se aplican después sin introducir breakpoints adicionales.
 
 La raíz del repositorio redirige a `dist/`, que es también la ruta publicada por GitHub Pages.
+
+## Datos e imágenes de las piezas
+
+Cada producto de `piezas`, `niguiris`, `sashimis` y `geisha` debe declarar una propiedad `image` dentro de `menu.json`:
+
+```json
+{
+  "name": "BUENOS AIRES",
+  "description": "...",
+  "image": "assets/piezas/buenos_aires.webp"
+}
+```
+
+Las rutas deben comenzar con `assets/piezas/` y terminar en `.webp`. Las bebidas no llevan imagen ni botón. Durante el build, cada ruta se copia como atributo del botón estático correspondiente y un único modal reutilizable carga la imagen seleccionada.
 
 ## Desarrollo
 
@@ -51,7 +66,7 @@ npm test
 npm run serve
 ```
 
-`npm run build` valida `menu.json`, genera categorías, productos, chips y descripciones como DOM estático dentro de `dist/index.html`, elimina cualquier `dist/menu.json` residual y compila un `app.js` sin cargador ni renderer de datos del menú.
+`npm run build` valida `menu.json`, genera categorías, productos, chips, botones y el modal como DOM estático dentro de `dist/index.html`, elimina cualquier `dist/menu.json` residual y compila un `app.js` sin cargador ni renderer de datos del menú.
 
 `npm run clean` elimina solamente los archivos generados y preserva `dist/assets/`.
 
