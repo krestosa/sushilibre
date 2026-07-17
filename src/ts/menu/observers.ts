@@ -1,55 +1,56 @@
 import { query } from '../shared/dom';
 
+interface OverlapTarget {
+  heading: HTMLElement;
+  sentinel: HTMLElement;
+}
+
 export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
   const mobileQuery = window.matchMedia('(max-width: 720px)');
-  let observers: IntersectionObserver[] = [];
-  let resizeFrame = 0;
+  const targets = groups.flatMap((group): OverlapTarget[] => {
+    const heading = query<HTMLElement>('.menu-group__heading', group);
+    const sentinel = query<HTMLElement>('.menu-group__overlap-sentinel', group);
+    return heading && sentinel ? [{ heading, sentinel }] : [];
+  });
 
-  const disconnectObservers = (): void => {
-    observers.forEach((observer) => observer.disconnect());
-    observers = [];
-    groups.forEach((group) => {
-      query<HTMLElement>('.menu-group__heading', group)?.classList.remove('is-overlapping');
+  let updateFrame = 0;
+  let resizeTimer = 0;
+
+  const updateOverlapState = (): void => {
+    updateFrame = 0;
+    const mobile = mobileQuery.matches;
+
+    targets.forEach(({ heading, sentinel }) => {
+      if (!mobile) {
+        heading.classList.remove('is-overlapping');
+        return;
+      }
+
+      const headingBounds = heading.getBoundingClientRect();
+      const sentinelBounds = sentinel.getBoundingClientRect();
+      const overlaps = sentinelBounds.top <= headingBounds.bottom;
+      heading.classList.toggle('is-overlapping', overlaps);
     });
   };
 
-  const configure = (): void => {
-    disconnectObservers();
-    if (!mobileQuery.matches || !('IntersectionObserver' in window)) return;
-
-    groups.forEach((group) => {
-      const heading = query<HTMLElement>('.menu-group__heading', group);
-      const sentinel = query<HTMLElement>('.menu-group__overlap-sentinel', group);
-      if (!heading || !sentinel) return;
-
-      const headingHeight = Math.ceil(heading.getBoundingClientRect().height);
-      const observer = new IntersectionObserver((entries) => {
-        const entry = entries[0];
-        if (!entry) return;
-        const overlaps = !entry.isIntersecting && entry.boundingClientRect.top <= headingHeight;
-        heading.classList.toggle('is-overlapping', overlaps);
-      }, {
-        rootMargin: `-${headingHeight}px 0px 0px 0px`,
-        threshold: 0
-      });
-
-      observer.observe(sentinel);
-      observers.push(observer);
-    });
+  const scheduleUpdate = (): void => {
+    if (updateFrame) return;
+    updateFrame = window.requestAnimationFrame(updateOverlapState);
   };
 
-  const scheduleConfigure = (): void => {
-    if (resizeFrame) return;
-    resizeFrame = window.requestAnimationFrame(() => {
-      resizeFrame = 0;
-      configure();
-    });
+  const scheduleResizeSettlement = (): void => {
+    if (resizeTimer) window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      resizeTimer = 0;
+      scheduleUpdate();
+    }, 140);
   };
 
-  configure();
-  mobileQuery.addEventListener('change', scheduleConfigure);
-  window.addEventListener('resize', scheduleConfigure, { passive: true });
-  document.fonts.ready.then(scheduleConfigure).catch(() => undefined);
+  scheduleUpdate();
+  mobileQuery.addEventListener('change', scheduleUpdate);
+  window.addEventListener('scroll', scheduleUpdate, { passive: true });
+  window.addEventListener('resize', scheduleResizeSettlement, { passive: true });
+  document.fonts.ready.then(scheduleUpdate).catch(() => undefined);
 };
 
 export const observeActiveMenuGroup = (
