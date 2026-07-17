@@ -1,136 +1,318 @@
 <!doctype html>
 <html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#000000">
-  <meta name="description" content="Sushi Libre — una experiencia exclusiva en SushiClub Puerto Madero.">
-  <title>Sushi Libre — SushiClub Puerto Madero</title>
-  <script>
-    (() => {
-      const root = document.documentElement;
-      root.classList.add('has-menu-reveal');
-      root.classList.add('has-proposal-reveal');
-      window.setTimeout(() => {
-        if (!root.hasAttribute('data-menu-reveal-ready')) {
-          root.classList.add('menu-reveal-fallback');
-        }
-        if (!root.hasAttribute('data-proposal-reveal-ready')) {
-          root.classList.add('proposal-reveal-fallback');
-        }
-      }, 1800);
-    })();
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="app.css?v=c798f71052f3">
-  <script src="app.js?v=c798f71052f3" defer></script>
-</head>
-<body>
-  <main class="page">
-    <aside class="booking-dock" aria-label="Información y reserva del evento">
-      <a class="booking-dock__meta booking-dock__meta--location" href="https://maps.app.goo.gl/N6UjNEoETLvo1ucRA" target="_blank" rel="noopener noreferrer">
-        <span class="booking-dock__label">Restó <span class="booking-dock__external-arrow" aria-hidden="true">↗</span></span>
-        <strong><span class="sr-only">Puerto Madero — abrir en Google Maps</span><span class="booking-dock__value booking-dock__value--desktop" aria-hidden="true">PUERTO MADERO</span><span class="booking-dock__value booking-dock__value--mobile" aria-hidden="true">PTO. MADERO</span></strong>
-      </a>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Sushi Libre — una experiencia exclusiva en SushiClub Puerto Madero."
+    />
+    <title>Sushi Libre — SushiClub Puerto Madero</title>
+    <script>
+      (() => {
+        const root = document.documentElement;
+        root.classList.add("has-menu-reveal");
+        root.classList.add("has-proposal-reveal");
+        window.setTimeout(() => {
+          if (!root.hasAttribute("data-menu-reveal-ready")) {
+            root.classList.add("menu-reveal-fallback");
+          }
+          if (!root.hasAttribute("data-proposal-reveal-ready")) {
+            root.classList.add("proposal-reveal-fallback");
+          }
+        }, 1800);
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="app.css?v=c798f71052f3" />
+    <script src="app.js?v=c798f71052f3" defer></script>
+  </head>
+  <body>
+    <main class="page">
+      <aside class="booking-dock" aria-label="Información y reserva del evento">
+        <a
+          class="booking-dock__meta booking-dock__meta--location"
+          href="https://maps.app.goo.gl/N6UjNEoETLvo1ucRA"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="booking-dock__label"
+            >Restó
+            <span class="booking-dock__external-arrow" aria-hidden="true"
+              >↗</span
+            ></span
+          >
+          <strong
+            ><span class="sr-only">Puerto Madero — abrir en Google Maps</span
+            ><span
+              class="booking-dock__value booking-dock__value--desktop"
+              aria-hidden="true"
+              >PUERTO MADERO</span
+            ><span
+              class="booking-dock__value booking-dock__value--mobile"
+              aria-hidden="true"
+              >PTO. MADERO</span
+            ></strong
+          >
+        </a>
 
-      <div class="booking-dock__meta">
-        <span class="booking-dock__label">Fecha</span>
-        <strong><span class="sr-only">Jueves 30 de julio</span><span class="booking-dock__value booking-dock__value--desktop" aria-hidden="true">JUEVES 30/07</span><span class="booking-dock__value booking-dock__value--mobile" aria-hidden="true">JUE 30/07</span></strong>
-      </div>
-
-      <div class="booking-dock__meta booking-dock__meta--time">
-        <span class="booking-dock__label">Desde</span>
-        <strong>20.00HS</strong>
-      </div>
-
-      <div class="countdown" aria-label="Cuenta regresiva hasta el 30 de julio de 2026 a las 20 horas">
-        <div class="countdown__unit"><strong data-countdown="days">00</strong><span>DÍAS</span></div>
-        <div class="countdown__unit"><strong data-countdown="hours">00</strong><span>HORAS</span></div>
-        <div class="countdown__unit"><strong data-countdown="minutes">00</strong><span>MINUTOS</span></div>
-        <div class="countdown__unit"><strong data-countdown="seconds">00</strong><span>SEGUNDOS</span></div>
-      </div>
-
-      <a class="booking-dock__cta" data-booking-cta href="https://www.sushiclub.com.ar/shop_reservas.php"><span data-booking-cta-label>RESERVÁ<br>AHORA</span></a>
-    </aside>
-
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero__video-stack" aria-hidden="true">
-        <video class="hero__video is-active" data-loop-video data-video-source="assets/hero_bg.webm" autoplay loop muted playsinline preload="metadata"><source src="assets/hero_bg.webm" type="video/webm"></video>
-        <video class="hero__video" data-loop-video data-video-source="assets/hero_bg.webm" muted playsinline preload="none"></video>
-      </div>
-      <div class="hero__black-filter" aria-hidden="true"></div>
-      <div class="hero__gradient" aria-hidden="true"></div>
-      <div class="hero__grain" aria-hidden="true"></div>
-
-      <header class="masthead" style="left:50%;right:auto;width:calc(100% - (2 * var(--page-x)));transform:translateX(-50%);grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);">
-        <p class="masthead__venue" style="grid-column:1;justify-self:start;">PUERTO<br>MADERO</p>
-        <div class="masthead__brands" style="grid-column:2;justify-self:center;">
-          <img class="masthead__sushiclub" src="assets/sushiclub.svg" width="234" height="34" alt="SushiClub">
-          <img class="masthead__anniversary" src="assets/anniversary-25.svg" width="147" height="113" alt="25 Anniversary Edition">
+        <div class="booking-dock__meta">
+          <span class="booking-dock__label">Fecha</span>
+          <strong
+            ><span class="sr-only">Jueves 30 de julio</span
+            ><span
+              class="booking-dock__value booking-dock__value--desktop"
+              aria-hidden="true"
+              >JUEVES 30/07</span
+            ><span
+              class="booking-dock__value booking-dock__value--mobile"
+              aria-hidden="true"
+              >JUE 30/07</span
+            ></strong
+          >
         </div>
-        <p class="masthead__reservation" style="grid-column:3;justify-self:end;">RESERVA<br>ANTICIPADA</p>
-      </header>
 
-      <div class="title-lockup" id="hero-title">
-        <h1 class="title-word title-word--sushi">SUSHI</h1>
-        <p class="title-kicker">EXCLUSIVE EXPERIENCE</p>
-        <p class="title-word title-word--libre">LIBRE</p>
-      </div>
+        <div class="booking-dock__meta booking-dock__meta--time">
+          <span class="booking-dock__label">Desde</span>
+          <strong>20.00HS</strong>
+        </div>
 
-      <div class="hero-copy">
-        <h2>UNA NOCHE PARA DISFRUTAR SIN LÍMITES</h2>
-        <p>DESCUBRÍ UNA SELECCIÓN PREPARADA PARA RECORRER LOS SABORES MÁS<br class="desktop-only"> REPRESENTATIVOS DE SUSHICLUB. NIGUIRIS, ROLLS Y SASHIMIS SERVIDOS DURANTE<br class="desktop-only"> TODA LA NOCHE EN UN ENTORNO PENSADO PARA DISFRUTAR SIN APURO.</p>
-      </div>
-    </section>
+        <div
+          class="countdown"
+          aria-label="Cuenta regresiva hasta el 30 de julio de 2026 a las 20 horas"
+        >
+          <div class="countdown__unit">
+            <strong data-countdown="days">00</strong><span>DÍAS</span>
+          </div>
+          <div class="countdown__unit">
+            <strong data-countdown="hours">00</strong><span>HORAS</span>
+          </div>
+          <div class="countdown__unit">
+            <strong data-countdown="minutes">00</strong><span>MINUTOS</span>
+          </div>
+          <div class="countdown__unit">
+            <strong data-countdown="seconds">00</strong><span>SEGUNDOS</span>
+          </div>
+        </div>
 
-    <section class="proposal" id="propuesta" data-proposal-root aria-labelledby="proposal-heading">
-      <div class="proposal__shell">
-        <header class="proposal__header">
-          <h2 class="proposal-reveal proposal-reveal--heading" data-proposal-reveal style="--proposal-reveal-delay:0ms" id="proposal-heading">NUESTRA PROPUESTA</h2>
+        <a
+          class="booking-dock__cta"
+          data-booking-cta
+          href="https://www.sushiclub.com.ar/shop_reservas.php"
+          ><span data-booking-cta-label>RESERVÁ<br />AHORA</span></a
+        >
+      </aside>
+
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero__video-stack" aria-hidden="true">
+          <video
+            class="hero__video is-active"
+            data-loop-video
+            data-video-source="assets/hero_bg.webm"
+            autoplay
+            loop
+            muted
+            playsinline
+            preload="metadata"
+          >
+            <source src="assets/hero_bg.webm" type="video/webm" />
+          </video>
+          <video
+            class="hero__video"
+            data-loop-video
+            data-video-source="assets/hero_bg.webm"
+            muted
+            playsinline
+            preload="none"
+          ></video>
+        </div>
+        <div class="hero__black-filter" aria-hidden="true"></div>
+        <div class="hero__gradient" aria-hidden="true"></div>
+        <div class="hero__grain" aria-hidden="true"></div>
+
+        <header
+          class="masthead"
+          style="
+            left: 50%;
+            right: auto;
+            width: calc(100% - (2 * var(--page-x)));
+            transform: translateX(-50%);
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+          "
+        >
+          <p
+            class="masthead__venue"
+            style="grid-column: 1; justify-self: start"
+          >
+            PUERTO<br />MADERO
+          </p>
+          <div
+            class="masthead__brands"
+            style="grid-column: 2; justify-self: center"
+          >
+            <img
+              class="masthead__sushiclub"
+              src="assets/sushiclub.svg"
+              width="234"
+              height="34"
+              alt="SushiClub"
+            />
+            <img
+              class="masthead__anniversary"
+              src="assets/anniversary-25.svg"
+              width="147"
+              height="113"
+              alt="25 Anniversary Edition"
+            />
+          </div>
+          <p
+            class="masthead__reservation"
+            style="grid-column: 3; justify-self: end"
+          >
+            RESERVA<br />ANTICIPADA
+          </p>
         </header>
 
-        <div class="proposal__content">
-          <p class="proposal__intro proposal-reveal proposal-reveal--intro" data-proposal-reveal style="--proposal-reveal-delay:70ms">VIVÍ UNA EXPERIENCIA DONDE EL SABOR, LA FRESCURA Y LA DEDICACIÓN SE ENCUENTRAN EN CADA PIEZA. SUSHI PREPARADO EN EL MOMENTO, INGREDIENTES DE CALIDAD Y UNA NOCHE PENSADA PARA DISFRUTAR DE PRINCIPIO A FIN.</p>
-
-          <ul class="proposal__chips proposal-reveal proposal-reveal--chips" data-proposal-reveal style="--proposal-reveal-delay:120ms" aria-label="Características de la experiencia">
-            <li>INCLUYE CUBIERTO</li>
-            <li>PIEZAS ILIMITADAS</li>
-            <li>EXPERIENCIA EXCLUSIVA</li>
-          </ul>
-
-          <div class="proposal__prices">
-            <article class="proposal__price proposal-reveal proposal-reveal--prices" data-proposal-reveal style="--proposal-reveal-delay:0ms">
-              <p class="proposal__eyebrow">PRECIO X PERSONA</p>
-              <p class="proposal__amount"><span aria-hidden="true">$</span>110.000</p>
-            </article>
-
-            <article class="proposal__price proposal__price--benefit proposal-reveal proposal-reveal--prices" data-proposal-reveal style="--proposal-reveal-delay:70ms">
-              <p class="proposal__eyebrow">CON 25% DE REINTEGRO</p>
-              <p class="proposal__amount"><span aria-hidden="true">$</span>82.500</p>
-              <img class="proposal__payment-logo" src="assets/galicia-eminent-visa.svg" width="245" height="32" alt="Éminent Exclusivo Visa Signature">
-            </article>
-          </div>
-
-          <div class="proposal__conditions">
-            <article class="proposal__condition proposal-reveal proposal-reveal--conditions" data-proposal-reveal style="--proposal-reveal-delay:0ms">
-              <h3>PIEZAS SOBRANTES</h3>
-              <p>HASTA 4 PIEZAS POR PERSONA, SIN CARGO. DESDE LA 5.ª, $2.900 POR PIEZA.</p>
-            </article>
-
-            <article class="proposal__condition proposal-reveal proposal-reveal--conditions" data-proposal-reveal style="--proposal-reveal-delay:70ms">
-              <h3>SI NO SOBRAN PIEZAS</h3>
-              <p>VOUCHER <strong>$15.000</strong><br>EN TU PRÓXIMO SUSHI LIBRE. POR CONSUMO RESPONSABLE.</p>
-            </article>
-          </div>
-
-          <p class="proposal__legal proposal-reveal proposal-reveal--legal" data-proposal-reveal>BASES, CONDICIONES Y LOCALES ADHERIDOS EN SUSHICLUB.COM.AR/BENEFICIOS. GALICIA ÉMINENT VISA SIGNATURE EN SALÓN: ÚNICAMENTE PARA COMPRAS REALIZADAS A TRAVÉS DE APPLE PAY Y GOOGLE PAY UTILIZANDO TECNOLOGÍA NFC (SIN CONTACTO).</p>
+        <div class="title-lockup" id="hero-title">
+          <h1 class="title-word title-word--sushi">SUSHI</h1>
+          <p class="title-kicker">EXCLUSIVE EXPERIENCE</p>
+          <p class="title-word title-word--libre">LIBRE</p>
         </div>
-      </div>
-    </section>
 
-    <section class="menu-section" id="menu" data-menu-root aria-labelledby="menu-heading" style="--menu-background-image:url(&quot;assets/menu_bg.webp&quot;)">
+        <div class="hero-copy">
+          <h2>UNA NOCHE PARA DISFRUTAR SIN LÍMITES</h2>
+          <p>
+            DESCUBRÍ UNA SELECCIÓN PREPARADA PARA RECORRER LOS SABORES MÁS<br
+              class="desktop-only"
+            />
+            REPRESENTATIVOS DE SUSHICLUB. NIGUIRIS, ROLLS Y SASHIMIS SERVIDOS
+            DURANTE<br class="desktop-only" />
+            TODA LA NOCHE EN UN ENTORNO PENSADO PARA DISFRUTAR SIN APURO.
+          </p>
+        </div>
+      </section>
+
+      <section
+        class="proposal"
+        id="propuesta"
+        data-proposal-root
+        aria-labelledby="proposal-heading"
+      >
+        <div class="proposal__shell">
+          <header class="proposal__header">
+            <h2
+              class="proposal-reveal proposal-reveal--heading"
+              data-proposal-reveal
+              style="--proposal-reveal-delay: 0ms"
+              id="proposal-heading"
+            >
+              NUESTRA PROPUESTA
+            </h2>
+          </header>
+
+          <div class="proposal__content">
+            <p
+              class="proposal__intro proposal-reveal proposal-reveal--intro"
+              data-proposal-reveal
+              style="--proposal-reveal-delay: 70ms"
+            >
+              VIVÍ UNA EXPERIENCIA DONDE EL SABOR, LA FRESCURA Y LA DEDICACIÓN
+              SE ENCUENTRAN EN CADA PIEZA. SUSHI PREPARADO EN EL MOMENTO,
+              INGREDIENTES DE CALIDAD Y UNA NOCHE PENSADA PARA DISFRUTAR DE
+              PRINCIPIO A FIN.
+            </p>
+
+            <ul
+              class="proposal__chips proposal-reveal proposal-reveal--chips"
+              data-proposal-reveal
+              style="--proposal-reveal-delay: 120ms"
+              aria-label="Características de la experiencia"
+            >
+              <li>INCLUYE CUBIERTO</li>
+              <li>PIEZAS ILIMITADAS</li>
+              <li>AGUA & LIMONADA LIBRE</li>
+            </ul>
+
+            <div class="proposal__prices">
+              <article
+                class="proposal__price proposal-reveal proposal-reveal--prices"
+                data-proposal-reveal
+                style="--proposal-reveal-delay: 0ms"
+              >
+                <p class="proposal__eyebrow">PRECIO X PERSONA</p>
+                <p class="proposal__amount">
+                  <span aria-hidden="true">$</span>110.000
+                </p>
+              </article>
+
+              <article
+                class="proposal__price proposal__price--benefit proposal-reveal proposal-reveal--prices"
+                data-proposal-reveal
+                style="--proposal-reveal-delay: 70ms"
+              >
+                <p class="proposal__eyebrow">CON 25% DE REINTEGRO</p>
+                <p class="proposal__amount">
+                  <span aria-hidden="true">$</span>82.500
+                </p>
+                <img
+                  class="proposal__payment-logo"
+                  src="assets/galicia-eminent-visa.svg"
+                  width="245"
+                  height="32"
+                  alt="Éminent Exclusivo Visa Signature"
+                />
+              </article>
+            </div>
+
+            <div class="proposal__conditions">
+              <article
+                class="proposal__condition proposal-reveal proposal-reveal--conditions"
+                data-proposal-reveal
+                style="--proposal-reveal-delay: 0ms"
+              >
+                <h3>PIEZAS SOBRANTES</h3>
+                <p>
+                  HASTA 4 PIEZAS POR PERSONA, SIN CARGO. DESDE LA 5.ª, $2.900
+                  POR PIEZA.
+                </p>
+              </article>
+
+              <article
+                class="proposal__condition proposal-reveal proposal-reveal--conditions"
+                data-proposal-reveal
+                style="--proposal-reveal-delay: 70ms"
+              >
+                <h3>SI NO SOBRAN PIEZAS</h3>
+                <p>
+                  VOUCHER <strong>$15.000</strong><br />EN TU PRÓXIMO SUSHI
+                  LIBRE. POR CONSUMO RESPONSABLE.
+                </p>
+              </article>
+            </div>
+
+            <p
+              class="proposal__legal proposal-reveal proposal-reveal--legal"
+              data-proposal-reveal
+            >
+              BASES, CONDICIONES Y LOCALES ADHERIDOS EN
+              SUSHICLUB.COM.AR/BENEFICIOS. GALICIA ÉMINENT VISA SIGNATURE EN
+              SALÓN: ÚNICAMENTE PARA COMPRAS REALIZADAS A TRAVÉS DE APPLE PAY Y
+              GOOGLE PAY UTILIZANDO TECNOLOGÍA NFC (SIN CONTACTO).
+            </p>
+          </div>
+        </div>
+      </section>
+
+          <section class="menu-section" id="menu" data-menu-root aria-labelledby="menu-heading" style="--menu-background-image:url(&quot;assets/menu_bg.webp&quot;)">
       <div class="menu-section__background" aria-hidden="true"></div>
       <div class="menu-section__shell">
         <header class="menu-section__intro"><h2 class="menu-reveal menu-reveal--intro" data-menu-reveal id="menu-heading">MENÚ</h2></header>
@@ -407,6 +589,6 @@
         <p class="piece-viewer__disclaimer">Imagen ilustrativa. Cantidad de piezas según menú.</p>
       </div>
     </dialog>
-  </main>
-</body>
+    </main>
+  </body>
 </html>
