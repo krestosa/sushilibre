@@ -50,7 +50,11 @@ jobs:
         run: npm run build
 
       - name: Verify menu and style contracts
-        run: npm test
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build-diagnostics
+          npm test 2>&1 | tee build-diagnostics/test.log
 
       - name: Upload build diagnostics
         if: always()
