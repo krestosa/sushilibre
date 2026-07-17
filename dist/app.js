@@ -230,11 +230,10 @@
   var setupPieceViewer = () => {
     const dialog = query("[data-piece-viewer]");
     const image = query("[data-piece-viewer-image]", dialog ?? void 0);
-    const title = query("[data-piece-viewer-title]", dialog ?? void 0);
     const status = query("[data-piece-viewer-status]", dialog ?? void 0);
     const closeButton = query("[data-piece-viewer-close]", dialog ?? void 0);
     const openButtons = queryAll("[data-piece-viewer-open]");
-    if (!dialog || !image || !title || !status || !closeButton || !openButtons.length) return;
+    if (!dialog || !image || !status || !closeButton || !openButtons.length) return;
     let activeButton = null;
     const setLoadingState = () => {
       dialog.dataset.state = "loading";
@@ -271,8 +270,8 @@
       const source = button.dataset.pieceImage?.trim();
       if (!name || !source) return;
       activeButton = button;
-      title.textContent = name;
-      image.alt = `${name} \u2014 SushiClub`;
+      dialog.setAttribute("aria-label", `Imagen de ${name}`);
+      image.alt = name;
       setLoadingState();
       document.documentElement.classList.add("has-piece-viewer");
       openDialog();
@@ -283,9 +282,9 @@
     };
     const cleanup = () => {
       document.documentElement.classList.remove("has-piece-viewer");
+      dialog.setAttribute("aria-label", "Vista de pieza");
       image.removeAttribute("src");
       image.alt = "";
-      title.textContent = "";
       status.textContent = LOADING_MESSAGE;
       status.hidden = false;
       image.hidden = true;
