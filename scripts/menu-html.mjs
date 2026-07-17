@@ -1,4 +1,5 @@
 const MENU_MARKER = '<!-- MENU_SECTION -->';
+const PIECE_IMAGE_PATTERN = /^assets\/piezas\/[a-z0-9_/-]+\.webp$/;
 
 const isRecord = (value) => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 
@@ -18,7 +19,15 @@ const optionalPositiveNumber = (value, label) => {
   return number;
 };
 
-const normalizeItem = (value, sectionIndex, itemIndex) => {
+const normalizeImagePath = (value, label) => {
+  const path = requireString(value, label);
+  if (!PIECE_IMAGE_PATTERN.test(path) || path.includes('..') || path.includes('\\')) {
+    throw new TypeError(`${label} must point to a .webp file inside assets/piezas/.`);
+  }
+  return path;
+};
+
+const normalizeItem = (value, sectionIndex, itemIndex, sectionId) => {
   if (!isRecord(value)) {
     throw new TypeError(`sections[${sectionIndex}].items[${itemIndex}] must be an object.`);
   }
@@ -47,6 +56,13 @@ const normalizeItem = (value, sectionIndex, itemIndex) => {
   );
   if (pieces !== undefined) item.pieces = pieces;
 
+  if (sectionId !== 'bebidas') {
+    item.image = normalizeImagePath(
+      value.image,
+      `sections[${sectionIndex}].items[${itemIndex}].image`
+    );
+  }
+
   return item;
 };
 
@@ -70,11 +86,12 @@ export const parseMenuSource = (rawMenu) => {
         throw new TypeError(`sections[${sectionIndex}] must contain an items array.`);
       }
 
+      const id = requireString(section.id, `sections[${sectionIndex}].id`);
       return {
-        id: requireString(section.id, `sections[${sectionIndex}].id`),
+        id,
         title: requireString(section.title, `sections[${sectionIndex}].title`),
         quantity: requireString(section.quantity, `sections[${sectionIndex}].quantity`, { allowEmpty: true }),
-        items: section.items.map((item, itemIndex) => normalizeItem(item, sectionIndex, itemIndex))
+        items: section.items.map((item, itemIndex) => normalizeItem(item, sectionIndex, itemIndex, id))
       };
     })
   };
@@ -119,12 +136,15 @@ const renderMenuItem = (item, sectionPieces) => {
   const descriptionMarkup = item.description
     ? `<p class="menu-item__description" data-balance-text="${escapeAttribute(item.description)}">${escapeText(item.description)}</p>`
     : '';
+  const viewButton = item.image
+    ? `<button class="menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="${escapeAttribute(item.name)}" data-piece-image="${escapeAttribute(item.image)}">VER PIEZA</button>`
+    : '';
   const modifier = item.description ? '' : ' menu-item--simple';
 
   return [
     `          <article class="menu-item${modifier}">`,
     '            <div class="menu-item__header">',
-    `              <h4 class="menu-item__name">${escapeText(item.name)}</h4>${badgeMarkup}`,
+    `              <div class="menu-item__identity"><h4 class="menu-item__name">${escapeText(item.name)}</h4>${badgeMarkup}</div>${viewButton}`,
     '            </div>',
     descriptionMarkup ? `            ${descriptionMarkup}` : '',
     '          </article>'
@@ -154,6 +174,22 @@ const renderMenuGroup = (section) => {
   ].join('\n');
 };
 
+const renderPieceViewer = () => [
+  '    <dialog class="piece-viewer" id="piece-viewer" data-piece-viewer aria-labelledby="piece-viewer-title">',
+  '      <div class="piece-viewer__panel">',
+  '        <button class="piece-viewer__close" type="button" data-piece-viewer-close aria-label="Cerrar imagen de la pieza">CERRAR</button>',
+  '        <div class="piece-viewer__media" data-piece-viewer-media aria-live="polite">',
+  '          <img class="piece-viewer__image" data-piece-viewer-image alt="" decoding="async">',
+  '          <p class="piece-viewer__status" data-piece-viewer-status>CARGANDO IMAGEN</p>',
+  '        </div>',
+  '        <div class="piece-viewer__caption">',
+  '          <span>PIEZA</span>',
+  '          <h2 id="piece-viewer-title" data-piece-viewer-title></h2>',
+  '        </div>',
+  '      </div>',
+  '    </dialog>'
+].join('\n');
+
 export const renderMenuSection = (menu) => {
   const groups = menu.sections.map(renderMenuGroup).join('\n');
   const background = escapeAttribute(escapeCssUrl(menu.background));
@@ -167,7 +203,8 @@ export const renderMenuSection = (menu) => {
     groups,
     '        </div>',
     '      </div>',
-    '    </section>'
+    '    </section>',
+    renderPieceViewer()
   ].join('\n');
 };
 
