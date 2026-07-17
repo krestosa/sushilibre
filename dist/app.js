@@ -1086,50 +1086,13 @@
     const easeOut2 = "cubic-bezier(.22, 1, .36, 1)";
     let resolved = false;
     let observer = null;
-    let contentRevealed = false;
-    const metadata = queryAll(".booking-dock__meta", dock);
-    const countdownUnits = queryAll(".countdown__unit", dock);
-    const ctaLabel = query(".booking-dock__cta > span", dock);
-    const revealTargets = [
-      ...metadata.map((element, index) => ({ element, order: index })),
-      ...countdownUnits.map((element, index) => ({ element, order: metadata.length + index })),
-      ...ctaLabel ? [{ element: ctaLabel, order: metadata.length + countdownUnits.length }] : []
-    ];
-    revealTargets.forEach(({ element }) => {
-      element.style.opacity = "0";
-      element.style.transform = reducedMotion2.matches ? "translate3d(0, 2px, 0)" : "translate3d(0, 6px, 0)";
-    });
     const disconnect = () => {
       observer?.disconnect();
       observer = null;
     };
-    const revealDockContent = ({ fast = false } = {}) => {
-      if (contentRevealed) return;
-      contentRevealed = true;
-      const baseDuration = reducedMotion2.matches ? 120 : fast ? 170 : 230;
-      const stagger = reducedMotion2.matches ? 0 : fast ? 22 : 34;
-      const distance = reducedMotion2.matches ? 2 : fast ? 4 : 6;
-      revealTargets.forEach(({ element, order }) => {
-        const animation = element.animate([
-          { opacity: 0, transform: `translate3d(0, ${distance}px, 0)` },
-          { opacity: 1, transform: "translate3d(0, 0, 0)" }
-        ], {
-          duration: baseDuration,
-          delay: order * stagger,
-          easing: easeOut2,
-          fill: "both"
-        });
-        animation.addEventListener("finish", () => {
-          element.style.opacity = "1";
-          element.style.transform = "translate3d(0, 0, 0)";
-          animation.cancel();
-        }, { once: true });
-      });
-    };
-    const finishReveal = ({ fast = false } = {}) => {
+    const finishReveal = () => {
       resolved = true;
       disconnect();
-      revealDockContent({ fast });
     };
     const revealImmediately = () => {
       if (resolved) return;
@@ -1149,7 +1112,6 @@
         dock.style.translate = "0 0";
         dock.style.scale = "1";
         dock.style.willChange = "";
-        revealDockContent({ fast: true });
         return;
       }
       const animation = dock.animate([
@@ -1174,7 +1136,6 @@
         dock.style.scale = "1";
         dock.style.willChange = "";
         animation.cancel();
-        revealDockContent({ fast: true });
       }, { once: true });
     };
     const titleIsOutsideViewport = () => {
@@ -1193,7 +1154,7 @@
       (animation) => animation.playState === "running"
     );
     if (!activeDockAnimation && Number.parseFloat(getComputedStyle(dock).opacity) >= 0.99) {
-      finishReveal({ fast: true });
+      finishReveal();
     } else if (supportsIntersectionObserver) {
       const nextObserver = new IntersectionObserver((entries) => {
         const entry = entries[0];
