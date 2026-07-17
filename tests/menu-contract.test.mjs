@@ -38,9 +38,9 @@ test('menu values and categories remain unchanged', async () => {
   ]);
 });
 
-test('embedded fallback data matches menu.json exactly', async () => {
+test('static template fallback data matches menu.json exactly', async () => {
   const [html, rawMenu] = await Promise.all([
-    readFile(new URL('../index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../src/static/index.html', import.meta.url), 'utf8'),
     readFile(new URL('../menu.json', import.meta.url), 'utf8')
   ]);
   const embedded = html.match(/<script id="menu-data" type="application\/json">([\s\S]*?)<\/script>/);
