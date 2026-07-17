@@ -21,8 +21,9 @@ html.has-proposal-reveal .proposal-reveal--chips {
 }
 
 html.has-proposal-reveal .proposal-reveal--prices {
-  --proposal-reveal-distance: 14px;
+  --proposal-reveal-distance: 0px;
   --proposal-reveal-duration: 480ms;
+  transform: none;
 }
 
 html.has-proposal-reveal .proposal-reveal--conditions {
@@ -37,6 +38,10 @@ html.has-proposal-reveal .proposal-reveal--legal {
 
 html.has-proposal-reveal .proposal-reveal.is-visible {
   animation: proposal-reveal-in var(--proposal-reveal-duration) var(--ease-out) var(--proposal-reveal-delay, 0ms) both;
+}
+
+html.has-proposal-reveal .proposal-reveal--prices.is-visible {
+  animation-name: proposal-reveal-fade;
 }
 
 html.has-proposal-reveal .proposal-reveal.is-visible.is-reveal-bypassed {
