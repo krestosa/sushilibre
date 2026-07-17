@@ -1,5 +1,7 @@
 const MENU_MARKER = '<!-- MENU_SECTION -->';
-const PIECE_IMAGE_PATTERN = /^assets\/piezas\/[a-z0-9_/-]+\.webp$/;
+const PIECE_IMAGE_PATTERN = /^assets\/piezas\/[a-z0-9_\/-]+\.webp$/;
+const ITEM_REVEAL_STAGGER_MS = 45;
+const MAX_ITEM_REVEAL_STAGGER_MS = 90;
 
 const isRecord = (value) => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 
@@ -123,7 +125,7 @@ const renderViewButton = (item) => item.image
   ? `<button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="${escapeAttribute(item.name)}" data-piece-image="${escapeAttribute(item.image)}">VER PIEZA</button>`
   : '';
 
-const renderMenuItem = (item, sectionPieces) => {
+const renderMenuItem = (item, sectionPieces, itemIndex) => {
   const controls = [];
   if (item.diet) controls.push(renderBadge(item.diet, 'diet'));
   if (
@@ -144,9 +146,10 @@ const renderMenuItem = (item, sectionPieces) => {
     ? `<p class="menu-item__description" data-balance-text="${escapeAttribute(item.description)}">${escapeText(item.description)}</p>`
     : '';
   const modifier = item.description ? '' : ' menu-item--simple';
+  const revealDelay = Math.min(itemIndex * ITEM_REVEAL_STAGGER_MS, MAX_ITEM_REVEAL_STAGGER_MS);
 
   return [
-    `          <article class="menu-item${modifier}">`,
+    `          <article class="menu-item${modifier} menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:${revealDelay}ms">`,
     '            <div class="menu-item__header">',
     `              <div class="menu-item__identity"><h4 class="menu-item__name">${escapeText(item.name)}</h4>${controlsMarkup}</div>`,
     '            </div>',
@@ -158,7 +161,7 @@ const renderMenuItem = (item, sectionPieces) => {
 const renderMenuGroup = (section) => {
   const sectionPieces = parseSectionPieces(section.quantity);
   const items = section.items
-    .map((item) => renderMenuItem(item, sectionPieces))
+    .map((item, itemIndex) => renderMenuItem(item, sectionPieces, itemIndex))
     .join('\n');
   const quantity = section.quantity
     ? `<span class="menu-group__quantity">${escapeText(section.quantity)}</span>`
@@ -167,7 +170,7 @@ const renderMenuGroup = (section) => {
   return [
     `      <article class="menu-group" id="menu-${escapeAttribute(section.id)}" data-menu-group="${escapeAttribute(section.id)}" data-item-count="${section.items.length}" style="--menu-item-count:${Math.max(1, section.items.length)}">`,
     '        <h3 class="menu-group__heading">',
-    `          <span class="menu-group__title-line"><span class="menu-group__title">${escapeText(section.title)}</span>${quantity}</span>`,
+    `          <span class="menu-group__title-line menu-reveal menu-reveal--group" data-menu-reveal><span class="menu-group__title">${escapeText(section.title)}</span>${quantity}</span>`,
     '        </h3>',
     '        <div class="menu-group__items">',
     '          <span class="menu-group__overlap-sentinel" aria-hidden="true"></span>',
@@ -181,9 +184,12 @@ const renderMenuGroup = (section) => {
 const renderPieceViewer = () => [
   '    <dialog class="piece-viewer" id="piece-viewer" data-piece-viewer aria-label="Vista de pieza">',
   '      <div class="piece-viewer__content">',
-  '        <button class="piece-viewer__close" type="button" data-piece-viewer-close aria-label="Cerrar">×</button>',
+  '        <button class="piece-viewer__close" type="button" data-piece-viewer-close aria-label="Cerrar"><span class="piece-viewer__close-icon" aria-hidden="true"></span></button>',
   '        <img class="piece-viewer__image" data-piece-viewer-image alt="" decoding="async">',
-  '        <p class="piece-viewer__status" data-piece-viewer-status>CARGANDO IMAGEN</p>',
+  '        <div class="piece-viewer__status" data-piece-viewer-status role="status" aria-live="polite">',
+  '          <span class="piece-viewer__loader" aria-hidden="true"></span>',
+  '          <span class="piece-viewer__status-text" data-piece-viewer-status-text>CARGANDO IMAGEN</span>',
+  '        </div>',
   '        <p class="piece-viewer__disclaimer">Imagen ilustrativa. Cantidad de piezas según menú.</p>',
   '      </div>',
   '    </dialog>'
@@ -197,7 +203,7 @@ export const renderMenuSection = (menu) => {
     `    <section class="menu-section" id="menu" data-menu-root aria-labelledby="menu-heading" style="--menu-background-image:url(&quot;${background}&quot;)">`,
     '      <div class="menu-section__background" aria-hidden="true"></div>',
     '      <div class="menu-section__shell">',
-    `        <header class="menu-section__intro"><h2 id="menu-heading">${escapeText(menu.title)}</h2></header>`,
+    `        <header class="menu-section__intro"><h2 class="menu-reveal menu-reveal--intro" data-menu-reveal id="menu-heading">${escapeText(menu.title)}</h2></header>`,
     '        <div class="menu-section__groups" data-menu-groups>',
     groups,
     '        </div>',
