@@ -12,6 +12,11 @@
   appearance: none;
   font-family: inherit;
   cursor: pointer;
+  transition:
+    border-color 140ms ease-out,
+    background-color 140ms ease-out,
+    color 140ms ease-out,
+    scale 120ms ease-out;
 
   &:hover,
   &:focus-visible {
@@ -23,6 +28,10 @@
   &:focus-visible {
     outline: 2px solid var(--orange);
     outline-offset: 3px;
+  }
+
+  &:active {
+    scale: 0.97;
   }
 }
 
@@ -40,9 +49,37 @@ html.has-piece-viewer {
   overflow: visible;
   background: #000;
   color: #fff;
+  opacity: 0;
+  scale: 0.97;
+  transform-origin: center;
+  transition:
+    opacity 220ms ease-out,
+    scale 260ms var(--ease-out);
 
   &::backdrop {
     background: rgba(0, 0, 0, 0.78);
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+  }
+
+  &.is-open {
+    opacity: 1;
+    scale: 1;
+
+    &::backdrop {
+      opacity: 1;
+    }
+  }
+
+  &.is-closing {
+    opacity: 0;
+    scale: 0.97;
+    transition-duration: 180ms;
+
+    &::backdrop {
+      opacity: 0;
+      transition-duration: 160ms;
+    }
   }
 }
 
@@ -76,6 +113,7 @@ html.has-piece-viewer {
   font-weight: 300;
   line-height: 1;
   cursor: pointer;
+  transition: background-color 140ms ease-out, scale 120ms ease-out;
 
   &:hover,
   &:focus-visible {
@@ -86,6 +124,10 @@ html.has-piece-viewer {
     outline: 2px solid #fff;
     outline-offset: 2px;
   }
+
+  &:active {
+    scale: 0.94;
+  }
 }
 
 .piece-viewer__image {
@@ -94,6 +136,12 @@ html.has-piece-viewer {
   max-height: calc(100dvh - 82px);
   object-fit: contain;
   object-position: center;
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+}
+
+.piece-viewer[data-state="ready"] .piece-viewer__image {
+  opacity: 1;
 }
 
 .piece-viewer__status {
@@ -124,4 +172,30 @@ html.has-piece-viewer {
   line-height: 1.3;
   letter-spacing: 0.025em;
   text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-item__view,
+  .piece-viewer__close {
+    scale: 1;
+  }
+
+  .piece-viewer {
+    scale: 1;
+    transition: opacity 120ms linear;
+
+    &.is-closing {
+      scale: 1;
+      transition-duration: 100ms;
+    }
+
+    &::backdrop,
+    &.is-closing::backdrop {
+      transition-duration: 100ms;
+    }
+  }
+
+  .piece-viewer__image {
+    transition-duration: 100ms;
+  }
 }
