@@ -1,24 +1,42 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import {
+  hasAttribute,
+  hasClass,
+  openingTags
+} from './html-contract-helpers.mjs';
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-const countMatches = (source, expression) => source.match(expression)?.length ?? 0;
-
 const assertIndividualCommercialTargets = (html) => {
+  const articles = openingTags(html, 'article');
+  const divs = openingTags(html, 'div');
+
+  const priceTargets = articles.filter((tag) => (
+    hasClass(tag, 'proposal__price')
+    && hasClass(tag, 'proposal-reveal--prices')
+    && hasAttribute(tag, 'data-proposal-reveal')
+  ));
+  const conditionTargets = articles.filter((tag) => (
+    hasClass(tag, 'proposal__condition')
+    && hasClass(tag, 'proposal-reveal--conditions')
+    && hasAttribute(tag, 'data-proposal-reveal')
+  ));
+
+  assert.equal(priceTargets.length, 2, 'each price card must reveal from its own viewport position');
+  assert.equal(conditionTargets.length, 2, 'each condition card must reveal from its own viewport position');
+
   assert.equal(
-    countMatches(html, /<article class="proposal__price[^\"]*proposal-reveal--prices[^\"]*"[^>]*data-proposal-reveal/g),
-    2,
-    'each price card must reveal from its own viewport position'
+    divs.some((tag) => hasClass(tag, 'proposal__prices') && hasAttribute(tag, 'data-proposal-reveal')),
+    false,
+    'price grid cannot own the reveal trigger'
   );
   assert.equal(
-    countMatches(html, /<article class="proposal__condition[^\"]*proposal-reveal--conditions[^\"]*"[^>]*data-proposal-reveal/g),
-    2,
-    'each condition card must reveal from its own viewport position'
+    divs.some((tag) => hasClass(tag, 'proposal__conditions') && hasAttribute(tag, 'data-proposal-reveal')),
+    false,
+    'conditions grid cannot own the reveal trigger'
   );
-  assert.doesNotMatch(html, /<div class="proposal__prices[^\"]*"[^>]*data-proposal-reveal/);
-  assert.doesNotMatch(html, /<div class="proposal__conditions[^\"]*"[^>]*data-proposal-reveal/);
 };
 
 test('proposal reveal is restrained, prepaint-safe and one-time', async () => {
@@ -40,17 +58,21 @@ test('proposal reveal is restrained, prepaint-safe and one-time', async () => {
   assert.match(template, /proposal-reveal--conditions/);
   assert.match(template, /proposal-reveal--legal/);
   assertIndividualCommercialTargets(template);
-  assert.doesNotMatch(template, /proposal__amount[^>]*data-proposal-reveal/);
-  assert.doesNotMatch(template, /proposal__payment-logo[^>]*data-proposal-reveal/);
-  assert.doesNotMatch(template, /<li[^>]*data-proposal-reveal/);
+
+  const amountTags = openingTags(template, 'p').filter((tag) => hasClass(tag, 'proposal__amount'));
+  const paymentLogos = openingTags(template, 'img').filter((tag) => hasClass(tag, 'proposal__payment-logo'));
+  const chips = openingTags(template, 'li');
+  assert.equal(amountTags.some((tag) => hasAttribute(tag, 'data-proposal-reveal')), false);
+  assert.equal(paymentLogos.some((tag) => hasAttribute(tag, 'data-proposal-reveal')), false);
+  assert.equal(chips.some((tag) => hasAttribute(tag, 'data-proposal-reveal')), false);
 
   assert.match(application, /setupProposalReveal\(\)/);
   assert.match(feature, /IntersectionObserver/);
   assert.match(feature, /observer\.unobserve\(element\)/);
   assert.match(feature, /isInitiallyVisible/);
   assert.match(feature, /requestAnimationFrame/);
-  assert.match(feature, /setAttribute\('data-proposal-reveal-ready'/);
-  assert.match(feature, /REVEAL_ROOT_MARGIN = '0px 0px -18% 0px'/);
+  assert.match(feature, /setAttribute\(\s*["']data-proposal-reveal-ready["']/);
+  assert.match(feature, /REVEAL_ROOT_MARGIN = ["']0px 0px -18% 0px["']/);
   assert.match(feature, /REVEAL_THRESHOLD = 0\.08/);
   assert.match(feature, /INITIAL_VIEWPORT_RATIO = 0\.84/);
   assert.match(feature, /entry\.intersectionRatio < REVEAL_THRESHOLD/);
