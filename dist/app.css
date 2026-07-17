@@ -188,6 +188,7 @@ video {
   appearance: none;
   font-family: inherit;
   cursor: pointer;
+  transition: border-color 140ms ease-out, background-color 140ms ease-out, color 140ms ease-out, scale 120ms ease-out;
 }
 .menu-item__view:hover, .menu-item__view:focus-visible {
   border-color: rgba(221, 112, 45, 0.82);
@@ -197,6 +198,9 @@ video {
 .menu-item__view:focus-visible {
   outline: 2px solid var(--orange);
   outline-offset: 3px;
+}
+.menu-item__view:active {
+  scale: 0.97;
 }
 
 html.has-piece-viewer {
@@ -213,9 +217,31 @@ html.has-piece-viewer {
   overflow: visible;
   background: #000;
   color: #fff;
+  opacity: 0;
+  scale: 0.97;
+  transform-origin: center;
+  transition: opacity 220ms ease-out, scale 260ms var(--ease-out);
 }
 .piece-viewer::backdrop {
   background: rgba(0, 0, 0, 0.78);
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+.piece-viewer.is-open {
+  opacity: 1;
+  scale: 1;
+}
+.piece-viewer.is-open::backdrop {
+  opacity: 1;
+}
+.piece-viewer.is-closing {
+  opacity: 0;
+  scale: 0.97;
+  transition-duration: 180ms;
+}
+.piece-viewer.is-closing::backdrop {
+  opacity: 0;
+  transition-duration: 160ms;
 }
 
 .piece-viewer__content {
@@ -248,6 +274,7 @@ html.has-piece-viewer {
   font-weight: 300;
   line-height: 1;
   cursor: pointer;
+  transition: background-color 140ms ease-out, scale 120ms ease-out;
 }
 .piece-viewer__close:hover, .piece-viewer__close:focus-visible {
   background: rgba(0, 0, 0, 0.9);
@@ -256,6 +283,9 @@ html.has-piece-viewer {
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
+.piece-viewer__close:active {
+  scale: 0.94;
+}
 
 .piece-viewer__image {
   display: block;
@@ -263,6 +293,12 @@ html.has-piece-viewer {
   max-height: calc(100dvh - 82px);
   object-fit: contain;
   object-position: center;
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+}
+
+.piece-viewer[data-state=ready] .piece-viewer__image {
+  opacity: 1;
 }
 
 .piece-viewer__status {
@@ -295,6 +331,49 @@ html.has-piece-viewer {
   text-align: center;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .menu-item__view,
+  .piece-viewer__close {
+    scale: 1;
+  }
+  .piece-viewer {
+    scale: 1;
+    transition: opacity 120ms linear;
+  }
+  .piece-viewer.is-closing {
+    scale: 1;
+    transition-duration: 100ms;
+  }
+  .piece-viewer::backdrop, .piece-viewer.is-closing::backdrop {
+    transition-duration: 100ms;
+  }
+  .piece-viewer__image {
+    transition-duration: 100ms;
+  }
+}
+.menu-reveal {
+  opacity: 0;
+  translate: 0 12px;
+  transition: opacity 360ms var(--ease-out) var(--menu-reveal-delay, 0ms), translate 420ms var(--ease-out) var(--menu-reveal-delay, 0ms);
+}
+
+.menu-reveal--intro {
+  translate: 0 14px;
+}
+
+.menu-reveal--group {
+  translate: 0 10px;
+}
+
+.menu-reveal--item {
+  translate: 0 8px;
+}
+
+.menu-reveal.is-visible {
+  opacity: 1;
+  translate: 0 0;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .booking-dock__cta::before {
     animation: cta-sheen 5.9s ease-in-out 2.35s infinite;
@@ -323,6 +402,12 @@ html.has-piece-viewer {
   }
   .masthead {
     animation: stage-masthead-in 400ms var(--ease-out) 1660ms both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-reveal {
+    translate: 0 0;
+    transition: opacity 140ms linear;
   }
 }
 @keyframes video-settle {
