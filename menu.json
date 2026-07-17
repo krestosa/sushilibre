@@ -7,25 +7,88 @@
       "title": "PIEZAS",
       "quantity": "4U",
       "items": [
-        { "name": "BUENOS AIRES", "description": "SALMÓN, LANGOSTINOS, PALTA, QUESO CREMA Y SALSA DE SÉSAMO." },
-        { "name": "CELERITY", "description": "LANGOSTINOS Y PALTA, SALMÓN CON CRIOLLA DE ROCOTO Y MAYONESA DE APIO." },
-        { "name": "FEEL", "description": "SALMÓN, QUESO CREMA Y VERDEO, ENVUELTO EN LÁMINAS DE TAMAGO." },
-        { "name": "SOUL", "description": "PALMITO, SALMÓN, TAMAGO, RECUBIERTO CON QUESO Y ALMENDRAS CARAMELIZADAS." },
-        { "name": "PLACER REAL", "description": "PALTA, PALMITO, QUESO CREMA, TAMAGO Y SALMÓN CON SALSA DE MARACUYÁ." },
-        { "name": "FUTURAMA 2", "description": "LANGOSTINOS REBOZADOS, QUESO SABORIZADO, PANKO Y SALSA DE MIEL Y MOSTAZA." },
-        { "name": "SWEET", "description": "LANGOSTINOS, TAMAGO, PALTA Y QUESO SABORIZADO, SALMÓN CON SALSA DE MANGO." },
-        { "name": "SPF", "description": "SALMÓN, PALTA Y QUESO CREMA, CON SÉSAMO." },
-        { "name": "HONEY", "description": "SALMÓN COCIDO SABORIZADO CON REDUCCIÓN DE MIEL Y JENGIBRE." },
-        { "name": "PHILADELPHIA", "description": "SALMÓN Y QUESO CREMA, CON SÉSAMO." },
-        { "name": "TIGER", "description": "LANGOSTINOS APANADOS, PALTA, SALMÓN, CROCANTE DE PAPA Y LECHE DE TIGRE." },
-        { "name": "MERKEN", "description": "SALMÓN AHUMADO, PALTA, TATAKI DE SALMÓN CON MERKEN Y SALSA PICANTE." },
-        { "name": "SC EVOLUTION", "description": "SALMÓN, PALTA, QUESO CREMA Y NEGUI, SALMÓN CON PANKO Y SALSA DE ANANÁ." },
-        { "name": "PINK FLOYD", "description": "LANGOSTINO RELLENO CON PASTA DE SALMÓN, PANKO, ENVUELTO EN SALMÓN, CON SALSA THAI, LECHE DE TIGRE Y SALSA DE ANANÁ.", "pieces": 3 },
-        { "name": "BOOM!", "description": "CORTES DE SALMÓN, CON QUESO CREMA SABORIZADO, CUBIERTOS DE MASA TEMPURA.", "pieces": 6 },
-        { "name": "CRISPY GREEN", "description": "TOMATES CONFITADOS, ESPINACA, QUESO SABORIZADO Y PANKO CON SALSA AGRIPICANTE.", "diet": "veggie" },
-        { "name": "FRESH FUSION", "description": "QUESO CAMEMBERT Y PALTA, ENVUELTO CON ZANAHORIA, ROCOTO Y SALSA DE APIO.", "diet": "veggie" },
-        { "name": "CAMEMBERT", "description": "TOMATES CONFITADOS, ESPINACA, PALTA, QUESO CAMEMBERT Y SALSA DE MANGO.", "diet": "veggie" },
-        { "name": "SWEET TREEE", "description": "VEGETALES SALTEADOS, PALTA, CEVICHE DE PALTA Y MANGO CON MAÍZ CANCHA FRITO.", "diet": "vegan" }
+        {
+          "name": "BUENOS AIRES",
+          "description": "SALMÓN, LANGOSTINOS, PALTA, QUESO CREMA Y SALSA DE SÉSAMO."
+        },
+        {
+          "name": "CELERITY",
+          "description": "LANGOSTINOS Y PALTA, SALMÓN CON CRIOLLA DE ROCOTO Y MAYONESA DE APIO."
+        },
+        {
+          "name": "FEEL",
+          "description": "SALMÓN, QUESO CREMA Y VERDEO, ENVUELTO EN LÁMINAS DE TAMAGO."
+        },
+        {
+          "name": "SOUL",
+          "description": "PALMITO, SALMÓN, TAMAGO, RECUBIERTO CON QUESO Y ALMENDRAS CARAMELIZADAS."
+        },
+        {
+          "name": "PLACER REAL",
+          "description": "PALTA, PALMITO, QUESO CREMA, TAMAGO Y SALMÓN CON SALSA DE MARACUYÁ."
+        },
+        {
+          "name": "FUTURAMA 2",
+          "description": "LANGOSTINOS REBOZADOS, QUESO SABORIZADO, PANKO Y SALSA DE MIEL Y MOSTAZA."
+        },
+        {
+          "name": "SWEET",
+          "description": "LANGOSTINOS, TAMAGO, PALTA Y QUESO SABORIZADO, SALMÓN CON SALSA DE MANGO."
+        },
+        {
+          "name": "SPF",
+          "description": "SALMÓN, PALTA Y QUESO CREMA, CON SÉSAMO."
+        },
+        {
+          "name": "HONEY",
+          "description": "SALMÓN COCIDO SABORIZADO CON REDUCCIÓN DE MIEL Y JENGIBRE."
+        },
+        {
+          "name": "PHILADELPHIA",
+          "description": "SALMÓN Y QUESO CREMA, CON SÉSAMO."
+        },
+        {
+          "name": "TIGER",
+          "description": "LANGOSTINOS APANADOS, PALTA, SALMÓN, CROCANTE DE PAPA Y LECHE DE TIGRE."
+        },
+        {
+          "name": "MERKEN",
+          "description": "SALMÓN AHUMADO, PALTA, TATAKI DE SALMÓN CON MERKEN Y SALSA PICANTE."
+        },
+        {
+          "name": "SC EVOLUTION",
+          "description": "SALMÓN, PALTA, QUESO CREMA Y NEGUI, SALMÓN CON PANKO Y SALSA DE ANANÁ."
+        },
+        {
+          "name": "PINK FLOYD",
+          "description": "LANGOSTINO RELLENO CON PASTA DE SALMÓN, PANKO, ENVUELTO EN SALMÓN, CON SALSA THAI, LECHE DE TIGRE Y SALSA DE ANANÁ.",
+          "pieces": 3
+        },
+        {
+          "name": "BOOM!",
+          "description": "CORTES DE SALMÓN, CON QUESO CREMA SABORIZADO, CUBIERTOS DE MASA TEMPURA.",
+          "pieces": 6
+        },
+        {
+          "name": "CRISPY GREEN",
+          "description": "TOMATES CONFITADOS, ESPINACA, QUESO SABORIZADO Y PANKO CON SALSA AGRIPICANTE.",
+          "diet": "veggie"
+        },
+        {
+          "name": "FRESH FUSION",
+          "description": "QUESO CAMEMBERT Y PALTA, ENVUELTO CON ZANAHORIA, ROCOTO Y SALSA DE APIO.",
+          "diet": "veggie"
+        },
+        {
+          "name": "CAMEMBERT",
+          "description": "TOMATES CONFITADOS, ESPINACA, PALTA, QUESO CAMEMBERT Y SALSA DE MANGO.",
+          "diet": "veggie"
+        },
+        {
+          "name": "SWEET TREEE",
+          "description": "VEGETALES SALTEADOS, PALTA, CEVICHE DE PALTA Y MANGO CON MAÍZ CANCHA FRITO.",
+          "diet": "vegan"
+        }
       ]
     },
     {
@@ -33,14 +96,39 @@
       "title": "NIGUIRIS",
       "quantity": "3U",
       "items": [
-        { "name": "CRISPY WHITE", "description": "PESCADO BLANCO CON PANKO, CREMA DE PALTA Y CRIOLLA DE ROCOTO SOBRE ARROZ." },
-        { "name": "ANTICUCHERO", "description": "SALMÓN CON SALSA ANTICUCHO, FLAMEADO CON EMULSIÓN ALIMONADA SOBRE ARROZ." },
-        { "name": "FUEGO THAI", "description": "SALMÓN CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE." },
-        { "name": "LANGOSTINO FUEGO THAI", "description": "LANGOSTINO CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE." },
-        { "name": "PULPO", "description": "FINAS FETAS DE PULPO SOBRE BOCADITOS DE ARROZ." },
-        { "name": "ATÚN ROJO", "description": "FINAS FETAS DE ATÚN ROJO SOBRE BOCADITOS DE ARROZ." },
-        { "name": "SALMÓN AHUMADO", "description": "FINAS FETAS DE SALMÓN AHUMADO SOBRE BOCADITOS DE ARROZ." },
-        { "name": "PALTA THAI", "description": "CON SALSA TAILANDESA A BASE DE PASTA DE MANÍ, FLAMBEADA Y SALSA AGRIPICANTE.", "diet": "vegan" }
+        {
+          "name": "CRISPY WHITE",
+          "description": "PESCADO BLANCO CON PANKO, CREMA DE PALTA Y CRIOLLA DE ROCOTO SOBRE ARROZ."
+        },
+        {
+          "name": "ANTICUCHERO",
+          "description": "SALMÓN CON SALSA ANTICUCHO, FLAMEADO CON EMULSIÓN ALIMONADA SOBRE ARROZ."
+        },
+        {
+          "name": "FUEGO THAI",
+          "description": "SALMÓN CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE."
+        },
+        {
+          "name": "LANGOSTINO FUEGO THAI",
+          "description": "LANGOSTINO CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE."
+        },
+        {
+          "name": "PULPO",
+          "description": "FINAS FETAS DE PULPO SOBRE BOCADITOS DE ARROZ."
+        },
+        {
+          "name": "ATÚN ROJO",
+          "description": "FINAS FETAS DE ATÚN ROJO SOBRE BOCADITOS DE ARROZ."
+        },
+        {
+          "name": "SALMÓN AHUMADO",
+          "description": "FINAS FETAS DE SALMÓN AHUMADO SOBRE BOCADITOS DE ARROZ."
+        },
+        {
+          "name": "PALTA THAI",
+          "description": "CON SALSA TAILANDESA A BASE DE PASTA DE MANÍ, FLAMBEADA Y SALSA AGRIPICANTE.",
+          "diet": "vegan"
+        }
       ]
     },
     {
@@ -49,7 +137,10 @@
       "quantity": "5U",
       "items": [
         { "name": "SALMÓN", "description": "FINAS FETAS DE SALMÓN." },
-        { "name": "SALMÓN AHUMADO", "description": "FINAS FETAS DE SALMÓN AHUMADO." },
+        {
+          "name": "SALMÓN AHUMADO",
+          "description": "FINAS FETAS DE SALMÓN AHUMADO."
+        },
         { "name": "PULPO", "description": "FINAS FETAS DE PULPO." },
         { "name": "ATÚN ROJO", "description": "FINAS FETAS DE ATÚN ROJO." }
       ]
@@ -59,7 +150,10 @@
       "title": "GEISHA",
       "quantity": "4U",
       "items": [
-        { "name": "SALMÓN", "description": "QUESO CREMA Y PALTA, ENVUELTOS EN SALMÓN." }
+        {
+          "name": "SALMÓN",
+          "description": "QUESO CREMA Y PALTA, ENVUELTOS EN SALMÓN."
+        }
       ]
     },
     {
@@ -69,7 +163,7 @@
       "items": [
         { "name": "AGUA CON/SIN GAS LIBRE" },
         { "name": "& LIMONADA CLÁSICA LIBRE" },
-        { "name": "+ CAFÉ NESPRESSO" }
+        { "name": "+ CAFÉ NESPRESSO X PERSONA" }
       ]
     }
   ]
