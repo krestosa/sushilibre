@@ -30,6 +30,20 @@ test('menu reveal motion is prepaint-safe, one-time and viewport driven', async 
   assert.match(motion, /prefers-reduced-motion: reduce/);
 });
 
+test('booking dock enters as one complete unit', async () => {
+  const [feature, motion] = await Promise.all([
+    readSource('src/ts/dock-reveal.ts'),
+    readSource('src/scss/_motion.scss')
+  ]);
+
+  assert.match(motion, /\.booking-dock\s*\{[\s\S]*?animation: stage-dock-in/);
+  assert.match(feature, /dock\.animate/);
+  assert.doesNotMatch(feature, /queryAll/);
+  assert.doesNotMatch(feature, /booking-dock__meta|countdown__unit|booking-dock__cta > span/);
+  assert.doesNotMatch(feature, /revealDockContent|stagger/);
+  assert.doesNotMatch(feature, /element\.style\.opacity\s*=\s*['"]0['"]/);
+});
+
 test('piece viewer separates loading, ready and error states', async () => {
   const [feature, styles, generator] = await Promise.all([
     readSource('src/ts/features/piece-viewer.ts'),
@@ -101,6 +115,7 @@ test('compiled distribution contains synchronized animation and popup hooks', as
   assert.match(script, /is-closing/);
   assert.match(script, /data-piece-viewer-status-text/);
   assert.match(script, /piece-viewer-scroll-offset/);
+  assert.doesNotMatch(script, /revealDockContent|booking-dock__meta.*opacity/);
   assert.match(styles, /html\.has-menu-reveal \.menu-reveal/);
   assert.match(styles, /@keyframes menu-reveal-in/);
   assert.match(styles, /@keyframes piece-viewer-loader/);
