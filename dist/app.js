@@ -229,19 +229,75 @@
   var ERROR_MESSAGE = "IMAGEN NO DISPONIBLE";
   var CLOSE_FALLBACK_MS = 320;
   var REDUCED_CLOSE_FALLBACK_MS = 170;
+  var SCROLL_KEYS = /* @__PURE__ */ new Set([
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "End",
+    "Home",
+    "PageDown",
+    "PageUp",
+    " ",
+    "Spacebar"
+  ]);
+  var isInteractiveTarget = (target2) => target2 instanceof Element && Boolean(target2.closest(
+    'a[href], button, input, textarea, select, [contenteditable="true"]'
+  ));
   var setupPieceViewer = () => {
+    const root = document.documentElement;
+    const page = query(".page");
     const dialog = query("[data-piece-viewer]");
     const image = query("[data-piece-viewer-image]", dialog ?? void 0);
     const status = query("[data-piece-viewer-status]", dialog ?? void 0);
     const statusText = query("[data-piece-viewer-status-text]", dialog ?? void 0);
     const closeButton = query("[data-piece-viewer-close]", dialog ?? void 0);
     const openButtons = queryAll("[data-piece-viewer-open]");
-    if (!dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
+    if (!page || !dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
     const reducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)");
     let activeButton = null;
     let closeTimer = 0;
     let openFrame = 0;
     let imageFrame = 0;
+    let lockedScrollY = 0;
+    let backgroundLocked = false;
+    const preventBackgroundScroll = (event) => {
+      if (event.cancelable) event.preventDefault();
+    };
+    const preventBackgroundScrollKey = (event) => {
+      if (!SCROLL_KEYS.has(event.key) || isInteractiveTarget(event.target)) return;
+      event.preventDefault();
+    };
+    const lockBackground = () => {
+      if (backgroundLocked) return;
+      lockedScrollY = window.scrollY;
+      const documentHeight = Math.max(
+        root.scrollHeight,
+        document.body.scrollHeight,
+        window.innerHeight
+      );
+      root.style.setProperty("--piece-viewer-scroll-offset", `${-lockedScrollY}px`);
+      root.style.setProperty("--piece-viewer-document-height", `${documentHeight}px`);
+      root.classList.add("has-piece-viewer");
+      window.addEventListener("wheel", preventBackgroundScroll, { passive: false });
+      window.addEventListener("touchmove", preventBackgroundScroll, { passive: false });
+      document.addEventListener("keydown", preventBackgroundScrollKey, true);
+      backgroundLocked = true;
+    };
+    const unlockBackground = () => {
+      if (!backgroundLocked) return;
+      window.removeEventListener("wheel", preventBackgroundScroll);
+      window.removeEventListener("touchmove", preventBackgroundScroll);
+      document.removeEventListener("keydown", preventBackgroundScrollKey, true);
+      const previousScrollBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = "auto";
+      root.classList.remove("has-piece-viewer");
+      root.style.removeProperty("--piece-viewer-scroll-offset");
+      root.style.removeProperty("--piece-viewer-document-height");
+      window.scrollTo(0, lockedScrollY);
+      root.style.scrollBehavior = previousScrollBehavior;
+      backgroundLocked = false;
+    };
     const setLoadingState = () => {
       if (imageFrame) window.cancelAnimationFrame(imageFrame);
       dialog.dataset.state = "loading";
@@ -285,7 +341,7 @@
     };
     const cleanup = () => {
       clearMotionSchedules();
-      document.documentElement.classList.remove("has-piece-viewer");
+      unlockBackground();
       dialog.classList.remove("is-open", "is-closing");
       dialog.setAttribute("aria-label", "Vista de pieza");
       image.removeAttribute("src");
@@ -332,7 +388,7 @@
       dialog.setAttribute("aria-label", `Imagen de ${name}`);
       image.alt = name;
       setLoadingState();
-      document.documentElement.classList.add("has-piece-viewer");
+      lockBackground();
       dialog.classList.remove("is-open", "is-closing");
       openDialog();
       image.removeAttribute("src");
