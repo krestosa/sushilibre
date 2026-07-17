@@ -185,8 +185,8 @@ const findBalancedLayout = (
       return;
     }
 
-    const minimumWordsForRemainingLines = remainingLines * minimumWordsPerLine;
-    const maximumEnd = words.length - minimumWordsForRemainingLines;
+    const minimumWordsForFollowingLines = (remainingLines - 1) * minimumWordsPerLine;
+    const maximumEnd = words.length - minimumWordsForFollowingLines;
 
     for (let end = start + minimumWordsPerLine; end <= maximumEnd; end += 1) {
       const lineWords = words.slice(start, end);
