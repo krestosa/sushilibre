@@ -30,7 +30,10 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Type-check TypeScript
-        run: npm run typecheck
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run typecheck -- --pretty false 2>&1 | tee typecheck.log
 
       - name: Compile Sass and TypeScript
         run: npm run build
@@ -52,12 +55,13 @@ jobs:
           path: dist
           if-no-files-found: error
 
-      - name: Upload browser diagnostics
+      - name: Upload diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-diagnostics
+          name: build-diagnostics
           path: |
+            typecheck.log
             playwright-report
             test-results
           if-no-files-found: ignore
