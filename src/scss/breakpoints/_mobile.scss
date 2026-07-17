@@ -227,7 +227,8 @@
 
 @media (max-width: 620px) {
   .hero {
-    min-height: 820px;
+    height: 100svh;
+    min-height: 640px;
   }
 
   .hero__video {
@@ -261,7 +262,7 @@
   }
 
   .title-lockup {
-    top: 18.5%;
+    top: clamp(124px, 35vw, 150px);
     width: calc(100% - 32px);
     grid-template-columns: repeat(12, minmax(0, 1fr));
     grid-template-rows: auto auto auto;
@@ -293,7 +294,8 @@
   }
 
   .hero-copy {
-    top: 66%;
+    top: auto;
+    bottom: calc(var(--dock-height) + var(--dock-bottom) + 22px);
     width: 88vw;
 
     h2 {
