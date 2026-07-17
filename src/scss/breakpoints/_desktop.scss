@@ -56,17 +56,37 @@
 .hero__gradient {
   z-index: -2;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0) 72%, rgba(0, 0, 0, 0.16) 78%, rgba(0, 0, 0, 0.52) 88%, rgba(0, 0, 0, 0.88) 96%, #000 100%),
-    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.93) 16%, rgba(0, 0, 0, 0.59) 39%, rgba(0, 0, 0, 0.2) 58%, rgba(0, 0, 0, 0) 69.5%);
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0) 72%,
+      rgba(0, 0, 0, 0.16) 78%,
+      rgba(0, 0, 0, 0.52) 88%,
+      rgba(0, 0, 0, 0.88) 96%,
+      #000 100%
+    ),
+    linear-gradient(
+      180deg,
+      #000 0%,
+      rgba(0, 0, 0, 0.93) 16%,
+      rgba(0, 0, 0, 0.59) 39%,
+      rgba(0, 0, 0, 0.2) 58%,
+      rgba(0, 0, 0, 0) 69.5%
+    );
 }
 
 .hero__grain {
   z-index: 8;
   opacity: 0.12;
   background-image:
-    radial-gradient(circle, rgba(255, 255, 255, 0.11) 0 0.42px, transparent 0.56px),
+    radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.11) 0 0.42px,
+      transparent 0.56px
+    ),
     radial-gradient(circle, rgba(0, 0, 0, 0.18) 0 0.42px, transparent 0.58px);
-  background-position: 0 0, 1.5px 1.5px;
+  background-position:
+    0 0,
+    1.5px 1.5px;
   background-size: 3px 3px;
   mix-blend-mode: soft-light;
 }
@@ -143,7 +163,9 @@
   font-weight: 500;
   line-height: 0.78;
   letter-spacing: -0.075em;
-  text-shadow: 0 0 3px rgba(255, 255, 255, 0.64), 0 0 18px rgba(255, 255, 255, 0.18);
+  text-shadow:
+    0 0 3px rgba(255, 255, 255, 0.64),
+    0 0 18px rgba(255, 255, 255, 0.18);
 }
 
 .title-word--sushi {
@@ -205,7 +227,10 @@
   height: var(--dock-height);
   margin: 0 auto calc(-1 * var(--dock-height));
   display: grid;
-  grid-template-columns: minmax(158px, 1.16fr) minmax(150px, 1.08fr) minmax(0, 2.55fr) 108px;
+  grid-template-columns: minmax(158px, 1.16fr) minmax(150px, 1.08fr) minmax(
+      0,
+      2.55fr
+    ) 108px;
   align-items: stretch;
   gap: 9px;
   padding: 9px;
@@ -275,17 +300,36 @@
 
   &::before {
     background:
-      linear-gradient(180deg, #000 0%, #000 6%, rgba(0, 0, 0, 0.97) 13%, rgba(0, 0, 0, 0.82) 25%, rgba(0, 0, 0, 0.48) 39%, rgba(0, 0, 0, 0.12) 54%),
-      linear-gradient(90deg, rgba(0, 0, 0, 0.86) 0%, rgba(0, 0, 0, 0.58) 47%, rgba(0, 0, 0, 0.76) 100%),
+      linear-gradient(
+        180deg,
+        #000 0%,
+        #000 6%,
+        rgba(0, 0, 0, 0.97) 13%,
+        rgba(0, 0, 0, 0.82) 25%,
+        rgba(0, 0, 0, 0.48) 39%,
+        rgba(0, 0, 0, 0.12) 54%
+      ),
+      linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.86) 0%,
+        rgba(0, 0, 0, 0.58) 47%,
+        rgba(0, 0, 0, 0.76) 100%
+      ),
       rgba(0, 0, 0, 0.34);
   }
 
   &::after {
     opacity: 0.12;
     background-image:
-      radial-gradient(circle, rgba(255, 255, 255, 0.1) 0 0.42px, transparent 0.56px),
+      radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.1) 0 0.42px,
+        transparent 0.56px
+      ),
       radial-gradient(circle, rgba(0, 0, 0, 0.18) 0 0.42px, transparent 0.58px);
-    background-position: 0 0, 1.5px 1.5px;
+    background-position:
+      0 0,
+      1.5px 1.5px;
     background-size: 3px 3px;
     mix-blend-mode: soft-light;
   }
@@ -300,7 +344,6 @@
 }
 
 .menu-section__intro {
-  min-height: 35vh;
   display: flex;
   align-items: flex-start;
 
@@ -312,7 +355,9 @@
     line-height: 0.84;
     letter-spacing: -0.065em;
     text-transform: uppercase;
-    text-shadow: 0 0 3px rgba(255, 255, 255, 0.58), 0 0 18px rgba(255, 255, 255, 0.15);
+    text-shadow:
+      0 0 3px rgba(255, 255, 255, 0.58),
+      0 0 18px rgba(255, 255, 255, 0.15);
   }
 }
 
@@ -346,7 +391,9 @@
   margin: 0;
   opacity: 0.36;
   transform: translate3d(0, 12px, 0);
-  transition: opacity 260ms ease-out, transform 320ms var(--ease-out);
+  transition:
+    opacity 260ms ease-out,
+    transform 320ms var(--ease-out);
 }
 
 .menu-group__title-line {
@@ -363,7 +410,9 @@
   line-height: 0.78;
   letter-spacing: -0.072em;
   text-transform: uppercase;
-  text-shadow: 0 0 3px rgba(255, 255, 255, 0.55), 0 0 15px rgba(255, 255, 255, 0.13);
+  text-shadow:
+    0 0 3px rgba(255, 255, 255, 0.55),
+    0 0 15px rgba(255, 255, 255, 0.13);
 }
 
 .menu-group__quantity {

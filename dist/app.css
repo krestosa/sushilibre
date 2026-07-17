@@ -704,7 +704,6 @@ html.has-piece-viewer {
 }
 
 .menu-section__intro {
-  min-height: 35vh;
   display: flex;
   align-items: flex-start;
 }
@@ -912,9 +911,6 @@ html.has-piece-viewer {
     width: min(870px, 100vw - 32px);
     grid-template-columns: 1fr 1fr 2.4fr 104px;
   }
-  .menu-section__intro {
-    min-height: 16vh;
-  }
   .menu-group {
     min-height: max(52vh, 18vh + var(--menu-item-count, 1) * 11.5vh);
     padding: 5vh 0 7vh;
@@ -1111,9 +1107,6 @@ html.has-piece-viewer {
     width: calc(100% - 32px);
     padding-top: 17vh;
     padding-bottom: calc(var(--dock-height) + 20vh);
-  }
-  .menu-section__intro {
-    min-height: 28vh;
   }
   .menu-section__intro h2 {
     font-size: clamp(38px, 12vw, 54px);

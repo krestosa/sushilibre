@@ -25,10 +25,6 @@
     grid-template-columns: 1fr 1fr 2.4fr 104px;
   }
 
-  .menu-section__intro {
-    min-height: 16vh;
-  }
-
   .menu-group {
     min-height: max(52vh, calc(18vh + var(--menu-item-count, 1) * 11.5vh));
     padding: 5vh 0 7vh;

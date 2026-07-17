@@ -16,7 +16,10 @@
     left: max(12px, env(safe-area-inset-left, 0px));
     width: auto;
     margin: 0;
-    grid-template-columns: minmax(0, 1.28fr) minmax(0, 1.05fr) minmax(0, 0.72fr) 96px;
+    grid-template-columns: minmax(0, 1.28fr) minmax(0, 1.05fr) minmax(
+        0,
+        0.72fr
+      ) 96px;
     grid-template-rows: 48px 96px;
     gap: 8px;
     padding: 8px;
@@ -73,7 +76,15 @@
 
     &::before {
       background:
-        linear-gradient(180deg, #000 0%, #000 7%, rgba(0, 0, 0, 0.98) 15%, rgba(0, 0, 0, 0.86) 28%, rgba(0, 0, 0, 0.58) 43%, rgba(0, 0, 0, 0.18) 58%),
+        linear-gradient(
+          180deg,
+          #000 0%,
+          #000 7%,
+          rgba(0, 0, 0, 0.98) 15%,
+          rgba(0, 0, 0, 0.86) 28%,
+          rgba(0, 0, 0, 0.58) 43%,
+          rgba(0, 0, 0, 0.18) 58%
+        ),
         rgba(0, 0, 0, 0.68);
     }
   }
@@ -85,8 +96,6 @@
   }
 
   .menu-section__intro {
-    min-height: 28vh;
-
     h2 {
       font-size: clamp(38px, 12vw, 54px);
     }
@@ -133,7 +142,14 @@
       left: -16px;
       opacity: 0;
       pointer-events: none;
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0.97) 0%, rgba(0, 0, 0, 0.93) 48%, rgba(0, 0, 0, 0.72) 68%, rgba(0, 0, 0, 0.34) 84%, rgba(0, 0, 0, 0) 100%);
+      background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.97) 0%,
+        rgba(0, 0, 0, 0.93) 48%,
+        rgba(0, 0, 0, 0.72) 68%,
+        rgba(0, 0, 0, 0.34) 84%,
+        rgba(0, 0, 0, 0) 100%
+      );
       transition: opacity 170ms ease-out;
     }
 
