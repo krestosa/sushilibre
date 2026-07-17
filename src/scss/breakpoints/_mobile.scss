@@ -262,7 +262,7 @@
   }
 
   .title-lockup {
-    top: clamp(124px, 35vw, 150px);
+    top: clamp(124px, 47vw, 170px);
     width: calc(100% - 32px);
     grid-template-columns: repeat(12, minmax(0, 1fr));
     grid-template-rows: auto auto auto;
@@ -282,7 +282,7 @@
     grid-column: 4 / span 9;
     grid-row: 2;
     align-self: auto;
-    justify-self: end;
+    justify-self: start;
     margin: 0;
     font-size: 4.55vw;
   }
@@ -295,7 +295,7 @@
 
   .hero-copy {
     top: auto;
-    bottom: calc(var(--dock-height) + var(--dock-bottom) + 80px);
+    bottom: calc(var(--dock-height) + var(--dock-bottom) + 150px);
     text-align: left;
     width: 88vw;
 
