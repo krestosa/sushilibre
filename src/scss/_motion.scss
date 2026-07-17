@@ -42,7 +42,7 @@ html.hero-intro-complete {
 
 @media (prefers-reduced-motion: no-preference) {
   .booking-dock__cta::before {
-    animation: cta-sheen 5.9s ease-in-out 2.35s infinite;
+    animation: cta-sheen 8.8s ease-in-out 1.5s infinite;
   }
 
   .hero__video-stack {
@@ -210,27 +210,24 @@ html.hero-intro-complete {
 }
 
 @keyframes cta-sheen {
-  0% {
-    left: -92%;
+  0%,
+  10% {
+    left: -104%;
     opacity: 0;
   }
 
-  3% {
-    opacity: 0;
+  16% {
+    opacity: 0.82;
   }
 
-  7% {
-    opacity: 0.68;
+  34% {
+    left: 152%;
+    opacity: 0.58;
   }
 
-  22% {
-    left: 138%;
-    opacity: 0.46;
-  }
-
-  28%,
+  42%,
   100% {
-    left: 138%;
+    left: 152%;
     opacity: 0;
   }
 }
