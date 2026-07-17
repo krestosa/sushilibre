@@ -634,66 +634,6 @@
     window.requestAnimationFrame(prioritizeWhenNeeded);
   }
 
-  // src/ts/menu/types.ts
-  var isRecord = (value) => typeof value === "object" && value !== null;
-  var isMenuItem = (value) => {
-    if (!isRecord(value) || typeof value.name !== "string") return false;
-    if (value.description !== void 0 && typeof value.description !== "string") return false;
-    if (value.pieces !== void 0 && typeof value.pieces !== "number") return false;
-    if (value.diet !== void 0 && value.diet !== "veggie" && value.diet !== "vegan") return false;
-    return true;
-  };
-  var isMenuSection = (value) => isRecord(value) && typeof value.id === "string" && typeof value.title === "string" && typeof value.quantity === "string" && Array.isArray(value.items) && value.items.every(isMenuItem);
-  var isMenuData = (value) => isRecord(value) && typeof value.title === "string" && (value.background === void 0 || typeof value.background === "string") && Array.isArray(value.sections) && value.sections.every(isMenuSection);
-
-  // src/ts/menu/data.ts
-  var readEmbeddedData = () => {
-    const embeddedData = query("#menu-data");
-    if (!embeddedData?.textContent) return null;
-    try {
-      const parsed = JSON.parse(embeddedData.textContent);
-      return isMenuData(parsed) ? parsed : null;
-    } catch (error) {
-      console.error("Embedded menu JSON is invalid.", error);
-      return null;
-    }
-  };
-  var loadMenuData = async () => {
-    const fallback = readEmbeddedData();
-    const canRequestFile = ["http:", "https:"].includes(window.location.protocol);
-    if (!canRequestFile || typeof window.fetch !== "function") {
-      if (fallback) return fallback;
-      throw new Error("No menu data source is available.");
-    }
-    try {
-      const response = await window.fetch("menu.json", { cache: "no-cache" });
-      if (!response.ok) throw new Error(`Menu request failed with ${response.status}.`);
-      const parsed = await response.json();
-      if (!isMenuData(parsed)) throw new TypeError("Invalid menu data.");
-      return parsed;
-    } catch (error) {
-      if (fallback) return fallback;
-      throw error;
-    }
-  };
-  var setMenuBackground = (menuRoot2, requestedPath) => {
-    const candidates = Array.from(new Set(
-      [requestedPath, "assets/menu_bg.png", "menu_bg.png"].filter((value) => Boolean(value))
-    ));
-    const tryCandidate = (index) => {
-      const path = candidates[index];
-      if (!path) return;
-      const image = new Image();
-      image.onload = () => {
-        const safePath = path.replace(/["\\]/g, "\\$&");
-        menuRoot2.style.setProperty("--menu-background-image", `url("${safePath}")`);
-      };
-      image.onerror = () => tryCandidate(index + 1);
-      image.src = path;
-    };
-    tryCandidate(0);
-  };
-
   // src/ts/menu/observers.ts
   var configureMobileOverlapShadows = (groups) => {
     const mobileQuery2 = window.matchMedia("(max-width: 720px)");
@@ -769,90 +709,6 @@
       threshold: [0, 0.12, 0.25, 0.4, 0.6, 0.8]
     });
     groups.forEach((group) => observer.observe(group));
-  };
-
-  // src/ts/menu/render.ts
-  var createTextElement = (tag, className, value) => {
-    const element = document.createElement(tag);
-    element.className = className;
-    element.textContent = value;
-    return element;
-  };
-  var keepLastTwoWordsTogether = (value) => {
-    const normalized = value.trim();
-    return normalized.replace(/\s+(\S+)$/, "\xA0$1");
-  };
-  var parseSectionPieces = (quantity) => {
-    const value = Number.parseInt(quantity, 10);
-    return Number.isFinite(value) ? value : null;
-  };
-  var createBadge = (label, modifier) => createTextElement("span", `menu-item__badge menu-item__badge--${modifier}`, label);
-  var renderItem = (entry, sectionPieces) => {
-    const item = document.createElement("article");
-    item.className = `menu-item${entry.description ? "" : " menu-item--simple"}`;
-    const itemHeader = document.createElement("div");
-    itemHeader.className = "menu-item__header";
-    itemHeader.append(createTextElement("h4", "menu-item__name", entry.name));
-    const badges = document.createElement("div");
-    badges.className = "menu-item__badges";
-    if (entry.diet === "veggie" || entry.diet === "vegan") {
-      badges.append(createBadge(entry.diet, "diet"));
-    }
-    const itemPieces = Number(entry.pieces);
-    if (Number.isFinite(itemPieces) && itemPieces > 0 && itemPieces !== sectionPieces) {
-      badges.append(createBadge(`${itemPieces}U`, "pieces"));
-    }
-    if (badges.childElementCount) itemHeader.append(badges);
-    item.append(itemHeader);
-    if (entry.description) {
-      const description = createTextElement(
-        "p",
-        "menu-item__description",
-        keepLastTwoWordsTogether(entry.description)
-      );
-      description.dataset.balanceText = entry.description;
-      item.append(description);
-    }
-    return item;
-  };
-  var renderMenu = (data, elements) => {
-    elements.heading.textContent = data.title;
-    setMenuBackground(elements.root, data.background);
-    elements.groups.replaceChildren();
-    const fragment = document.createDocumentFragment();
-    data.sections.forEach((section, sectionIndex) => {
-      const sectionPieces = parseSectionPieces(section.quantity);
-      const group = document.createElement("article");
-      const groupId = section.id || String(sectionIndex + 1);
-      group.className = "menu-group";
-      group.id = `menu-${groupId}`;
-      group.dataset.menuGroup = groupId;
-      group.dataset.itemCount = String(section.items.length);
-      group.style.setProperty("--menu-item-count", String(Math.max(1, section.items.length)));
-      const heading = document.createElement("h3");
-      heading.className = "menu-group__heading";
-      const titleLine = document.createElement("span");
-      titleLine.className = "menu-group__title-line";
-      titleLine.append(createTextElement("span", "menu-group__title", section.title));
-      if (section.quantity) {
-        titleLine.append(createTextElement("span", "menu-group__quantity", section.quantity));
-      }
-      heading.append(titleLine);
-      const items = document.createElement("div");
-      items.className = "menu-group__items";
-      const sentinel = document.createElement("span");
-      sentinel.className = "menu-group__overlap-sentinel";
-      sentinel.setAttribute("aria-hidden", "true");
-      items.append(sentinel);
-      section.items.forEach((entry) => {
-        items.append(renderItem(entry, sectionPieces));
-      });
-      group.append(heading, items);
-      fragment.append(group);
-    });
-    elements.groups.append(fragment);
-    elements.status.hidden = true;
-    return queryAll("[data-menu-group]", elements.groups);
   };
 
   // src/ts/menu/typography.ts
@@ -1195,25 +1051,14 @@
 
   // src/ts/menu-bootstrap.ts
   var menuRoot = query("[data-menu-root]");
-  var menuHeading = query("[data-menu-heading]");
   var menuGroups = query("[data-menu-groups]");
-  var menuStatus = query("[data-menu-status]");
-  if (menuRoot && menuHeading && menuGroups && menuStatus) {
-    void loadMenuData().then((data) => {
-      const groups = renderMenu(data, {
-        root: menuRoot,
-        heading: menuHeading,
-        groups: menuGroups,
-        status: menuStatus
-      });
-      if (!groups.length) return;
+  if (menuRoot && menuGroups) {
+    const groups = queryAll("[data-menu-group]", menuGroups);
+    if (groups.length) {
       observeBalancedMenuDescriptions(menuGroups);
       configureMobileOverlapShadows(groups);
       observeActiveMenuGroup(menuRoot, groups);
-    }).catch((error) => {
-      menuStatus.textContent = "NO SE PUDO CARGAR EL MEN\xDA.";
-      console.error(error);
-    });
+    }
   }
 
   // src/ts/menu-motion.ts
@@ -1224,11 +1069,10 @@
   var menuIntroHeading = query(".menu-section__intro h2");
   if (menuGroups2) {
     query(".menu-mobile-sticky")?.remove();
-    let contentObserver = null;
     let revealObserver = null;
     let exitObservers = [];
     let resizeFrame = 0;
-    const getGroups = () => queryAll("[data-menu-group]", menuGroups2);
+    const groups = queryAll("[data-menu-group]", menuGroups2);
     const animateOnce = (element, keyframes, options) => {
       const animation = element.animate(keyframes, {
         fill: "both",
@@ -1240,7 +1084,7 @@
         animation.cancel();
       }, { once: true });
     };
-    const setupScrollReveals = (groups) => {
+    const setupScrollReveals = () => {
       revealObserver?.disconnect();
       revealObserver = null;
       if (!("IntersectionObserver" in window)) return;
@@ -1292,26 +1136,20 @@
       });
       candidates.forEach(({ element }) => revealObserver?.observe(element));
     };
-    const disconnectExitObservers = (groups) => {
+    const disconnectExitObservers = () => {
       exitObservers.forEach((observer) => observer.disconnect());
       exitObservers = [];
       groups.forEach((group) => {
         query(".menu-group__heading", group)?.classList.remove("is-leaving");
       });
     };
-    const setupStickyExitAnimations = (groups) => {
-      disconnectExitObservers(groups);
+    const setupStickyExitAnimations = () => {
+      disconnectExitObservers();
       if (!mobileQuery.matches || !("IntersectionObserver" in window)) return;
       groups.forEach((group) => {
         const heading = query(".menu-group__heading", group);
-        if (!heading) return;
-        let sentinel = query(".menu-group__exit-sentinel", group);
-        if (!sentinel) {
-          sentinel = document.createElement("span");
-          sentinel.className = "menu-group__exit-sentinel";
-          sentinel.setAttribute("aria-hidden", "true");
-          group.append(sentinel);
-        }
+        const sentinel = query(".menu-group__exit-sentinel", group);
+        if (!heading || !sentinel) return;
         const headingHeight = Math.ceil(heading.getBoundingClientRect().height);
         const preExitBuffer = Math.max(12, Math.min(22, Math.round(window.innerHeight * 0.018)));
         const handoffLine = headingHeight + preExitBuffer;
@@ -1334,24 +1172,12 @@
       if (resizeFrame) return;
       resizeFrame = window.requestAnimationFrame(() => {
         resizeFrame = 0;
-        setupStickyExitAnimations(getGroups());
+        setupStickyExitAnimations();
       });
     };
-    const install = () => {
-      const groups = getGroups();
-      if (!groups.length) return false;
-      setupScrollReveals(groups);
-      setupStickyExitAnimations(groups);
-      return true;
-    };
-    if (!install()) {
-      contentObserver = new MutationObserver(() => {
-        if (install()) {
-          contentObserver?.disconnect();
-          contentObserver = null;
-        }
-      });
-      contentObserver.observe(menuGroups2, { childList: true, subtree: true });
+    if (groups.length) {
+      setupScrollReveals();
+      setupStickyExitAnimations();
     }
     mobileQuery.addEventListener("change", scheduleStickySetup);
     window.addEventListener("resize", scheduleStickySetup, { passive: true });
