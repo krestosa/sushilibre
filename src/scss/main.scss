@@ -6,6 +6,7 @@
 @use "components/piece-viewer";
 @use "motion";
 @use "proposal";
+@use "proposal-motion";
 
 // Herencia responsive: desktop define la base, tablet la modifica y mobile cierra la cascada.
 @use "breakpoints/desktop";
