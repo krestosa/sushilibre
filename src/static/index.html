@@ -9,7 +9,8 @@
   <script>
     (() => {
       const root = document.documentElement;
-      root.classList.add('has-menu-reveal', 'has-proposal-reveal');
+      root.classList.add('has-menu-reveal');
+      root.classList.add('has-proposal-reveal');
       window.setTimeout(() => {
         if (!root.hasAttribute('data-menu-reveal-ready')) {
           root.classList.add('menu-reveal-fallback');
