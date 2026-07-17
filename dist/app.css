@@ -1767,7 +1767,7 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
   }
   .countdown__unit span {
     margin-top: 7px;
-    font-size: 5px;
+    font-size: 9px;
   }
 }
 @media (max-width: 720px) {
