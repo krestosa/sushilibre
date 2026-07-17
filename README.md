@@ -17,8 +17,7 @@ La fuente mantenible vive en Sass y TypeScript. `dist/` es la distribución est�
 - `dist/assets/`: única ubicación de imágenes, videos y archivos gráficos.
 - `dist/assets/piezas/`: ubicación de las imágenes WebP abiertas por los botones `VER PIEZA`.
 - `dist/`: sitio estático final con HTML, CSS, JavaScript y assets; no contiene `menu.json`.
-- `tests/menu-contract.test.mjs`: valida categorías, valores, rutas de imágenes, HTML generado y ausencia de renderizado dinámico en producción.
-- `tests/style-contract.test.mjs`: validación integral de selectores y declaraciones compiladas.
+- `tests/`: contratos funcionales tolerantes al formateo del HTML y validaciones estructurales del CSS compilado.
 
 `src/scss/main.scss` carga desktop, luego tablet y finalmente mobile. No existe una capa separada de secciones: toda la estructura visual vive dentro de esos tres breakpoints. Las reglas de accesibilidad y capacidades del navegador se aplican después sin introducir breakpoints adicionales.
 
@@ -43,7 +42,7 @@ Las rutas deben comenzar con `assets/piezas/` y terminar en `.webp`. Las bebidas
 Requiere Node.js 22.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -56,13 +55,19 @@ Durante `npm run dev`:
 - cada cambio en `menu.json` regenera los elementos del menú dentro de `dist/index.html` y recarga la página;
 - los cambios de la plantilla o los assets recargan la página automáticamente.
 
-## Build estático
+## Verificación antes de subir cambios
+
+Ejecutá el mismo comando que usa GitHub Actions:
 
 ```bash
-npm run typecheck
-npm run clean
-npm run build
-npm test
+npm run verify
+```
+
+Ese comando realiza, en orden, typecheck, limpieza de archivos generados, build estático y todos los tests. Los contratos de HTML no dependen de comillas, indentación o saltos de línea, por lo que formatear la plantilla no genera falsos errores.
+
+Para revisar el sitio compilado:
+
+```bash
 npm run serve
 ```
 
@@ -72,4 +77,4 @@ npm run serve
 
 ## Integración continua
 
-`.github/workflows/build.yml` valida TypeScript, compila la distribución, verifica los contratos del menú y de estilos, publica `dist/` como artifact y actualiza los archivos estáticos versionados de `dist/`. Los assets se conservan únicamente en `dist/assets/`.
+`.github/workflows/build.yml` instala exactamente las versiones de `package-lock.json` mediante `npm ci` y ejecuta `npm run verify`. Sólo hay una ejecución por push en `refactor/sass-typescript`; los commits automáticos que contienen únicamente cambios en `dist/` no vuelven a disparar Actions.
