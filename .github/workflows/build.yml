@@ -1,4 +1,4 @@
-name: Build and validate
+name: Build, validate and deploy
 
 on:
   push:
@@ -11,6 +11,12 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
@@ -38,9 +44,33 @@ jobs:
       - name: Verify menu contract
         run: npm test
 
-      - name: Upload compiled site
+      - name: Upload compiled site artifact
         uses: actions/upload-artifact@v4
         with:
           name: sushilibre-dist
           path: dist
           if-no-files-found: error
+
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
