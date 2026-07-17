@@ -523,14 +523,6 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
   animation: none !important;
 }
 
-html.hero-intro-complete .title-word--sushi,
-html.hero-intro-complete .title-word--libre {
-  opacity: 1;
-  translate: 0 0;
-  filter: none;
-  animation: none !important;
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .booking-dock__cta::before {
     animation: cta-sheen 8.8s ease-in-out 1.5s infinite;
@@ -654,11 +646,9 @@ html.hero-intro-complete .title-word--libre {
 @keyframes stage-masthead-in {
   from {
     opacity: 0;
-    translate: 0 -8px;
   }
   to {
     opacity: 1;
-    translate: 0 0;
   }
 }
 @keyframes quiet-fade {
@@ -787,16 +777,23 @@ html.hero-intro-complete .title-word--libre {
   align-items: center;
   justify-content: center;
   gap: clamp(26px, 2.45vw, 48px);
+  min-width: 0;
 }
 
 .masthead__sushiclub {
+  display: block;
+  flex: 0 0 auto;
   width: clamp(122px, 9vw, 174px);
   height: auto;
+  aspect-ratio: 234/34;
 }
 
 .masthead__anniversary {
+  display: block;
+  flex: 0 0 auto;
   width: clamp(58px, 4.2vw, 82px);
   height: auto;
+  aspect-ratio: 147/113;
 }
 
 .masthead__reservation {
@@ -925,7 +922,7 @@ html.hero-intro-complete .title-word--libre {
   min-height: 100svh;
   background: #000;
   color: var(--white);
-  --menu-background-image: url("assets/menu_bg.png");
+  --menu-background-image: url("assets/menu_bg.webp");
 }
 
 .menu-section__background {
