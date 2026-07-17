@@ -5,7 +5,8 @@ import {
   attributeValue,
   findOpeningTag,
   findTagIndexByClass,
-  hasClass
+  hasClass,
+  visibleText
 } from './html-contract-helpers.mjs';
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
@@ -18,7 +19,7 @@ const assertCommercialContent = (html) => {
   assert.equal(attributeValue(paymentLogo, 'src'), 'assets/galicia-eminent-visa.svg');
   assert.equal(attributeValue(paymentLogo, 'width'), '245');
   assert.equal(attributeValue(paymentLogo, 'height'), '32');
-  assert.ok(html.includes(legal));
+  assert.ok(visibleText(html).includes(legal));
 };
 
 test('proposal is static, precedes the menu and includes complete commercial information', async () => {
