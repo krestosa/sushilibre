@@ -119,6 +119,22 @@ test('piece viewer separates loading, ready and error states', async () => {
   assert.match(styles, /prefers-reduced-motion: reduce/);
 });
 
+test('piece viewer loading state receives the same deterministic entrance animation', async () => {
+  const [feature, styles] = await Promise.all([
+    readSource('src/ts/features/piece-viewer.ts'),
+    readSource('src/scss/components/_piece-viewer.scss')
+  ]);
+
+  assert.match(feature, /const beginOpenAnimation/);
+  assert.match(feature, /requestAnimationFrame\([\s\S]*?getBoundingClientRect\(\)[\s\S]*?requestAnimationFrame/);
+  assert.match(feature, /classList\.add\('is-open'\);[\s\S]*?image\.src = source/);
+  assert.match(styles, /&\.is-open\s*\{[\s\S]*?animation: piece-viewer-open/);
+  assert.match(styles, /@keyframes piece-viewer-open/);
+  assert.match(styles, /@keyframes piece-viewer-backdrop-open/);
+  assert.match(styles, /@keyframes piece-viewer-loader-enter/);
+  assert.match(styles, /piece-viewer-loader 720ms linear infinite,[\s\S]*piece-viewer-loader-enter 220ms ease-out both/);
+});
+
 test('piece viewer locks scrolling without repositioning or hiding the page', async () => {
   const [feature, styles] = await Promise.all([
     readSource('src/ts/features/piece-viewer.ts'),
@@ -166,11 +182,13 @@ test('compiled distribution contains synchronized animation and popup hooks', as
   assert.match(script, /is-closing/);
   assert.match(script, /data-piece-viewer-status-text/);
   assert.match(script, /enforceLockedScroll/);
+  assert.match(script, /getBoundingClientRect/);
   assert.doesNotMatch(script, /piece-viewer-scroll-offset|piece-viewer-document-height/);
   assert.doesNotMatch(script, /revealDockContent|booking-dock__meta.*opacity/);
   assert.match(styles, /html\.has-menu-reveal \.menu-reveal/);
   assert.doesNotMatch(styles, /html\.hero-intro-complete/);
   assert.match(styles, /@keyframes menu-reveal-in/);
+  assert.match(styles, /@keyframes piece-viewer-open/);
   assert.match(styles, /@keyframes piece-viewer-loader/);
   assert.match(styles, /html\.has-piece-viewer/);
   assert.match(styles, /\.piece-viewer\.is-open/);
