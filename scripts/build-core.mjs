@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { access, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -13,6 +14,10 @@ export const stylesEntry = resolve(root, 'src/scss/main.scss');
 export const scriptsEntry = resolve(root, 'src/ts/main.ts');
 export const menuSource = resolve(root, 'menu.json');
 export const staticIndexTemplate = resolve(staticDir, 'index.html');
+
+const ASSET_VERSION_MARKER = '__ASSET_VERSION__';
+const stylesOutput = resolve(dist, 'app.css');
+const scriptsOutput = resolve(dist, 'app.js');
 
 const toBuffer = (content) => Buffer.isBuffer(content)
   ? content
@@ -53,14 +58,34 @@ export async function readMenuSource() {
   return parseMenuSource(rawMenu);
 }
 
-export async function syncStaticFiles() {
+export async function createAssetVersion() {
+  const [styles, scripts] = await Promise.all([
+    readFile(stylesOutput),
+    readFile(scriptsOutput)
+  ]);
+
+  return createHash('sha256')
+    .update(styles)
+    .update('\0')
+    .update(scripts)
+    .digest('hex')
+    .slice(0, 12);
+}
+
+export async function syncStaticFiles(assetVersion = await createAssetVersion()) {
   await mkdir(dist, { recursive: true });
 
   const [template, menu] = await Promise.all([
     readFile(staticIndexTemplate, 'utf8'),
     readMenuSource()
   ]);
-  const generatedHtml = renderStaticHtml(template, menu);
+
+  if (!template.includes(ASSET_VERSION_MARKER)) {
+    throw new Error(`Static template must contain ${ASSET_VERSION_MARKER}.`);
+  }
+
+  const versionedTemplate = template.replaceAll(ASSET_VERSION_MARKER, assetVersion);
+  const generatedHtml = renderStaticHtml(versionedTemplate, menu);
 
   const [htmlChanged, noJekyllChanged, staleMenuRemoved] = await Promise.all([
     writeFileIfChanged(resolve(dist, 'index.html'), generatedHtml),
@@ -78,14 +103,14 @@ export async function compileStyles() {
     sourceMap: false
   });
 
-  return writeFileIfChanged(resolve(dist, 'app.css'), stylesheet.css);
+  return writeFileIfChanged(stylesOutput, stylesheet.css);
 }
 
 export async function bundleScripts() {
   const result = await esbuild.build({
     absWorkingDir: root,
     entryPoints: [scriptsEntry],
-    outfile: resolve(dist, 'app.js'),
+    outfile: scriptsOutput,
     bundle: true,
     format: 'iife',
     platform: 'browser',
@@ -102,18 +127,19 @@ export async function bundleScripts() {
     throw new Error('esbuild did not produce app.js.');
   }
 
-  return writeFileIfChanged(resolve(dist, 'app.js'), output.contents);
+  return writeFileIfChanged(scriptsOutput, output.contents);
 }
 
 export async function buildAll() {
   await mkdir(dist, { recursive: true });
   await assertAssets();
 
-  const [staticChanged, stylesChanged, scriptsChanged] = await Promise.all([
-    syncStaticFiles(),
+  const [stylesChanged, scriptsChanged] = await Promise.all([
     compileStyles(),
     bundleScripts()
   ]);
+  const assetVersion = await createAssetVersion();
+  const staticChanged = await syncStaticFiles(assetVersion);
 
   return {
     staticChanged,
