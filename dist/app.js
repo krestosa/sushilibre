@@ -474,6 +474,20 @@
         reducedMotion2.matches ? REDUCED_CLOSE_FALLBACK_MS : CLOSE_FALLBACK_MS
       );
     };
+    const beginOpenAnimation = (source) => {
+      openFrame = window.requestAnimationFrame(() => {
+        openFrame = 0;
+        if (!dialog.open || dialog.classList.contains("is-closing")) return;
+        void dialog.getBoundingClientRect();
+        openFrame = window.requestAnimationFrame(() => {
+          openFrame = 0;
+          if (!dialog.open || dialog.classList.contains("is-closing")) return;
+          dialog.classList.add("is-open");
+          image.src = source;
+          enforceLockedScroll();
+        });
+      });
+    };
     const openPiece = (button) => {
       const name = button.dataset.pieceName?.trim();
       const source = button.dataset.pieceImage?.trim();
@@ -482,17 +496,12 @@
       activeButton = button;
       dialog.setAttribute("aria-label", `Imagen de ${name}`);
       image.alt = name;
+      image.removeAttribute("src");
       setLoadingState();
       lockBackground();
       dialog.classList.remove("is-open", "is-closing");
       openDialog();
-      image.removeAttribute("src");
-      openFrame = window.requestAnimationFrame(() => {
-        openFrame = 0;
-        dialog.classList.add("is-open");
-        image.src = source;
-        enforceLockedScroll();
-      });
+      beginOpenAnimation(source);
     };
     openButtons.forEach((button) => {
       button.addEventListener("click", () => openPiece(button));
