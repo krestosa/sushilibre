@@ -1,0 +1,198 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 100svh;
+  min-height: 720px;
+  overflow: hidden;
+  background: #000;
+}
+
+.hero__video,
+.hero__black-filter,
+.hero__gradient,
+.hero__grain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hero__video-stack {
+  position: absolute;
+  z-index: -4;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  contain: paint;
+}
+
+.hero__video {
+  z-index: 0;
+  object-fit: cover;
+  object-position: 50% 50%;
+  opacity: 0;
+  transition: opacity var(--video-mix-duration) linear;
+  will-change: opacity;
+
+  &.is-active {
+    z-index: 1;
+    opacity: 1;
+  }
+
+  &.is-mixing-in {
+    z-index: 2;
+  }
+}
+
+.hero__black-filter {
+  z-index: -3;
+  background: rgba(0, 0, 0, 0.43);
+}
+
+.hero__gradient {
+  z-index: -2;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 72%, rgba(0, 0, 0, 0.16) 78%, rgba(0, 0, 0, 0.52) 88%, rgba(0, 0, 0, 0.88) 96%, #000 100%),
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.93) 16%, rgba(0, 0, 0, 0.59) 39%, rgba(0, 0, 0, 0.2) 58%, rgba(0, 0, 0, 0) 69.5%);
+}
+
+.hero__grain {
+  z-index: 8;
+  opacity: 0.12;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.11) 0 0.42px, transparent 0.56px),
+    radial-gradient(circle, rgba(0, 0, 0, 0.18) 0 0.42px, transparent 0.58px);
+  background-position: 0 0, 1.5px 1.5px;
+  background-size: 3px 3px;
+  mix-blend-mode: soft-light;
+}
+
+.masthead,
+.title-lockup {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  column-gap: var(--grid-gap);
+}
+
+.masthead {
+  top: clamp(27px, 3.35vh, 41px);
+  left: var(--page-x);
+  right: var(--page-x);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+  text-transform: uppercase;
+  font-size: clamp(10px, 0.72vw, 14px);
+  font-weight: 650;
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+
+  p {
+    margin: 0;
+  }
+}
+
+.masthead__venue {
+  grid-column: 1 / span 2;
+}
+
+.masthead__brands {
+  grid-column: 5 / span 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(26px, 2.45vw, 48px);
+}
+
+.masthead__sushiclub {
+  width: clamp(122px, 9vw, 174px);
+  height: auto;
+}
+
+.masthead__anniversary {
+  width: clamp(58px, 4.2vw, 82px);
+  height: auto;
+}
+
+.masthead__reservation {
+  grid-column: 11 / span 2;
+  justify-self: end;
+  text-align: right;
+}
+
+.title-lockup {
+  top: 39.8%;
+  left: 50%;
+  right: auto;
+  width: min(1600px, 83.333vw);
+  transform: translateX(-50%);
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  column-gap: clamp(24px, 2.15vw, 44px);
+  align-items: center;
+  white-space: nowrap;
+}
+
+.title-word {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(108px, 10.55vw, 204px);
+  font-weight: 500;
+  line-height: 0.78;
+  letter-spacing: -0.075em;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.64), 0 0 18px rgba(255, 255, 255, 0.18);
+}
+
+.title-word--sushi {
+  grid-column: 1;
+  justify-self: start;
+  margin-left: -0.035em;
+}
+
+.title-kicker {
+  grid-column: 2;
+  justify-self: center;
+  margin: 0.06em 0 0;
+  font-size: clamp(18px, 1.58vw, 31px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.052em;
+  text-align: center;
+}
+
+.title-word--libre {
+  grid-column: 3;
+  justify-self: end;
+  margin-right: -0.02em;
+}
+
+.hero-copy {
+  position: absolute;
+  z-index: 3;
+  top: 65.3%;
+  left: 50%;
+  width: min(790px, 66vw);
+  transform: translateX(-50%);
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 1px 9px rgba(0, 0, 0, 0.72);
+
+  h2 {
+    margin: 0;
+    font-size: clamp(14px, 0.98vw, 19px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+  }
+
+  p {
+    margin: clamp(12px, 1.2vh, 17px) 0 0;
+    font-size: clamp(10px, 1.72vw, 14px);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.018em;
+  }
+}
