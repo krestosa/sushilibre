@@ -1,6 +1,6 @@
 {
   "title": "MENÚ",
-  "background": "assets/menu_bg.png",
+  "background": "assets/menu_bg.webp",
   "sections": [
     {
       "id": "piezas",
