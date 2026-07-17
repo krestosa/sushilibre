@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import {
+  attributeValue,
+  findOpeningTag,
+  findTagIndexByClass,
+  hasClass,
+  visibleText
+} from './html-contract-helpers.mjs';
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
@@ -8,27 +15,36 @@ const PROPOSAL_COPY = 'VIVÍ UNA EXPERIENCIA DONDE EL SABOR, LA FRESCURA Y LA DE
 const PROPOSAL_LEGAL = 'BASES, CONDICIONES Y LOCALES ADHERIDOS EN SUSHICLUB.COM.AR/BENEFICIOS.';
 
 const assertProposalMarkup = (html) => {
-  const heroIndex = html.indexOf('<section class="hero"');
-  const proposalIndex = html.indexOf('<section class="proposal"');
-  const menuIndex = html.indexOf('<section class="menu-section"');
+  const heroIndex = findTagIndexByClass(html, 'section', 'hero');
+  const proposalIndex = findTagIndexByClass(html, 'section', 'proposal');
+  const menuIndex = findTagIndexByClass(html, 'section', 'menu-section');
+  const text = visibleText(html);
 
   assert.ok(heroIndex >= 0, 'hero section is missing');
   assert.ok(proposalIndex > heroIndex, 'proposal must follow the hero');
   if (menuIndex >= 0) assert.ok(menuIndex > proposalIndex, 'proposal must precede the menu');
 
-  assert.match(html, /id="propuesta"/);
-  assert.match(html, /NUESTRA PROPUESTA/);
-  assert.match(html, new RegExp(PROPOSAL_COPY));
-  assert.match(html, /INCLUYE CUBIERTO/);
-  assert.match(html, /PIEZAS ILIMITADAS/);
-  assert.match(html, /EXPERIENCIA EXCLUSIVA/);
-  assert.match(html, /110\.000/);
-  assert.match(html, /82\.500/);
+  const proposal = findOpeningTag(html, 'section', (tag) => hasClass(tag, 'proposal'));
+  assert.ok(proposal, 'proposal section is missing');
+  assert.equal(attributeValue(proposal, 'id'), 'propuesta');
+
+  assert.ok(text.includes('NUESTRA PROPUESTA'));
+  assert.ok(text.includes(PROPOSAL_COPY));
+  assert.ok(text.includes('INCLUYE CUBIERTO'));
+  assert.ok(text.includes('PIEZAS ILIMITADAS'));
+  assert.ok(text.includes('AGUA & LIMONADA LIBRE'));
+  assert.ok(text.includes('110.000'));
+  assert.ok(text.includes('82.500'));
   assert.match(html, /assets\/galicia-eminent-visa\.svg/);
-  assert.match(html, /width="245" height="32"/);
-  assert.match(html, /PIEZAS SOBRANTES/);
-  assert.match(html, /SI NO SOBRAN PIEZAS/);
-  assert.ok(html.includes(PROPOSAL_LEGAL));
+
+  const paymentLogo = findOpeningTag(html, 'img', (tag) => hasClass(tag, 'proposal__payment-logo'));
+  assert.ok(paymentLogo, 'payment logo must exist');
+  assert.equal(attributeValue(paymentLogo, 'width'), '245');
+  assert.equal(attributeValue(paymentLogo, 'height'), '32');
+
+  assert.ok(text.includes('PIEZAS SOBRANTES'));
+  assert.ok(text.includes('SI NO SOBRAN PIEZAS'));
+  assert.ok(text.includes(PROPOSAL_LEGAL));
 };
 
 test('proposal is static, semantic and placed between hero and menu', async () => {
