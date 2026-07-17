@@ -190,6 +190,24 @@ export const setupPieceViewer = (): void => {
     );
   };
 
+  const beginOpenAnimation = (source: string): void => {
+    openFrame = window.requestAnimationFrame(() => {
+      openFrame = 0;
+      if (!dialog.open || dialog.classList.contains('is-closing')) return;
+
+      // Commit one complete loading-state paint before starting the entrance.
+      void dialog.getBoundingClientRect();
+      openFrame = window.requestAnimationFrame(() => {
+        openFrame = 0;
+        if (!dialog.open || dialog.classList.contains('is-closing')) return;
+
+        dialog.classList.add('is-open');
+        image.src = source;
+        enforceLockedScroll();
+      });
+    });
+  };
+
   const openPiece = (button: HTMLButtonElement): void => {
     const name = button.dataset.pieceName?.trim();
     const source = button.dataset.pieceImage?.trim();
@@ -199,18 +217,12 @@ export const setupPieceViewer = (): void => {
     activeButton = button;
     dialog.setAttribute('aria-label', `Imagen de ${name}`);
     image.alt = name;
+    image.removeAttribute('src');
     setLoadingState();
     lockBackground();
     dialog.classList.remove('is-open', 'is-closing');
     openDialog();
-
-    image.removeAttribute('src');
-    openFrame = window.requestAnimationFrame(() => {
-      openFrame = 0;
-      dialog.classList.add('is-open');
-      image.src = source;
-      enforceLockedScroll();
-    });
+    beginOpenAnimation(source);
   };
 
   openButtons.forEach((button) => {
