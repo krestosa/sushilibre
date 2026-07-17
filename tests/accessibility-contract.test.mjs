@@ -34,6 +34,11 @@ const assertAccessibleMarkup = (html) => {
   assert.ok(externalArrow, 'external-link arrow must exist');
   assert.equal(attributeValue(externalArrow, 'aria-hidden'), 'true');
 
+  const brandLink = findOpeningTag(compact, 'a', (tag) => hasClass(tag, 'masthead__brands'));
+  assert.ok(brandLink, 'masthead brand block must be a link');
+  assert.equal(attributeValue(brandLink, 'href'), 'https://www.sushiclub.com.ar/');
+  assert.equal(attributeValue(brandLink, 'aria-label'), 'Ir al sitio de SushiClub');
+
   const sushiClubLogo = findOpeningTag(compact, 'img', (tag) => hasClass(tag, 'masthead__sushiclub'));
   assert.ok(sushiClubLogo, 'SushiClub logo must exist');
   assert.equal(attributeValue(sushiClubLogo, 'width'), '234');
