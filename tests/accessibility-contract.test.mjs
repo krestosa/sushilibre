@@ -1,26 +1,49 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import {
+  attributeValue,
+  compactHtml,
+  findOpeningTag,
+  hasAttribute,
+  hasClass,
+  openingTags
+} from './html-contract-helpers.mjs';
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 const assertAccessibleMarkup = (html) => {
-  assert.doesNotMatch(html, /<strong\b[^>]*\baria-label=/i);
-  assert.match(html, /<span class="sr-only">Puerto Madero — abrir en Google Maps<\/span>/);
-  assert.match(html, /<span class="sr-only">Jueves 30 de julio<\/span>/);
-  assert.match(
-    html,
-    /<a class="booking-dock__meta booking-dock__meta--location"[^>]*href="https:\/\/maps\.app\.goo\.gl\/N6UjNEoETLvo1ucRA"[^>]*>/i
-  );
-  assert.match(html, /<span class="booking-dock__external-arrow" aria-hidden="true">↗<\/span>/);
-  assert.match(
-    html,
-    /<img class="masthead__sushiclub"[^>]*\bwidth="234"[^>]*\bheight="34"/i
-  );
-  assert.match(
-    html,
-    /<img class="masthead__anniversary"[^>]*\bwidth="147"[^>]*\bheight="113"/i
-  );
+  const compact = compactHtml(html);
+
+  openingTags(compact, 'strong').forEach((tag) => {
+    assert.equal(attributeValue(tag, 'aria-label'), null, 'strong elements cannot carry aria-label');
+  });
+
+  assert.match(compact, /<span\b[^>]*class=["']sr-only["'][^>]*>Puerto Madero — abrir en Google Maps<\/span>/i);
+  assert.match(compact, /<span\b[^>]*class=["']sr-only["'][^>]*>Jueves 30 de julio<\/span>/i);
+
+  const locationLink = findOpeningTag(compact, 'a', (tag) => (
+    hasClass(tag, 'booking-dock__meta--location')
+    && attributeValue(tag, 'href') === 'https://maps.app.goo.gl/N6UjNEoETLvo1ucRA'
+  ));
+  assert.ok(locationLink, 'location link must exist');
+  assert.equal(attributeValue(locationLink, 'target'), '_blank');
+  assert.equal(attributeValue(locationLink, 'rel'), 'noopener noreferrer');
+
+  const externalArrow = findOpeningTag(compact, 'span', (tag) => hasClass(tag, 'booking-dock__external-arrow'));
+  assert.ok(externalArrow, 'external-link arrow must exist');
+  assert.equal(attributeValue(externalArrow, 'aria-hidden'), 'true');
+
+  const sushiClubLogo = findOpeningTag(compact, 'img', (tag) => hasClass(tag, 'masthead__sushiclub'));
+  assert.ok(sushiClubLogo, 'SushiClub logo must exist');
+  assert.equal(attributeValue(sushiClubLogo, 'width'), '234');
+  assert.equal(attributeValue(sushiClubLogo, 'height'), '34');
+
+  const anniversaryLogo = findOpeningTag(compact, 'img', (tag) => hasClass(tag, 'masthead__anniversary'));
+  assert.ok(anniversaryLogo, 'anniversary logo must exist');
+  assert.equal(attributeValue(anniversaryLogo, 'width'), '147');
+  assert.equal(attributeValue(anniversaryLogo, 'height'), '113');
+  assert.ok(hasAttribute(anniversaryLogo, 'alt'));
 };
 
 test('source and compiled markup avoid prohibited ARIA and reserve logo dimensions', async () => {
