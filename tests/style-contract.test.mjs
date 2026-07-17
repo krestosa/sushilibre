@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const EXPECTED_STYLE_HASH = '5b08d0f9d38e866223ac61e1d001bcb1c8551ad08bac5072302d1930d7e09d85';
@@ -202,6 +202,13 @@ test('compiled Sass preserves the complete declaration contract', async () => {
   const hash = createHash('sha256')
     .update(JSON.stringify(declarations))
     .digest('hex');
+
+  const diagnosticsDirectory = new URL('../build-diagnostics/', import.meta.url);
+  await mkdir(diagnosticsDirectory, { recursive: true });
+  await writeFile(
+    new URL('style-contract.json', diagnosticsDirectory),
+    `${JSON.stringify({ declarationCount: declarations.length, hash }, null, 2)}\n`
+  );
 
   assert.equal(declarations.length, EXPECTED_DECLARATION_COUNT);
   assert.equal(hash, EXPECTED_STYLE_HASH);
