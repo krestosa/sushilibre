@@ -22,7 +22,7 @@ test('mobile booking dock tracks expanded and collapsed browser chrome', async (
   assert.match(layoutSource, /setChromeTarget\(0\)/);
   assert.match(layoutSource, /position = 'fixed'/);
   assert.match(layoutSource, /--dock-effective-bottom/);
-  assert.match(compiledScript, /100svh/);
-  assert.match(compiledScript, /100lvh/);
+  assert.match(compiledScript, /createViewportProbe\("svh"\)/);
+  assert.match(compiledScript, /createViewportProbe\("lvh"\)/);
   assert.match(compiledScript, /--dock-effective-bottom/);
 });
