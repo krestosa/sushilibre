@@ -4,7 +4,8 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { parseMenuSource, renderStaticHtml } from '../scripts/menu-html.mjs';
 
-const EXPECTED_MENU_HASH = '801ef99f4b9b1a84fb42276e42db80dc7d72db54babe3473cba0fb2f5dedba5a';
+const EXPECTED_MENU_HASH = 'b95fc9f0e18df869c7e7786608fa6dc1982b47dab798f0e3e5a43b75aa68b1b7';
+const PIECE_IMAGE_PATTERN = /^assets\/piezas\/[a-z0-9_/-]+\.webp$/;
 
 const sortValue = (value) => {
   if (Array.isArray(value)) return value.map(sortValue);
@@ -30,6 +31,13 @@ const assertStaticMenuMarkup = (html) => {
   assert.equal(countMatches(html, /<article class="menu-item(?:\s|\")/g), 36);
   assert.equal(countMatches(html, /class="menu-item__description"/g), 33);
   assert.equal(countMatches(html, /class="menu-group__exit-sentinel"/g), 5);
+  assert.equal(countMatches(html, /data-piece-viewer-open/g), 33);
+  assert.equal(countMatches(html, /<dialog class="piece-viewer"/g), 1);
+  assert.equal(countMatches(html, /data-piece-viewer-image/g), 1);
+  assert.match(html, /data-piece-image="assets\/piezas\/buenos_aires\.webp"/);
+  assert.match(html, /data-piece-image="assets\/piezas\/niguiri_salmon\.webp"/);
+  assert.match(html, /data-piece-image="assets\/piezas\/sashimi_salmon\.webp"/);
+  assert.match(html, /data-piece-image="assets\/piezas\/geisha_salmon\.webp"/);
   assert.match(html, /<h4 class="menu-item__name">BUENOS AIRES<\/h4>/);
   assert.match(html, /<h4 class="menu-item__name">FUTURAMA2<\/h4>/);
   assert.match(html, /<h4 class="menu-item__name">SALMÓN<\/h4>/);
@@ -38,7 +46,7 @@ const assertStaticMenuMarkup = (html) => {
   assert.match(html, /<h4 class="menu-item__name">\+ CAFÉ NESPRESSO X PERSONA<\/h4>/);
 };
 
-test('menu values and categories remain unchanged', async () => {
+test('menu values, categories and piece image paths remain unchanged', async () => {
   const rawMenu = await readFile(new URL('../menu.json', import.meta.url), 'utf8');
   const menu = JSON.parse(rawMenu);
 
@@ -56,6 +64,18 @@ test('menu values and categories remain unchanged', async () => {
     { id: 'bebidas', title: 'BEBIDAS', quantity: '', count: 3 }
   ]);
 
+  const pieceItems = menu.sections
+    .filter(({ id }) => id !== 'bebidas')
+    .flatMap(({ items }) => items);
+  const beverages = menu.sections.find(({ id }) => id === 'bebidas');
+
+  assert.equal(pieceItems.length, 33);
+  pieceItems.forEach(({ image, name }) => {
+    assert.equal(typeof image, 'string', `${name} must define an image path`);
+    assert.match(image, PIECE_IMAGE_PATTERN);
+  });
+  beverages.items.forEach(({ image }) => assert.equal(image, undefined));
+
   const niguiris = menu.sections.find(({ id }) => id === 'niguiris');
   assert.deepEqual(niguiris.items.map(({ name }) => name), [
     'SALMÓN',
@@ -70,7 +90,7 @@ test('menu values and categories remain unchanged', async () => {
   ]);
 });
 
-test('build converts menu.json into normal HTML elements', async () => {
+test('build converts menu.json into normal HTML elements and one reusable viewer', async () => {
   const [template, rawMenu] = await Promise.all([
     readFile(new URL('../src/static/index.html', import.meta.url), 'utf8'),
     readFile(new URL('../menu.json', import.meta.url), 'utf8')
@@ -97,4 +117,5 @@ test('compiled distribution is standalone and contains no runtime menu source', 
   assert.doesNotMatch(script, /menu-data/i);
   assert.doesNotMatch(script, /loadMenuData|renderMenu|createTextElement/);
   assert.doesNotMatch(script, /document\.createElement\(["']article["']\)/);
+  assert.match(script, /data-piece-viewer/);
 });
