@@ -57,13 +57,13 @@ const renderItem = (entry: MenuItemData, sectionPieces: number | null): HTMLElem
   item.append(itemHeader);
 
   if (entry.description) {
-    item.append(
-      createTextElement(
-        'p',
-        'menu-item__description',
-        keepLastTwoWordsTogether(entry.description)
-      )
+    const description = createTextElement(
+      'p',
+      'menu-item__description',
+      keepLastTwoWordsTogether(entry.description)
     );
+    description.dataset.balanceText = entry.description;
+    item.append(description);
   }
 
   return item;
