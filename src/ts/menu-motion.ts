@@ -8,20 +8,31 @@ interface RevealCandidate {
   delay: number;
 }
 
+interface StickyExitTarget {
+  heading: HTMLElement;
+  sentinel: HTMLElement;
+}
+
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const mobileQuery = window.matchMedia('(max-width: 720px)');
 const easeOut = 'cubic-bezier(.22, 1, .36, 1)';
 const menuGroups = query<HTMLElement>('[data-menu-groups]');
 const menuIntroHeading = query<HTMLElement>('.menu-section__intro h2');
+const clamp = (value: number, minimum: number, maximum: number): number =>
+  Math.min(maximum, Math.max(minimum, value));
 
 if (menuGroups) {
   query<HTMLElement>('.menu-mobile-sticky')?.remove();
 
   let revealObserver: IntersectionObserver | null = null;
-  let exitObservers: IntersectionObserver[] = [];
-  let resizeFrame = 0;
+  let stickyExitFrame = 0;
 
   const groups = queryAll<HTMLElement>('[data-menu-group]', menuGroups);
+  const stickyExitTargets = groups.flatMap((group): StickyExitTarget[] => {
+    const heading = query<HTMLElement>('.menu-group__heading', group);
+    const sentinel = query<HTMLElement>('.menu-group__exit-sentinel', group);
+    return heading && sentinel ? [{ heading, sentinel }] : [];
+  });
 
   const animateOnce = (
     element: HTMLElement,
@@ -105,58 +116,40 @@ if (menuGroups) {
     candidates.forEach(({ element }) => revealObserver?.observe(element));
   };
 
-  const disconnectExitObservers = (): void => {
-    exitObservers.forEach((observer) => observer.disconnect());
-    exitObservers = [];
-    groups.forEach((group) => {
-      query<HTMLElement>('.menu-group__heading', group)?.classList.remove('is-leaving');
+  const updateStickyExitProgress = (): void => {
+    stickyExitFrame = 0;
+
+    stickyExitTargets.forEach(({ heading, sentinel }) => {
+      let progress = 0;
+
+      if (mobileQuery.matches) {
+        const computed = window.getComputedStyle(heading);
+        const stickyTop = Number.parseFloat(computed.top || '0') || 0;
+        const headingHeight = Math.max(1, heading.getBoundingClientRect().height);
+        const triggerLine = stickyTop + headingHeight;
+        const sentinelTop = sentinel.getBoundingClientRect().top;
+        progress = clamp((triggerLine - sentinelTop) / headingHeight, 0, 1);
+      }
+
+      heading.style.setProperty(
+        '--menu-heading-exit-offset',
+        `${(-progress * 100).toFixed(3)}%`
+      );
     });
   };
 
-  const setupStickyExitAnimations = (): void => {
-    disconnectExitObservers();
-    if (!mobileQuery.matches || !('IntersectionObserver' in window)) return;
-
-    groups.forEach((group) => {
-      const heading = query<HTMLElement>('.menu-group__heading', group);
-      const sentinel = query<HTMLElement>('.menu-group__exit-sentinel', group);
-      if (!heading || !sentinel) return;
-
-      const headingHeight = Math.ceil(heading.getBoundingClientRect().height);
-      const preExitBuffer = Math.max(12, Math.min(22, Math.round(window.innerHeight * 0.018)));
-      const handoffLine = headingHeight + preExitBuffer;
-      const bottomMargin = Math.max(0, window.innerHeight - handoffLine - 1);
-
-      const observer = new IntersectionObserver((entries) => {
-        const entry = entries[0];
-        if (!entry) return;
-        const leaving = entry.boundingClientRect.top <= handoffLine;
-        heading.classList.toggle('is-leaving', leaving);
-      }, {
-        root: null,
-        rootMargin: `-${handoffLine}px 0px -${bottomMargin}px 0px`,
-        threshold: 0
-      });
-
-      observer.observe(sentinel);
-      exitObservers.push(observer);
-    });
-  };
-
-  const scheduleStickySetup = (): void => {
-    if (resizeFrame) return;
-    resizeFrame = window.requestAnimationFrame(() => {
-      resizeFrame = 0;
-      setupStickyExitAnimations();
-    });
+  const scheduleStickyExitUpdate = (): void => {
+    if (stickyExitFrame) return;
+    stickyExitFrame = window.requestAnimationFrame(updateStickyExitProgress);
   };
 
   if (groups.length) {
     setupScrollReveals();
-    setupStickyExitAnimations();
+    scheduleStickyExitUpdate();
   }
 
-  mobileQuery.addEventListener('change', scheduleStickySetup);
-  window.addEventListener('resize', scheduleStickySetup, { passive: true });
-  document.fonts.ready.then(scheduleStickySetup).catch(() => undefined);
+  mobileQuery.addEventListener('change', scheduleStickyExitUpdate);
+  window.addEventListener('scroll', scheduleStickyExitUpdate, { passive: true });
+  window.addEventListener('resize', scheduleStickyExitUpdate, { passive: true });
+  document.fonts.ready.then(scheduleStickyExitUpdate).catch(() => undefined);
 }
