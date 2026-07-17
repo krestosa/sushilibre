@@ -11,11 +11,11 @@ export const staticDir = resolve(root, 'src/static');
 export const stylesEntry = resolve(root, 'src/scss/main.scss');
 export const scriptsEntry = resolve(root, 'src/ts/main.ts');
 
-export async function assertAssets(): Promise<void> {
+export async function assertAssets() {
   await access(resolve(dist, 'assets'), constants.R_OK);
 }
 
-export async function syncStaticFiles(): Promise<void> {
+export async function syncStaticFiles() {
   await mkdir(dist, { recursive: true });
   await Promise.all([
     copyFile(resolve(staticDir, 'index.html'), resolve(dist, 'index.html')),
@@ -24,7 +24,7 @@ export async function syncStaticFiles(): Promise<void> {
   ]);
 }
 
-export async function compileStyles(): Promise<void> {
+export async function compileStyles() {
   const stylesheet = sass.compile(stylesEntry, {
     style: 'expanded',
     loadPaths: [resolve(root, 'src/scss')],
@@ -34,7 +34,7 @@ export async function compileStyles(): Promise<void> {
   await writeFile(resolve(dist, 'app.css'), stylesheet.css);
 }
 
-export async function bundleScripts(): Promise<void> {
+export async function bundleScripts() {
   await esbuild.build({
     absWorkingDir: root,
     entryPoints: [scriptsEntry],
@@ -50,7 +50,7 @@ export async function bundleScripts(): Promise<void> {
   });
 }
 
-export async function buildAll(): Promise<void> {
+export async function buildAll() {
   await mkdir(dist, { recursive: true });
   await assertAssets();
   await Promise.all([
