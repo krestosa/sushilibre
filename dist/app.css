@@ -1353,7 +1353,7 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
     padding: 8vh 0;
   }
   .menu-group + .menu-group {
-    margin-top: 5vh;
+    margin-top: -5vh;
   }
   .menu-group.is-active .menu-group__heading {
     opacity: 1;
