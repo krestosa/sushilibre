@@ -17,12 +17,11 @@ const menuIntroHeading = query<HTMLElement>('.menu-section__intro h2');
 if (menuGroups) {
   query<HTMLElement>('.menu-mobile-sticky')?.remove();
 
-  let contentObserver: MutationObserver | null = null;
   let revealObserver: IntersectionObserver | null = null;
   let exitObservers: IntersectionObserver[] = [];
   let resizeFrame = 0;
 
-  const getGroups = (): HTMLElement[] => queryAll<HTMLElement>('[data-menu-group]', menuGroups);
+  const groups = queryAll<HTMLElement>('[data-menu-group]', menuGroups);
 
   const animateOnce = (
     element: HTMLElement,
@@ -41,7 +40,7 @@ if (menuGroups) {
     }, { once: true });
   };
 
-  const setupScrollReveals = (groups: HTMLElement[]): void => {
+  const setupScrollReveals = (): void => {
     revealObserver?.disconnect();
     revealObserver = null;
     if (!('IntersectionObserver' in window)) return;
@@ -106,7 +105,7 @@ if (menuGroups) {
     candidates.forEach(({ element }) => revealObserver?.observe(element));
   };
 
-  const disconnectExitObservers = (groups: HTMLElement[]): void => {
+  const disconnectExitObservers = (): void => {
     exitObservers.forEach((observer) => observer.disconnect());
     exitObservers = [];
     groups.forEach((group) => {
@@ -114,21 +113,14 @@ if (menuGroups) {
     });
   };
 
-  const setupStickyExitAnimations = (groups: HTMLElement[]): void => {
-    disconnectExitObservers(groups);
+  const setupStickyExitAnimations = (): void => {
+    disconnectExitObservers();
     if (!mobileQuery.matches || !('IntersectionObserver' in window)) return;
 
     groups.forEach((group) => {
       const heading = query<HTMLElement>('.menu-group__heading', group);
-      if (!heading) return;
-
-      let sentinel = query<HTMLElement>('.menu-group__exit-sentinel', group);
-      if (!sentinel) {
-        sentinel = document.createElement('span');
-        sentinel.className = 'menu-group__exit-sentinel';
-        sentinel.setAttribute('aria-hidden', 'true');
-        group.append(sentinel);
-      }
+      const sentinel = query<HTMLElement>('.menu-group__exit-sentinel', group);
+      if (!heading || !sentinel) return;
 
       const headingHeight = Math.ceil(heading.getBoundingClientRect().height);
       const preExitBuffer = Math.max(12, Math.min(22, Math.round(window.innerHeight * 0.018)));
@@ -155,26 +147,13 @@ if (menuGroups) {
     if (resizeFrame) return;
     resizeFrame = window.requestAnimationFrame(() => {
       resizeFrame = 0;
-      setupStickyExitAnimations(getGroups());
+      setupStickyExitAnimations();
     });
   };
 
-  const install = (): boolean => {
-    const groups = getGroups();
-    if (!groups.length) return false;
-    setupScrollReveals(groups);
-    setupStickyExitAnimations(groups);
-    return true;
-  };
-
-  if (!install()) {
-    contentObserver = new MutationObserver(() => {
-      if (install()) {
-        contentObserver?.disconnect();
-        contentObserver = null;
-      }
-    });
-    contentObserver.observe(menuGroups, { childList: true, subtree: true });
+  if (groups.length) {
+    setupScrollReveals();
+    setupStickyExitAnimations();
   }
 
   mobileQuery.addEventListener('change', scheduleStickySetup);
