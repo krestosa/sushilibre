@@ -3,6 +3,9 @@ import { queryAll } from '../shared/dom';
 const DESCRIPTION_SELECTOR = '.menu-item__description';
 const NON_BREAKING_SPACE = '\u00A0';
 const WIDTH_EPSILON = 0.5;
+const MINIMUM_FILL_RATIO = 0.62;
+const MAXIMUM_FILL_RATIO = 0.78;
+const PREFERRED_FILL_RATIO = 0.72;
 
 interface BalancedLine {
   words: string[];
@@ -14,9 +17,34 @@ interface BalancedLayout {
   cost: number;
 }
 
+interface DescriptionMetrics {
+  element: HTMLElement;
+  source: string;
+  words: string[];
+  maxWidth: number;
+  totalWidth: number;
+  measure: TextMeasure;
+}
+
 type TextMeasure = (value: string) => number;
 
 let measurementNode: HTMLSpanElement | null = null;
+
+const clamp = (value: number, minimum: number, maximum: number): number =>
+  Math.min(maximum, Math.max(minimum, value));
+
+const median = (values: number[]): number => {
+  if (!values.length) return 0;
+
+  const sorted = [...values].sort((left, right) => left - right);
+  const middle = Math.floor(sorted.length / 2);
+  const upper = sorted[middle];
+  if (upper === undefined) return 0;
+
+  if (sorted.length % 2 === 1) return upper;
+  const lower = sorted[middle - 1] ?? upper;
+  return (lower + upper) / 2;
+};
 
 const getMeasurementNode = (): HTMLSpanElement => {
   if (measurementNode) return measurementNode;
@@ -39,23 +67,24 @@ const getMeasurementNode = (): HTMLSpanElement => {
 const createTextMeasure = (element: HTMLElement): TextMeasure => {
   const computed = window.getComputedStyle(element);
   const node = getMeasurementNode();
-
-  node.style.fontFamily = computed.fontFamily;
-  node.style.fontSize = computed.fontSize;
-  node.style.fontStyle = computed.fontStyle;
-  node.style.fontStretch = computed.fontStretch;
-  node.style.fontVariant = computed.fontVariant;
-  node.style.fontWeight = computed.fontWeight;
-  node.style.letterSpacing = computed.letterSpacing;
-  node.style.wordSpacing = computed.wordSpacing;
-  node.style.textTransform = computed.textTransform;
-
+  const styles = {
+    fontFamily: computed.fontFamily,
+    fontSize: computed.fontSize,
+    fontStyle: computed.fontStyle,
+    fontStretch: computed.fontStretch,
+    fontVariant: computed.fontVariant,
+    fontWeight: computed.fontWeight,
+    letterSpacing: computed.letterSpacing,
+    wordSpacing: computed.wordSpacing,
+    textTransform: computed.textTransform
+  };
   const cache = new Map<string, number>();
 
   return (value: string): number => {
     const cached = cache.get(value);
     if (cached !== undefined) return cached;
 
+    Object.assign(node.style, styles);
     node.textContent = value;
     const width = node.getBoundingClientRect().width;
     cache.set(value, width);
@@ -63,36 +92,70 @@ const createTextMeasure = (element: HTMLElement): TextMeasure => {
   };
 };
 
-const calculateLayoutCost = (lines: BalancedLine[], maxWidth: number): number => {
+const calculateGlobalTargetWidth = (metrics: DescriptionMetrics[]): number => {
+  const commonMaximumWidth = median(metrics.map(({ maxWidth }) => maxWidth));
+  if (commonMaximumWidth <= 0) return 0;
+
+  const individualIdealWidths = metrics.map(({ words, totalWidth, maxWidth }) => {
+    const minimumLineCount = words.length >= 4 ? 2 : 1;
+    const maximumLineCount = Math.max(minimumLineCount, Math.floor(words.length / 2));
+    const estimatedLineCount = clamp(
+      Math.round(totalWidth / Math.max(maxWidth * PREFERRED_FILL_RATIO, 1)),
+      minimumLineCount,
+      maximumLineCount
+    );
+
+    return totalWidth / Math.max(estimatedLineCount, 1);
+  });
+
+  return clamp(
+    median(individualIdealWidths),
+    commonMaximumWidth * MINIMUM_FILL_RATIO,
+    commonMaximumWidth * MAXIMUM_FILL_RATIO
+  );
+};
+
+const calculateLayoutCost = (
+  lines: BalancedLine[],
+  maxWidth: number,
+  targetWidth: number
+): number => {
   const widths = lines.map((line) => line.width);
   const mean = widths.reduce((total, width) => total + width, 0) / widths.length;
-  const normalize = (value: number): number => value / Math.max(maxWidth, 1);
+  const normalizeByMaximum = (value: number): number => value / Math.max(maxWidth, 1);
+  const normalizeByTarget = (value: number): number => value / Math.max(targetWidth, 1);
 
-  const variance = widths.reduce((total, width) => {
-    const delta = normalize(width - mean);
+  const localVariance = widths.reduce((total, width) => {
+    const delta = normalizeByMaximum(width - mean);
     return total + delta * delta;
-  }, 0);
+  }, 0) / widths.length;
 
   const adjacentDifference = widths.slice(1).reduce((total, width, index) => {
     const previous = widths[index];
     if (previous === undefined) return total;
-    const delta = normalize(previous - width);
+    const delta = normalizeByMaximum(previous - width);
     return total + delta * delta;
-  }, 0);
+  }, 0) / Math.max(widths.length - 1, 1);
 
+  const targetDeviation = widths.reduce((total, width) => {
+    const delta = normalizeByTarget(width - targetWidth);
+    return total + delta * delta;
+  }, 0) / widths.length;
+
+  const meanTargetDeviation = normalizeByTarget(mean - targetWidth);
   const widest = Math.max(...widths);
   const narrowest = Math.min(...widths);
-  const range = normalize(widest - narrowest);
+  const range = normalizeByMaximum(widest - narrowest);
   const lastWidth = widths[widths.length - 1] ?? mean;
-  const lastLineShortfall = normalize(Math.max(0, mean * 0.9 - lastWidth));
-  const isolatedWordPenalty = lines.filter((line) => line.words.length === 1).length * 0.35;
+  const lastLineShortfall = normalizeByTarget(Math.max(0, targetWidth * 0.82 - lastWidth));
 
   return (
-    variance +
-    adjacentDifference * 0.45 +
-    range * range * 0.75 +
-    lastLineShortfall * lastLineShortfall * 2 +
-    isolatedWordPenalty
+    targetDeviation * 3.2 +
+    meanTargetDeviation * meanTargetDeviation * 2.4 +
+    localVariance * 0.75 +
+    adjacentDifference * 0.4 +
+    range * range * 0.65 +
+    lastLineShortfall * lastLineShortfall * 2.2
   );
 };
 
@@ -100,30 +163,32 @@ const findBalancedLayout = (
   words: string[],
   lineCount: number,
   maxWidth: number,
+  targetWidth: number,
   measure: TextMeasure
 ): BalancedLayout | null => {
   let best: BalancedLayout | null = null;
   const current: BalancedLine[] = [];
+  const minimumWordsPerLine = lineCount > 1 ? 2 : 1;
 
   const visit = (start: number, remainingLines: number): void => {
     if (remainingLines === 1) {
       const finalWords = words.slice(start);
-      if (lineCount > 1 && finalWords.length < 2) return;
+      if (finalWords.length < minimumWordsPerLine) return;
 
       const value = finalWords.join(' ');
       const width = measure(value);
       if (width > maxWidth + WIDTH_EPSILON) return;
 
       const lines = [...current, { words: finalWords, width }];
-      const cost = calculateLayoutCost(lines, maxWidth);
+      const cost = calculateLayoutCost(lines, maxWidth, targetWidth);
       if (!best || cost < best.cost) best = { lines, cost };
       return;
     }
 
-    const minimumWordsForRemainingLines = remainingLines;
+    const minimumWordsForRemainingLines = remainingLines * minimumWordsPerLine;
     const maximumEnd = words.length - minimumWordsForRemainingLines;
 
-    for (let end = start + 1; end <= maximumEnd; end += 1) {
+    for (let end = start + minimumWordsPerLine; end <= maximumEnd; end += 1) {
       const lineWords = words.slice(start, end);
       const value = lineWords.join(' ');
       const width = measure(value);
@@ -140,19 +205,38 @@ const findBalancedLayout = (
 };
 
 const calculateBalancedLines = (
-  value: string,
-  maxWidth: number,
-  measure: TextMeasure
+  metrics: DescriptionMetrics,
+  globalTargetWidth: number
 ): string[][] => {
-  const words = value.trim().split(/\s+/).filter(Boolean);
+  const { words, maxWidth, totalWidth, measure } = metrics;
   if (words.length <= 1) return [words];
 
-  for (let lineCount = 1; lineCount < words.length; lineCount += 1) {
-    const layout = findBalancedLayout(words, lineCount, maxWidth, measure);
-    if (layout) return layout.lines.map((line) => line.words);
+  const targetWidth = Math.min(globalTargetWidth, maxWidth * MAXIMUM_FILL_RATIO);
+  const minimumLineCount = words.length >= 4 ? 2 : 1;
+  const maximumLineCount = Math.max(minimumLineCount, Math.floor(words.length / 2));
+  const preferredLineCount = clamp(
+    Math.round(totalWidth / Math.max(targetWidth, 1)),
+    minimumLineCount,
+    maximumLineCount
+  );
+
+  let best: BalancedLayout | null = null;
+
+  for (let lineCount = minimumLineCount; lineCount <= maximumLineCount; lineCount += 1) {
+    const layout = findBalancedLayout(words, lineCount, maxWidth, targetWidth, measure);
+    if (!layout) continue;
+
+    const lineCountDistance = lineCount - preferredLineCount;
+    const lineCountPenalty = lineCountDistance * lineCountDistance * 0.18;
+    const candidate = {
+      lines: layout.lines,
+      cost: layout.cost + lineCountPenalty
+    };
+
+    if (!best || candidate.cost < best.cost) best = candidate;
   }
 
-  return [words];
+  return best ? best.lines.map((line) => line.words) : [words];
 };
 
 const renderBalancedLines = (element: HTMLElement, lines: string[][]): void => {
@@ -166,16 +250,24 @@ const renderBalancedLines = (element: HTMLElement, lines: string[][]): void => {
   element.replaceChildren(fragment);
 };
 
-const balanceDescription = (element: HTMLElement): void => {
-  const source = element.dataset.balanceText?.trim();
-  const maxWidth = element.getBoundingClientRect().width;
-  if (!source || maxWidth <= 0) return;
+const collectMetrics = (descriptions: HTMLElement[]): DescriptionMetrics[] =>
+  descriptions.flatMap((element) => {
+    const source = element.dataset.balanceText?.trim();
+    const maxWidth = element.getBoundingClientRect().width;
+    if (!source || maxWidth <= 0) return [];
 
-  const measure = createTextMeasure(element);
-  const lines = calculateBalancedLines(source, maxWidth, measure);
-  renderBalancedLines(element, lines);
-  element.setAttribute('aria-label', source);
-};
+    const words = source.split(/\s+/).filter(Boolean);
+    const measure = createTextMeasure(element);
+
+    return [{
+      element,
+      source,
+      words,
+      maxWidth,
+      totalWidth: measure(words.join(' ')),
+      measure
+    }];
+  });
 
 export const observeBalancedMenuDescriptions = (root: ParentNode): void => {
   const descriptions = queryAll<HTMLElement>(DESCRIPTION_SELECTOR, root);
@@ -190,15 +282,23 @@ export const observeBalancedMenuDescriptions = (root: ParentNode): void => {
     const force = forceNextPass;
     forceNextPass = false;
 
-    descriptions.forEach((description) => {
+    const widthChanged = descriptions.some((description) => {
       const width = description.getBoundingClientRect().width;
       const previousWidth = measuredWidths.get(description);
-      if (!force && previousWidth !== undefined && Math.abs(previousWidth - width) < WIDTH_EPSILON) {
-        return;
-      }
-
       measuredWidths.set(description, width);
-      balanceDescription(description);
+      return previousWidth === undefined || Math.abs(previousWidth - width) >= WIDTH_EPSILON;
+    });
+
+    if (!force && !widthChanged) return;
+
+    const metrics = collectMetrics(descriptions);
+    const globalTargetWidth = calculateGlobalTargetWidth(metrics);
+    if (globalTargetWidth <= 0) return;
+
+    metrics.forEach((descriptionMetrics) => {
+      const lines = calculateBalancedLines(descriptionMetrics, globalTargetWidth);
+      renderBalancedLines(descriptionMetrics.element, lines);
+      descriptionMetrics.element.setAttribute('aria-label', descriptionMetrics.source);
     });
   };
 
