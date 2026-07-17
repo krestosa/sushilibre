@@ -1,4 +1,4 @@
-import './script';
-import './dock-visibility';
-import './menu';
-import './menu-layout-adjustments';
+import './application';
+import './dock-reveal';
+import './menu-bootstrap';
+import './menu-motion';
