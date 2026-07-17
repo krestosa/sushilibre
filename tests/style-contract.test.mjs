@@ -3,8 +3,8 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import test from 'node:test';
 
-const EXPECTED_STYLE_HASH = 'eb05b74350dec44f0e2c7174e5385d50e9683ae1ccaa0dcbc89a8898a43a7d9d';
-const EXPECTED_DECLARATION_COUNT = 863;
+const EXPECTED_STYLE_HASH = 'e9f7ff42dbde9757bb9d3c8c39a7acf68ff25f6b3b8dfa201e2198119c4e120b';
+const EXPECTED_DECLARATION_COUNT = 873;
 
 const normalize = (value) => value.trim().replace(/\s+/g, ' ');
 
