@@ -9,7 +9,7 @@
     "dev": "node scripts/dev.mjs",
     "serve": "node scripts/serve.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/menu-contract.test.mjs",
+    "test": "node --test tests/*.test.mjs",
     "ci": "npm run typecheck && npm run build && npm test"
   },
   "devDependencies": {
