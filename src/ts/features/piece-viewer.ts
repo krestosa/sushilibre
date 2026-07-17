@@ -6,12 +6,11 @@ const ERROR_MESSAGE = 'IMAGEN NO DISPONIBLE';
 export const setupPieceViewer = (): void => {
   const dialog = query<HTMLDialogElement>('[data-piece-viewer]');
   const image = query<HTMLImageElement>('[data-piece-viewer-image]', dialog ?? undefined);
-  const title = query<HTMLElement>('[data-piece-viewer-title]', dialog ?? undefined);
   const status = query<HTMLElement>('[data-piece-viewer-status]', dialog ?? undefined);
   const closeButton = query<HTMLButtonElement>('[data-piece-viewer-close]', dialog ?? undefined);
   const openButtons = queryAll<HTMLButtonElement>('[data-piece-viewer-open]');
 
-  if (!dialog || !image || !title || !status || !closeButton || !openButtons.length) return;
+  if (!dialog || !image || !status || !closeButton || !openButtons.length) return;
 
   let activeButton: HTMLButtonElement | null = null;
 
@@ -59,8 +58,8 @@ export const setupPieceViewer = (): void => {
     if (!name || !source) return;
 
     activeButton = button;
-    title.textContent = name;
-    image.alt = `${name} — SushiClub`;
+    dialog.setAttribute('aria-label', `Imagen de ${name}`);
+    image.alt = name;
     setLoadingState();
     document.documentElement.classList.add('has-piece-viewer');
     openDialog();
@@ -73,9 +72,9 @@ export const setupPieceViewer = (): void => {
 
   const cleanup = (): void => {
     document.documentElement.classList.remove('has-piece-viewer');
+    dialog.setAttribute('aria-label', 'Vista de pieza');
     image.removeAttribute('src');
     image.alt = '';
-    title.textContent = '';
     status.textContent = LOADING_MESSAGE;
     status.hidden = false;
     image.hidden = true;

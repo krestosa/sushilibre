@@ -6,6 +6,10 @@
   gap: 7px;
 }
 
+.menu-item__identity > .menu-item__badges {
+  flex-wrap: nowrap;
+}
+
 .menu-item__badge {
   display: inline-flex;
   align-items: center;

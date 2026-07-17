@@ -119,32 +119,36 @@ const parseSectionPieces = (quantity) => {
 const renderBadge = (label, modifier) =>
   `<span class="menu-item__badge menu-item__badge--${modifier}">${escapeText(label)}</span>`;
 
+const renderViewButton = (item) => item.image
+  ? `<button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="${escapeAttribute(item.name)}" data-piece-image="${escapeAttribute(item.image)}">VER PIEZA</button>`
+  : '';
+
 const renderMenuItem = (item, sectionPieces) => {
-  const badges = [];
-  if (item.diet) badges.push(renderBadge(item.diet, 'diet'));
+  const controls = [];
+  if (item.diet) controls.push(renderBadge(item.diet, 'diet'));
   if (
     Number.isFinite(item.pieces) &&
     item.pieces > 0 &&
     item.pieces !== sectionPieces
   ) {
-    badges.push(renderBadge(`${item.pieces}U`, 'pieces'));
+    controls.push(renderBadge(`${item.pieces}U`, 'pieces'));
   }
 
-  const badgeMarkup = badges.length
-    ? `<div class="menu-item__badges">${badges.join('')}</div>`
+  const viewButton = renderViewButton(item);
+  if (viewButton) controls.push(viewButton);
+
+  const controlsMarkup = controls.length
+    ? `<div class="menu-item__badges">${controls.join('')}</div>`
     : '';
   const descriptionMarkup = item.description
     ? `<p class="menu-item__description" data-balance-text="${escapeAttribute(item.description)}">${escapeText(item.description)}</p>`
-    : '';
-  const viewButton = item.image
-    ? `<button class="menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="${escapeAttribute(item.name)}" data-piece-image="${escapeAttribute(item.image)}">VER PIEZA</button>`
     : '';
   const modifier = item.description ? '' : ' menu-item--simple';
 
   return [
     `          <article class="menu-item${modifier}">`,
     '            <div class="menu-item__header">',
-    `              <div class="menu-item__identity"><h4 class="menu-item__name">${escapeText(item.name)}</h4>${badgeMarkup}</div>${viewButton}`,
+    `              <div class="menu-item__identity"><h4 class="menu-item__name">${escapeText(item.name)}</h4>${controlsMarkup}</div>`,
     '            </div>',
     descriptionMarkup ? `            ${descriptionMarkup}` : '',
     '          </article>'
@@ -175,17 +179,11 @@ const renderMenuGroup = (section) => {
 };
 
 const renderPieceViewer = () => [
-  '    <dialog class="piece-viewer" id="piece-viewer" data-piece-viewer aria-labelledby="piece-viewer-title">',
-  '      <div class="piece-viewer__panel">',
-  '        <button class="piece-viewer__close" type="button" data-piece-viewer-close aria-label="Cerrar imagen de la pieza">CERRAR</button>',
-  '        <div class="piece-viewer__media" data-piece-viewer-media aria-live="polite">',
-  '          <img class="piece-viewer__image" data-piece-viewer-image alt="" decoding="async">',
-  '          <p class="piece-viewer__status" data-piece-viewer-status>CARGANDO IMAGEN</p>',
-  '        </div>',
-  '        <div class="piece-viewer__caption">',
-  '          <span>PIEZA</span>',
-  '          <h2 id="piece-viewer-title" data-piece-viewer-title></h2>',
-  '        </div>',
+  '    <dialog class="piece-viewer" id="piece-viewer" data-piece-viewer aria-label="Vista de pieza">',
+  '      <div class="piece-viewer__content">',
+  '        <button class="piece-viewer__close" type="button" data-piece-viewer-close aria-label="Cerrar">×</button>',
+  '        <img class="piece-viewer__image" data-piece-viewer-image alt="" decoding="async">',
+  '        <p class="piece-viewer__status" data-piece-viewer-status>CARGANDO IMAGEN</p>',
   '      </div>',
   '    </dialog>'
 ].join('\n');
