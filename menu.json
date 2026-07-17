@@ -28,7 +28,7 @@
           "description": "PALTA, PALMITO, QUESO CREMA, TAMAGO Y SALMÓN CON SALSA DE MARACUYÁ."
         },
         {
-          "name": "FUTURAMA 2",
+          "name": "FUTURAMA2",
           "description": "LANGOSTINOS REBOZADOS, QUESO SABORIZADO, PANKO Y SALSA DE MIEL Y MOSTAZA."
         },
         {
@@ -97,8 +97,20 @@
       "quantity": "3U",
       "items": [
         {
-          "name": "CRISPY WHITE",
-          "description": "PESCADO BLANCO CON PANKO, CREMA DE PALTA Y CRIOLLA DE ROCOTO SOBRE ARROZ."
+          "name": "SALMÓN",
+          "description": "FINAS FETAS DE SALMÓN SOBRE BOCADITOS DE ARROZ."
+        },
+        {
+          "name": "SALMÓN AHUMADO",
+          "description": "FINAS FETAS DE SALMÓN AHUMADO SOBRE BOCADITOS DE ARROZ."
+        },
+        {
+          "name": "ATÚN ROJO",
+          "description": "FINAS FETAS DE ATÚN ROJO SOBRE BOCADITOS DE ARROZ."
+        },
+        {
+          "name": "PULPO",
+          "description": "FINAS FETAS DE PULPO SOBRE BOCADITOS DE ARROZ."
         },
         {
           "name": "ANTICUCHERO",
@@ -113,16 +125,8 @@
           "description": "LANGOSTINO CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE."
         },
         {
-          "name": "PULPO",
-          "description": "FINAS FETAS DE PULPO SOBRE BOCADITOS DE ARROZ."
-        },
-        {
-          "name": "ATÚN ROJO",
-          "description": "FINAS FETAS DE ATÚN ROJO SOBRE BOCADITOS DE ARROZ."
-        },
-        {
-          "name": "SALMÓN AHUMADO",
-          "description": "FINAS FETAS DE SALMÓN AHUMADO SOBRE BOCADITOS DE ARROZ."
+          "name": "CRISPY WHITE",
+          "description": "PESCADO BLANCO CON PANKO, CREMA DE PALTA Y CRIOLLA DE ROCOTO SOBRE ARROZ."
         },
         {
           "name": "PALTA THAI",
@@ -148,7 +152,7 @@
     {
       "id": "geisha",
       "title": "GEISHA",
-      "quantity": "4U",
+      "quantity": "3U",
       "items": [
         {
           "name": "SALMÓN",
