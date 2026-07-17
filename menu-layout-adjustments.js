@@ -69,9 +69,11 @@
 
       .menu-group__exit-sentinel {
         display: block;
+        position: absolute;
+        left: 0;
+        bottom: 0;
         width: 1px;
         height: 1px;
-        margin-top: -1px;
         pointer-events: none;
       }
     }
@@ -196,37 +198,33 @@
     disconnectExitObservers(groups);
     if (!mobileQuery.matches || !('IntersectionObserver' in window)) return;
 
-    const triggerRatio = .70;
-    const rootMarginBottom = Math.round((1 - triggerRatio) * 100);
-
-    groups.forEach((group, index) => {
+    groups.forEach((group) => {
       const heading = group.querySelector('.menu-group__heading');
       if (!heading) return;
 
-      const nextGroup = groups[index + 1];
-      let trigger = nextGroup?.querySelector('.menu-group__heading') || null;
-
-      if (!trigger) {
-        trigger = group.querySelector('.menu-group__exit-sentinel');
-        if (!trigger) {
-          trigger = document.createElement('span');
-          trigger.className = 'menu-group__exit-sentinel';
-          trigger.setAttribute('aria-hidden', 'true');
-          group.append(trigger);
-        }
+      let sentinel = group.querySelector('.menu-group__exit-sentinel');
+      if (!sentinel) {
+        sentinel = document.createElement('span');
+        sentinel.className = 'menu-group__exit-sentinel';
+        sentinel.setAttribute('aria-hidden', 'true');
+        group.append(sentinel);
       }
 
+      const headingHeight = Math.ceil(heading.getBoundingClientRect().height);
+      const preExitBuffer = Math.max(12, Math.min(22, Math.round(window.innerHeight * .018)));
+      const handoffLine = headingHeight + preExitBuffer;
+      const bottomMargin = Math.max(0, window.innerHeight - handoffLine - 1);
+
       const observer = new IntersectionObserver(([entry]) => {
-        const triggerLine = window.innerHeight * triggerRatio;
-        const leaving = entry.boundingClientRect.top <= triggerLine;
+        const leaving = entry.boundingClientRect.top <= handoffLine;
         heading.classList.toggle('is-leaving', leaving);
       }, {
         root: null,
-        rootMargin: `0px 0px -${rootMarginBottom}% 0px`,
+        rootMargin: `-${handoffLine}px 0px -${bottomMargin}px 0px`,
         threshold: 0
       });
 
-      observer.observe(trigger);
+      observer.observe(sentinel);
       exitObservers.push(observer);
     });
   };
