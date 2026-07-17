@@ -1472,7 +1472,7 @@ html.hero-intro-complete .title-word--libre {
     grid-column: 10/span 3;
   }
   .title-lockup {
-    top: 25.5%;
+    top: 18.5%;
     width: calc(100% - 32px);
     grid-template-columns: repeat(12, minmax(0, 1fr));
     grid-template-rows: auto auto auto;
@@ -1499,7 +1499,7 @@ html.hero-intro-complete .title-word--libre {
     justify-self: end;
   }
   .hero-copy {
-    top: 59%;
+    top: 66%;
     width: 88vw;
   }
   .hero-copy h2 {
