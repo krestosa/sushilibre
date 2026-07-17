@@ -35,8 +35,27 @@
   }
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 html.has-piece-viewer {
-  overflow: hidden;
+  overflow-y: scroll;
+  overscroll-behavior: none;
+
+  body {
+    height: var(--piece-viewer-document-height, auto);
+    min-height: var(--piece-viewer-document-height, 100%);
+    overscroll-behavior: none;
+  }
+
+  .page {
+    position: fixed;
+    top: var(--piece-viewer-scroll-offset, 0px);
+    right: 0;
+    left: 0;
+    width: auto;
+  }
 }
 
 .piece-viewer {
