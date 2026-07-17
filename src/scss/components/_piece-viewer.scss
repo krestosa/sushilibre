@@ -44,17 +44,7 @@ html.has-piece-viewer {
   overscroll-behavior: none;
 
   body {
-    height: var(--piece-viewer-document-height, auto);
-    min-height: var(--piece-viewer-document-height, 100%);
     overscroll-behavior: none;
-  }
-
-  .page {
-    position: fixed;
-    top: var(--piece-viewer-scroll-offset, 0px);
-    right: 0;
-    left: 0;
-    width: auto;
   }
 }
 
@@ -76,7 +66,7 @@ html.has-piece-viewer {
     scale 260ms var(--ease-out);
 
   &::backdrop {
-    background: rgba(0, 0, 0, 0.78);
+    background: rgba(0, 0, 0, 0.62);
     opacity: 0;
     transition: opacity 200ms ease-out;
   }
