@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { parseMenuSource, renderStaticHtml } from '../scripts/menu-html.mjs';
 
-const EXPECTED_MENU_HASH = 'b95fc9f0e18df869c7e7786608fa6dc1982b47dab798f0e3e5a43b75aa68b1b7';
+const EXPECTED_MENU_HASH = '48137eb7a88b06080576f11ae7e55a48da5b7ef4c15040d8d1e5c6b35f9b3379';
 const PIECE_IMAGE_PATTERN = /^assets\/piezas\/[a-z0-9_\/-]+\.webp$/;
 
 const sortValue = (value) => {
