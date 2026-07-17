@@ -10,8 +10,9 @@ const assertAccessibleMarkup = (html) => {
   assert.match(html, /<span class="sr-only">Jueves 30 de julio<\/span>/);
   assert.match(
     html,
-    /<a class="booking-dock__location"[^>]*href="https:\/\/maps\.app\.goo\.gl\/N6UjNEoETLvo1ucRA"[^>]*>/i
+    /<a class="booking-dock__meta booking-dock__meta--location"[^>]*href="https:\/\/maps\.app\.goo\.gl\/N6UjNEoETLvo1ucRA"[^>]*>/i
   );
+  assert.match(html, /<span class="booking-dock__external-arrow" aria-hidden="true">↗<\/span>/);
   assert.match(
     html,
     /<img class="masthead__sushiclub"[^>]*\bwidth="234"[^>]*\bheight="34"/i
