@@ -35,8 +35,10 @@ const assertStaticMenuMarkup = (html) => {
   assert.equal(countMatches(html, /class="menu-item__badge menu-item__view"/g), 33);
   assert.equal(countMatches(html, /<dialog class="piece-viewer"/g), 1);
   assert.equal(countMatches(html, /data-piece-viewer-image/g), 1);
+  assert.equal(countMatches(html, /class="piece-viewer__disclaimer"/g), 1);
   assert.match(html, /<div class="menu-item__badges">[^<]*(?:<[^>]+>[^<]*<\/[^>]+>)*<button class="menu-item__badge menu-item__view"/);
   assert.match(html, /<button class="piece-viewer__close"[^>]*>×<\/button>/);
+  assert.match(html, /La cantidad de piezas es la especificada en el menú\. Imagen ilustrativa\./);
   assert.doesNotMatch(html, /piece-viewer__caption|data-piece-viewer-title/);
   assert.match(html, /data-piece-image="assets\/piezas\/buenos_aires\.webp"/);
   assert.match(html, /data-piece-image="assets\/piezas\/niguiri_salmon\.webp"/);

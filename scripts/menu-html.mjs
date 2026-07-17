@@ -184,6 +184,7 @@ const renderPieceViewer = () => [
   '        <button class="piece-viewer__close" type="button" data-piece-viewer-close aria-label="Cerrar">×</button>',
   '        <img class="piece-viewer__image" data-piece-viewer-image alt="" decoding="async">',
   '        <p class="piece-viewer__status" data-piece-viewer-status>CARGANDO IMAGEN</p>',
+  '        <p class="piece-viewer__disclaimer">La cantidad de piezas es la especificada en el menú. Imagen ilustrativa.</p>',
   '      </div>',
   '    </dialog>'
 ].join('\n');
