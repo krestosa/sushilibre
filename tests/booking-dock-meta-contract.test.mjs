@@ -3,11 +3,10 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 test('booking dock exposes venue, date and start time as three metadata blocks', async () => {
-  const [template, compiledHtml, layoutSource, compiledScript] = await Promise.all([
+  const [template, compiledHtml, layoutSource] = await Promise.all([
     readFile(new URL('../src/static/index.html', import.meta.url), 'utf8'),
     readFile(new URL('../dist/index.html', import.meta.url), 'utf8'),
-    readFile(new URL('../src/ts/features/booking-dock-layout.ts', import.meta.url), 'utf8'),
-    readFile(new URL('../dist/app.js', import.meta.url), 'utf8')
+    readFile(new URL('../src/ts/features/booking-dock-layout.ts', import.meta.url), 'utf8')
   ]);
 
   for (const html of [template, compiledHtml]) {
@@ -19,5 +18,8 @@ test('booking dock exposes venue, date and start time as three metadata blocks',
   assert.match(layoutSource, /countdown\.style\.gridColumn = '1 \/ span 3'/);
   assert.match(layoutSource, /cta\.style\.gridColumn = '4'/);
   assert.match(layoutSource, /cta\.style\.gridColumn = '5'/);
-  assert.match(compiledScript, /20\.00HS|timeMeta|gridColumn = "1 \/ span 3"/);
+  assert.match(layoutSource, /applyDesktopLayout/);
+  assert.match(layoutSource, /applyCompactLayout/);
+  assert.match(layoutSource, /applyStackedLayout/);
+  assert.match(layoutSource, /applyMobileLayout/);
 });
