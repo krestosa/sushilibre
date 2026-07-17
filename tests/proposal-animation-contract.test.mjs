@@ -94,6 +94,8 @@ test('proposal reveal is restrained, prepaint-safe and sticky-dock aware', async
   assert.match(styles, /proposal-reveal--intro[\s\S]*?520ms/);
   assert.match(styles, /proposal-reveal--chips[\s\S]*?400ms/);
   assert.match(styles, /proposal-reveal--prices[\s\S]*?480ms/);
+  assert.match(styles, /proposal-reveal--prices\s*\{[\s\S]*?--proposal-reveal-distance:\s*0px;[\s\S]*?transform:\s*none;/);
+  assert.match(styles, /proposal-reveal--prices\.is-visible\s*\{[\s\S]*?animation-name:\s*proposal-reveal-fade;/);
   assert.match(styles, /proposal-reveal--conditions[\s\S]*?440ms/);
   assert.match(styles, /proposal-reveal--legal[\s\S]*?320ms/);
   assert.match(styles, /is-visible\.is-reveal-bypassed/);
@@ -120,6 +122,8 @@ test('compiled distribution includes sticky-aware proposal motion hooks', async 
   assert.match(script, /proposal-reveal-fallback/);
   assert.doesNotMatch(script, /0px 0px -18% 0px/);
   assert.match(styles, /html\.has-proposal-reveal \.proposal-reveal/);
+  assert.match(styles, /proposal-reveal--prices\.is-visible/);
+  assert.match(styles, /animation-name:\s*proposal-reveal-fade/);
   assert.match(styles, /is-reveal-bypassed/);
   assert.match(styles, /@keyframes proposal-reveal-in/);
   assert.match(html, /data-proposal-root/);
