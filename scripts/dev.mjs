@@ -54,29 +54,43 @@ async function rebuild() {
   rebuildTimer = null;
 
   const rebuildEverything = changes.some((path) => path === '*');
-  const stylesChanged = rebuildEverything || changes.some((path) => path.endsWith('.scss'));
-  const scriptsChanged = rebuildEverything || changes.some((path) => path.endsWith('.ts'));
-  const staticChanged = rebuildEverything || changes.some((path) =>
+  const sourceStylesChanged = rebuildEverything || changes.some((path) => path.endsWith('.scss'));
+  const sourceScriptsChanged = rebuildEverything || changes.some((path) => path.endsWith('.ts'));
+  const sourceStaticChanged = rebuildEverything || changes.some((path) =>
     path.startsWith('static/') || path === 'menu.json'
   );
 
   try {
+    let outputChanges;
+
     if (rebuildEverything) {
-      await buildAll();
+      outputChanges = await buildAll();
     } else {
-      const tasks = [];
-      if (stylesChanged) tasks.push(compileStyles());
-      if (scriptsChanged) tasks.push(bundleScripts());
-      if (staticChanged) tasks.push(syncStaticFiles());
-      await Promise.all(tasks);
+      const [stylesChanged, scriptsChanged, staticChanged] = await Promise.all([
+        sourceStylesChanged ? compileStyles() : false,
+        sourceScriptsChanged ? bundleScripts() : false,
+        sourceStaticChanged ? syncStaticFiles() : false
+      ]);
+
+      outputChanges = {
+        stylesChanged,
+        scriptsChanged,
+        staticChanged,
+        anyChanged: stylesChanged || scriptsChanged || staticChanged
+      };
     }
 
     const changedLabel = changes.join(', ') || 'unknown';
+    if (!outputChanges.anyChanged) {
+      console.log(`[dev] checked, output unchanged: ${changedLabel}`);
+      return;
+    }
+
     console.log(`[dev] rebuilt: ${changedLabel}`);
 
-    if (scriptsChanged || staticChanged || rebuildEverything) {
+    if (outputChanges.scriptsChanged || outputChanges.staticChanged) {
       broadcast('reload');
-    } else if (stylesChanged) {
+    } else if (outputChanges.stylesChanged) {
       broadcast('css');
     }
   } catch (error) {
