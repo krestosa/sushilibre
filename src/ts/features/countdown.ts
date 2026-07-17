@@ -5,12 +5,49 @@ type CountdownKey = 'days' | 'hours' | 'minutes' | 'seconds';
 const keys: CountdownKey[] = ['days', 'hours', 'minutes', 'seconds'];
 const target = new Date('2026-07-30T20:00:00-03:00').getTime();
 
+const replaceCtaLabel = (label: HTMLElement, firstLine: string, secondLine: string): void => {
+  label.replaceChildren(
+    document.createTextNode(firstLine),
+    document.createElement('br'),
+    document.createTextNode(secondLine)
+  );
+};
+
 export const setupCountdown = (): void => {
+  const countdown = query<HTMLElement>('.countdown');
+  const cta = query<HTMLAnchorElement>('[data-booking-cta]');
+  const ctaLabel = query<HTMLElement>('[data-booking-cta-label]', cta ?? undefined);
+  const menu = query<HTMLElement>('#menu');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let menuMode = false;
+
   const nodes: Record<CountdownKey, HTMLElement | null> = {
     days: query<HTMLElement>('[data-countdown="days"]'),
     hours: query<HTMLElement>('[data-countdown="hours"]'),
     minutes: query<HTMLElement>('[data-countdown="minutes"]'),
     seconds: query<HTMLElement>('[data-countdown="seconds"]')
+  };
+
+  const handleMenuClick = (event: MouseEvent): void => {
+    if (!menu) return;
+    event.preventDefault();
+    menu.scrollIntoView({
+      behavior: reducedMotion.matches ? 'auto' : 'smooth',
+      block: 'start'
+    });
+    window.history.replaceState(null, '', '#menu');
+  };
+
+  const activateMenuMode = (): void => {
+    if (menuMode || !cta || !ctaLabel) return;
+    menuMode = true;
+    cta.href = '#menu';
+    cta.dataset.destination = 'menu';
+    cta.setAttribute('aria-label', 'Ir al menú');
+    replaceCtaLabel(ctaLabel, 'IR A', 'MENÚ');
+    cta.addEventListener('click', handleMenuClick);
+    countdown?.setAttribute('aria-label', 'El evento comenzó');
+    countdown?.setAttribute('data-state', 'complete');
   };
 
   const pad = (value: number): string => String(value).padStart(2, '0');
@@ -30,6 +67,7 @@ export const setupCountdown = (): void => {
       if (node && node.textContent !== nextValue) node.textContent = nextValue;
     });
 
+    if (remaining === 0) activateMenuMode();
     return remaining;
   };
 
