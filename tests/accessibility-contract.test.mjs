@@ -6,8 +6,12 @@ const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), 'u
 
 const assertAccessibleMarkup = (html) => {
   assert.doesNotMatch(html, /<strong\b[^>]*\baria-label=/i);
-  assert.match(html, /<span class="sr-only">Puerto Madero<\/span>/);
+  assert.match(html, /<span class="sr-only">Puerto Madero — abrir en Google Maps<\/span>/);
   assert.match(html, /<span class="sr-only">Jueves 30 de julio<\/span>/);
+  assert.match(
+    html,
+    /<a class="booking-dock__location"[^>]*href="https:\/\/maps\.app\.goo\.gl\/N6UjNEoETLvo1ucRA"[^>]*>/i
+  );
   assert.match(
     html,
     /<img class="masthead__sushiclub"[^>]*\bwidth="234"[^>]*\bheight="34"/i
