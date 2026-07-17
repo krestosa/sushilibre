@@ -923,6 +923,17 @@ video {
     filter: blur(3px);
   }
 }
+@media (max-width: 820px) {
+  .booking-dock {
+    position: fixed;
+    top: auto;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: var(--dock-bottom);
+    left: max(16px, env(safe-area-inset-left, 0px));
+    width: auto;
+    margin: 0;
+  }
+}
 @media (max-width: 720px) {
   .menu-section__background {
     background-position: 58% center;
@@ -1043,7 +1054,7 @@ video {
 @media (max-width: 620px) {
   :root {
     --dock-height: 174px;
-    --dock-bottom: max(14px, env(safe-area-inset-bottom));
+    --dock-bottom: max(14px, env(safe-area-inset-bottom, 0px));
   }
   .hero {
     min-height: 820px;
@@ -1113,7 +1124,8 @@ video {
     display: none;
   }
   .booking-dock {
-    width: calc(100vw - 24px);
+    right: max(12px, env(safe-area-inset-right, 0px));
+    left: max(12px, env(safe-area-inset-left, 0px));
     grid-template-columns: 1fr 1fr 96px;
     grid-template-rows: 48px 96px;
     gap: 8px;
