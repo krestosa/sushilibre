@@ -19,15 +19,12 @@ const stylesheet = sass.compile(resolve(root, 'src/scss/main.scss'), {
   loadPaths: [resolve(root, 'src/scss')],
   sourceMap: false
 });
-await writeFile(resolve(dist, 'styles.css'), stylesheet.css);
+await writeFile(resolve(dist, 'app.css'), stylesheet.css);
 
 await esbuild.build({
   absWorkingDir: root,
   entryPoints: {
-    script: 'src/ts/script.ts',
-    'dock-visibility': 'src/ts/dock-visibility.ts',
-    menu: 'src/ts/menu.ts',
-    'menu-layout-adjustments': 'src/ts/menu-layout-adjustments.ts'
+    app: 'src/ts/main.ts'
   },
   outdir: dist,
   bundle: true,
