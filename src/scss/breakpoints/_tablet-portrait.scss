@@ -1,0 +1,47 @@
+@media (min-width: 621px) and (max-width: 900px) and (orientation: portrait) {
+  .hero {
+    min-height: 860px;
+  }
+
+  .title-lockup {
+    top: 24.5%;
+    left: 50%;
+    right: auto;
+    width: calc(100% - clamp(44px, 7vw, 72px));
+    transform: translateX(-50%);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto auto auto;
+    column-gap: var(--grid-gap);
+    row-gap: clamp(7px, 1.1vh, 12px);
+  }
+
+  .title-word {
+    font-size: clamp(94px, 18.5vw, 142px);
+  }
+
+  .title-word--sushi {
+    grid-column: 1 / span 9;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  .title-kicker {
+    grid-column: 4 / span 9;
+    grid-row: 2;
+    align-self: auto;
+    justify-self: end;
+    margin: 0;
+    font-size: clamp(17px, 3.25vw, 25px);
+  }
+
+  .title-word--libre {
+    grid-column: 3 / span 10;
+    grid-row: 3;
+    justify-self: end;
+  }
+
+  .hero-copy {
+    top: 59%;
+    width: min(690px, 86vw);
+  }
+}
