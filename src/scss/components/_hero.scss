@@ -130,7 +130,7 @@
   right: auto;
   width: min(1600px, 83.333vw);
   transform: translateX(-50%);
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
   column-gap: clamp(24px, 2.15vw, 44px);
   align-items: center;
   white-space: nowrap;
