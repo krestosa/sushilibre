@@ -8,15 +8,22 @@ const RESERVATION_URL = 'https://www.sushiclub.com.ar/shop_reservas.php';
 const MAPS_URL = 'https://maps.app.goo.gl/N6UjNEoETLvo1ucRA';
 
 test('booking dock exposes reservation and Maps destinations', async () => {
-  const template = await readSource('src/static/index.html');
+  const [template, styles] = await Promise.all([
+    readSource('src/static/index.html'),
+    readSource('src/scss/components/_booking-button.scss')
+  ]);
 
   assert.match(template, new RegExp(`href="${RESERVATION_URL.replaceAll('.', '\\.') }"`));
   assert.match(template, /data-booking-cta/);
   assert.match(template, /data-booking-cta-label/);
   assert.match(template, new RegExp(`href="${MAPS_URL.replaceAll('.', '\\.') }"`));
-  assert.match(template, /class="booking-dock__location"/);
+  assert.match(template, /class="booking-dock__meta booking-dock__meta--location"/);
+  assert.match(template, /class="booking-dock__external-arrow" aria-hidden="true">↗<\/span>/);
   assert.match(template, /target="_blank"/);
   assert.match(template, /rel="noopener noreferrer"/);
+  assert.match(styles, /\.booking-dock__meta--location/);
+  assert.match(styles, /\.booking-dock__external-arrow/);
+  assert.match(styles, /translate3d\(2px, -2px, 0\)/);
 });
 
 test('countdown converts the CTA into a smooth menu action at zero', async () => {
@@ -56,6 +63,7 @@ test('compiled distribution keeps booking destinations and action hooks', async 
 
   assert.match(html, new RegExp(`href="${RESERVATION_URL.replaceAll('.', '\\.') }"`));
   assert.match(html, new RegExp(`href="${MAPS_URL.replaceAll('.', '\\.') }"`));
+  assert.match(html, /booking-dock__external-arrow/);
   assert.match(script, /data-booking-cta/);
   assert.match(script, /scrollIntoView/);
   assert.match(script, /replaceChildren/);
