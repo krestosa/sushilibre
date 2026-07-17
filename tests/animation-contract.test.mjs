@@ -58,6 +58,24 @@ test('piece viewer separates loading, ready and error states', async () => {
   assert.match(styles, /prefers-reduced-motion: reduce/);
 });
 
+test('piece viewer locks the background without removing the scrollbar', async () => {
+  const [feature, styles] = await Promise.all([
+    readSource('src/ts/features/piece-viewer.ts'),
+    readSource('src/scss/components/_piece-viewer.scss')
+  ]);
+
+  assert.match(styles, /scrollbar-gutter: stable/);
+  assert.match(styles, /html\.has-piece-viewer[\s\S]*overflow-y: scroll/);
+  assert.match(styles, /\.page[\s\S]*position: fixed/);
+  assert.doesNotMatch(styles, /html\.has-piece-viewer\s*\{[^}]*overflow:\s*hidden/);
+  assert.match(feature, /--piece-viewer-scroll-offset/);
+  assert.match(feature, /--piece-viewer-document-height/);
+  assert.match(feature, /addEventListener\('wheel',[\s\S]*passive: false/);
+  assert.match(feature, /addEventListener\('touchmove',[\s\S]*passive: false/);
+  assert.match(feature, /SCROLL_KEYS/);
+  assert.match(feature, /window\.scrollTo\(0, lockedScrollY\)/);
+});
+
 test('short desktop categories end with their final product divider', async () => {
   const tablet = await readSource('src/scss/breakpoints/_tablet.scss');
 
@@ -82,9 +100,11 @@ test('compiled distribution contains synchronized animation and popup hooks', as
   assert.match(script, /data-menu-reveal/);
   assert.match(script, /is-closing/);
   assert.match(script, /data-piece-viewer-status-text/);
+  assert.match(script, /piece-viewer-scroll-offset/);
   assert.match(styles, /html\.has-menu-reveal \.menu-reveal/);
   assert.match(styles, /@keyframes menu-reveal-in/);
   assert.match(styles, /@keyframes piece-viewer-loader/);
+  assert.match(styles, /html\.has-piece-viewer/);
   assert.match(styles, /\.piece-viewer\.is-open/);
   assert.match(styles, /\.piece-viewer\.is-closing/);
   assert.match(html, /piece-viewer__loader/);
