@@ -951,8 +951,10 @@ video {
   }
   .menu-group.is-active .menu-group__heading {
     opacity: 1;
+    transform: translate3d(0, var(--menu-heading-exit-offset, 0%), 0);
   }
   .menu-group__heading {
+    --menu-heading-exit-offset: 0%;
     position: sticky;
     z-index: 10;
     top: 0;
@@ -960,10 +962,11 @@ video {
     padding: 16px 0 22px;
     background: transparent;
     visibility: visible;
-    opacity: 0.62;
-    transform: translate3d(0, 0, 0);
+    opacity: 1;
+    transform: translate3d(0, var(--menu-heading-exit-offset), 0);
     pointer-events: none;
-    transition: opacity 150ms ease-out, transform 170ms var(--ease-out);
+    will-change: transform;
+    transition: opacity 150ms ease-out;
   }
   .menu-group__heading::before {
     content: "";
@@ -980,13 +983,6 @@ video {
   }
   .menu-group__heading.is-overlapping::before {
     opacity: 1;
-  }
-  .menu-group__heading.is-leaving {
-    opacity: 0;
-    transform: translate3d(0, -6px, 0);
-  }
-  .menu-group__heading.is-leaving::before {
-    opacity: 0;
   }
   .menu-group__title-line {
     position: relative;
@@ -1011,9 +1007,6 @@ video {
   }
   .menu-group__exit-sentinel {
     display: block;
-    position: absolute;
-    left: 0;
-    bottom: 0;
     width: 1px;
     height: 1px;
     pointer-events: none;
