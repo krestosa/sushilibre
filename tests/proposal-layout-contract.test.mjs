@@ -1,14 +1,23 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import {
+  attributeValue,
+  findOpeningTag,
+  findTagIndexByClass,
+  hasClass
+} from './html-contract-helpers.mjs';
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 const legal = 'BASES, CONDICIONES Y LOCALES ADHERIDOS EN SUSHICLUB.COM.AR/BENEFICIOS.';
 
 const assertCommercialContent = (html) => {
-  assert.match(html, /class="proposal__payment-logo"[^>]*assets\/galicia-eminent-visa\.svg/);
-  assert.match(html, /width="245" height="32"/);
+  const paymentLogo = findOpeningTag(html, 'img', (tag) => hasClass(tag, 'proposal__payment-logo'));
+  assert.ok(paymentLogo, 'payment logo must exist');
+  assert.equal(attributeValue(paymentLogo, 'src'), 'assets/galicia-eminent-visa.svg');
+  assert.equal(attributeValue(paymentLogo, 'width'), '245');
+  assert.equal(attributeValue(paymentLogo, 'height'), '32');
   assert.ok(html.includes(legal));
 };
 
@@ -18,14 +27,14 @@ test('proposal is static, precedes the menu and includes complete commercial inf
     readSource('dist/index.html')
   ]);
 
-  const sourceProposalIndex = template.indexOf('<section class="proposal"');
+  const sourceProposalIndex = findTagIndexByClass(template, 'section', 'proposal');
   const sourceMenuMarkerIndex = template.indexOf('<!-- MENU_SECTION -->');
   assert.ok(sourceProposalIndex >= 0, 'source proposal section must exist');
   assert.ok(sourceMenuMarkerIndex > sourceProposalIndex, 'source proposal must precede the menu marker');
   assertCommercialContent(template);
 
-  const generatedProposalIndex = generated.indexOf('<section class="proposal"');
-  const generatedMenuIndex = generated.indexOf('<section class="menu-section"');
+  const generatedProposalIndex = findTagIndexByClass(generated, 'section', 'proposal');
+  const generatedMenuIndex = findTagIndexByClass(generated, 'section', 'menu-section');
   assert.ok(generatedProposalIndex >= 0, 'generated proposal section must exist');
   assert.ok(generatedMenuIndex > generatedProposalIndex, 'generated proposal must precede the menu');
   assertCommercialContent(generated);
