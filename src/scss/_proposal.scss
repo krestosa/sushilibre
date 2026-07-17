@@ -1,6 +1,6 @@
 .proposal {
   position: relative;
-  padding: clamp(72px, 8vh, 104px) 0 clamp(48px, 6vh, 76px);
+  padding: clamp(48px, 6vh, 76px) 0 clamp(48px, 6vh, 76px);
   overflow: hidden;
   background: #000;
   color: var(--white);
@@ -48,7 +48,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px 18px;
-  margin: clamp(28px, 4vh, 42px) 0 0;
+  margin: clamp(16px, 4vh, 24px) 0 0;
   padding: 0;
   list-style: none;
 
@@ -95,7 +95,7 @@
 
 .proposal__amount {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 7px;
   margin: 10px 0 0;
   color: #fff;
@@ -113,7 +113,7 @@
 
 .proposal__payment-logo {
   display: block;
-  width: min(290px, 100%);
+  width: min(290px, 90%);
   height: auto;
   margin-top: 18px;
   aspect-ratio: 245 / 32;
@@ -123,7 +123,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(36px, 5vw, 76px);
-  margin-top: clamp(72px, 10vh, 112px);
+  margin-top: clamp(72px, 10vh, 72px);
 }
 
 .proposal__condition {
@@ -240,7 +240,7 @@
 
 @media (max-width: 620px) {
   .proposal {
-    padding: 62px 0 calc(var(--dock-height) + 52px);
+    padding: 62px 0 calc(var(--dock-height) - 100px);
   }
 
   .proposal__shell {
@@ -258,7 +258,7 @@
 
   .proposal__intro {
     max-width: none;
-    font-size: clamp(23px, 7.2vw, 31px);
+    font-size: clamp(23px, 6.2vw, 31px);
     line-height: 1.04;
   }
 
@@ -269,7 +269,7 @@
     li {
       min-height: 26px;
       padding: 5px 10px 4px;
-      font-size: 9px;
+      font-size: 12px;
     }
   }
 
@@ -301,7 +301,7 @@
   .proposal__condition p {
     max-width: 32ch;
     margin-top: 14px;
-    font-size: 13px;
+    font-size: 18px;
     line-height: 1.18;
   }
 

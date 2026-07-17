@@ -91,7 +91,7 @@
   .menu-section__shell {
     width: calc(100% - 32px);
     padding-top: 17vh;
-    padding-bottom: calc(var(--dock-height) + 20vh);
+    padding-bottom: calc(var(--dock-height) + 0vh);
   }
 
   .menu-section__intro {
@@ -295,7 +295,8 @@
 
   .hero-copy {
     top: auto;
-    bottom: calc(var(--dock-height) + var(--dock-bottom) + 22px);
+    bottom: calc(var(--dock-height) + var(--dock-bottom) + 80px);
+    text-align: left;
     width: 88vw;
 
     h2 {
