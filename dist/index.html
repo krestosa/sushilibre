@@ -6,6 +6,17 @@
   <meta name="theme-color" content="#000000">
   <meta name="description" content="Sushi Libre — una experiencia exclusiva en SushiClub Puerto Madero.">
   <title>Sushi Libre — SushiClub Puerto Madero</title>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      root.classList.add('has-menu-reveal');
+      window.setTimeout(() => {
+        if (!root.hasAttribute('data-menu-reveal-ready')) {
+          root.classList.add('menu-reveal-fallback');
+        }
+      }, 1800);
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -73,123 +84,123 @@
     <section class="menu-section" id="menu" data-menu-root aria-labelledby="menu-heading" style="--menu-background-image:url(&quot;assets/menu_bg.png&quot;)">
       <div class="menu-section__background" aria-hidden="true"></div>
       <div class="menu-section__shell">
-        <header class="menu-section__intro"><h2 id="menu-heading">MENÚ</h2></header>
+        <header class="menu-section__intro"><h2 class="menu-reveal menu-reveal--intro" data-menu-reveal id="menu-heading">MENÚ</h2></header>
         <div class="menu-section__groups" data-menu-groups>
       <article class="menu-group" id="menu-piezas" data-menu-group="piezas" data-item-count="19" style="--menu-item-count:19">
         <h3 class="menu-group__heading">
-          <span class="menu-group__title-line"><span class="menu-group__title">PIEZAS</span><span class="menu-group__quantity">4U</span></span>
+          <span class="menu-group__title-line menu-reveal menu-reveal--group" data-menu-reveal><span class="menu-group__title">PIEZAS</span><span class="menu-group__quantity">4U</span></span>
         </h3>
         <div class="menu-group__items">
           <span class="menu-group__overlap-sentinel" aria-hidden="true"></span>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:0ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">BUENOS AIRES</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="BUENOS AIRES" data-piece-image="assets/piezas/buenos_aires.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="SALMÓN, LANGOSTINOS, PALTA, QUESO CREMA Y SALSA DE SÉSAMO.">SALMÓN, LANGOSTINOS, PALTA, QUESO CREMA Y SALSA DE SÉSAMO.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:45ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">CELERITY</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="CELERITY" data-piece-image="assets/piezas/celerity.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="LANGOSTINOS Y PALTA, SALMÓN CON CRIOLLA DE ROCOTO Y MAYONESA DE APIO.">LANGOSTINOS Y PALTA, SALMÓN CON CRIOLLA DE ROCOTO Y MAYONESA DE APIO.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">FEEL</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="FEEL" data-piece-image="assets/piezas/feel.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="SALMÓN, QUESO CREMA Y VERDEO, ENVUELTO EN LÁMINAS DE TAMAGO.">SALMÓN, QUESO CREMA Y VERDEO, ENVUELTO EN LÁMINAS DE TAMAGO.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">SOUL</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="SOUL" data-piece-image="assets/piezas/soul.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="PALMITO, SALMÓN, TAMAGO, RECUBIERTO CON QUESO Y ALMENDRAS CARAMELIZADAS.">PALMITO, SALMÓN, TAMAGO, RECUBIERTO CON QUESO Y ALMENDRAS CARAMELIZADAS.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">PLACER REAL</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="PLACER REAL" data-piece-image="assets/piezas/placer_real.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="PALTA, PALMITO, QUESO CREMA, TAMAGO Y SALMÓN CON SALSA DE MARACUYÁ.">PALTA, PALMITO, QUESO CREMA, TAMAGO Y SALMÓN CON SALSA DE MARACUYÁ.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">FUTURAMA2</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="FUTURAMA2" data-piece-image="assets/piezas/futurama2.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="LANGOSTINOS REBOZADOS, QUESO SABORIZADO, PANKO Y SALSA DE MIEL Y MOSTAZA.">LANGOSTINOS REBOZADOS, QUESO SABORIZADO, PANKO Y SALSA DE MIEL Y MOSTAZA.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">SWEET</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="SWEET" data-piece-image="assets/piezas/sweet.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="LANGOSTINOS, TAMAGO, PALTA Y QUESO SABORIZADO, SALMÓN CON SALSA DE MANGO.">LANGOSTINOS, TAMAGO, PALTA Y QUESO SABORIZADO, SALMÓN CON SALSA DE MANGO.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">SPF</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="SPF" data-piece-image="assets/piezas/spf.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="SALMÓN, PALTA Y QUESO CREMA, CON SÉSAMO.">SALMÓN, PALTA Y QUESO CREMA, CON SÉSAMO.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">HONEY</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="HONEY" data-piece-image="assets/piezas/honey.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="SALMÓN COCIDO SABORIZADO CON REDUCCIÓN DE MIEL Y JENGIBRE.">SALMÓN COCIDO SABORIZADO CON REDUCCIÓN DE MIEL Y JENGIBRE.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">PHILADELPHIA</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="PHILADELPHIA" data-piece-image="assets/piezas/philadelphia.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="SALMÓN Y QUESO CREMA, CON SÉSAMO.">SALMÓN Y QUESO CREMA, CON SÉSAMO.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">TIGER</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="TIGER" data-piece-image="assets/piezas/tiger.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="LANGOSTINOS APANADOS, PALTA, SALMÓN, CROCANTE DE PAPA Y LECHE DE TIGRE.">LANGOSTINOS APANADOS, PALTA, SALMÓN, CROCANTE DE PAPA Y LECHE DE TIGRE.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">MERKEN</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="MERKEN" data-piece-image="assets/piezas/merken.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="SALMÓN AHUMADO, PALTA, TATAKI DE SALMÓN CON MERKEN Y SALSA PICANTE.">SALMÓN AHUMADO, PALTA, TATAKI DE SALMÓN CON MERKEN Y SALSA PICANTE.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">SC EVOLUTION</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="SC EVOLUTION" data-piece-image="assets/piezas/sc_evolution.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="SALMÓN, PALTA, QUESO CREMA Y NEGUI, SALMÓN CON PANKO Y SALSA DE ANANÁ.">SALMÓN, PALTA, QUESO CREMA Y NEGUI, SALMÓN CON PANKO Y SALSA DE ANANÁ.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">PINK FLOYD</h4><div class="menu-item__badges"><span class="menu-item__badge menu-item__badge--pieces">3U</span><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="PINK FLOYD" data-piece-image="assets/piezas/pink_floyd.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="LANGOSTINO RELLENO CON PASTA DE SALMÓN, PANKO, ENVUELTO EN SALMÓN, CON SALSA THAI, LECHE DE TIGRE Y SALSA DE ANANÁ.">LANGOSTINO RELLENO CON PASTA DE SALMÓN, PANKO, ENVUELTO EN SALMÓN, CON SALSA THAI, LECHE DE TIGRE Y SALSA DE ANANÁ.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">BOOM!</h4><div class="menu-item__badges"><span class="menu-item__badge menu-item__badge--pieces">6U</span><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="BOOM!" data-piece-image="assets/piezas/boom.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="CORTES DE SALMÓN, CON QUESO CREMA SABORIZADO, CUBIERTOS DE MASA TEMPURA.">CORTES DE SALMÓN, CON QUESO CREMA SABORIZADO, CUBIERTOS DE MASA TEMPURA.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">CRISPY GREEN</h4><div class="menu-item__badges"><span class="menu-item__badge menu-item__badge--diet">veggie</span><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="CRISPY GREEN" data-piece-image="assets/piezas/crispy_green.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="TOMATES CONFITADOS, ESPINACA, QUESO SABORIZADO Y PANKO CON SALSA AGRIPICANTE.">TOMATES CONFITADOS, ESPINACA, QUESO SABORIZADO Y PANKO CON SALSA AGRIPICANTE.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">FRESH FUSION</h4><div class="menu-item__badges"><span class="menu-item__badge menu-item__badge--diet">veggie</span><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="FRESH FUSION" data-piece-image="assets/piezas/fresh_fusion.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="QUESO CAMEMBERT Y PALTA, ENVUELTO CON ZANAHORIA, ROCOTO Y SALSA DE APIO.">QUESO CAMEMBERT Y PALTA, ENVUELTO CON ZANAHORIA, ROCOTO Y SALSA DE APIO.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">CAMEMBERT</h4><div class="menu-item__badges"><span class="menu-item__badge menu-item__badge--diet">veggie</span><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="CAMEMBERT" data-piece-image="assets/piezas/camembert.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="TOMATES CONFITADOS, ESPINACA, PALTA, QUESO CAMEMBERT Y SALSA DE MANGO.">TOMATES CONFITADOS, ESPINACA, PALTA, QUESO CAMEMBERT Y SALSA DE MANGO.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">SWEET TREEE</h4><div class="menu-item__badges"><span class="menu-item__badge menu-item__badge--diet">vegan</span><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="SWEET TREEE" data-piece-image="assets/piezas/sweet_treee.webp">VER PIEZA</button></div></div>
             </div>
@@ -200,59 +211,59 @@
       </article>
       <article class="menu-group" id="menu-niguiris" data-menu-group="niguiris" data-item-count="9" style="--menu-item-count:9">
         <h3 class="menu-group__heading">
-          <span class="menu-group__title-line"><span class="menu-group__title">NIGUIRIS</span><span class="menu-group__quantity">3U</span></span>
+          <span class="menu-group__title-line menu-reveal menu-reveal--group" data-menu-reveal><span class="menu-group__title">NIGUIRIS</span><span class="menu-group__quantity">3U</span></span>
         </h3>
         <div class="menu-group__items">
           <span class="menu-group__overlap-sentinel" aria-hidden="true"></span>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:0ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">SALMÓN</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="SALMÓN" data-piece-image="assets/piezas/niguiri_salmon.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="FINAS FETAS DE SALMÓN SOBRE BOCADITOS DE ARROZ.">FINAS FETAS DE SALMÓN SOBRE BOCADITOS DE ARROZ.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:45ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">SALMÓN AHUMADO</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="SALMÓN AHUMADO" data-piece-image="assets/piezas/niguiri_salmon_ahumado.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="FINAS FETAS DE SALMÓN AHUMADO SOBRE BOCADITOS DE ARROZ.">FINAS FETAS DE SALMÓN AHUMADO SOBRE BOCADITOS DE ARROZ.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">ATÚN ROJO</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="ATÚN ROJO" data-piece-image="assets/piezas/niguiri_atun_rojo.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="FINAS FETAS DE ATÚN ROJO SOBRE BOCADITOS DE ARROZ.">FINAS FETAS DE ATÚN ROJO SOBRE BOCADITOS DE ARROZ.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">PULPO</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="PULPO" data-piece-image="assets/piezas/niguiri_pulpo.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="FINAS FETAS DE PULPO SOBRE BOCADITOS DE ARROZ.">FINAS FETAS DE PULPO SOBRE BOCADITOS DE ARROZ.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">ANTICUCHERO</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="ANTICUCHERO" data-piece-image="assets/piezas/niguiri_anticuchero.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="SALMÓN CON SALSA ANTICUCHO, FLAMEADO CON EMULSIÓN ALIMONADA SOBRE ARROZ.">SALMÓN CON SALSA ANTICUCHO, FLAMEADO CON EMULSIÓN ALIMONADA SOBRE ARROZ.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">FUEGO THAI</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="FUEGO THAI" data-piece-image="assets/piezas/niguiri_fuego_thai.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="SALMÓN CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE.">SALMÓN CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">LANGOSTINO FUEGO THAI</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="LANGOSTINO FUEGO THAI" data-piece-image="assets/piezas/niguiri_langostino_fuego_thai.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="LANGOSTINO CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE.">LANGOSTINO CON SALSA THAI A BASE DE MANÍ, FLAMBEADO, SOBRE ARROZ CON SALSA AGRIPICANTE.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">CRISPY WHITE</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="CRISPY WHITE" data-piece-image="assets/piezas/niguiri_crispy_white.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="PESCADO BLANCO CON PANKO, CREMA DE PALTA Y CRIOLLA DE ROCOTO SOBRE ARROZ.">PESCADO BLANCO CON PANKO, CREMA DE PALTA Y CRIOLLA DE ROCOTO SOBRE ARROZ.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">PALTA THAI</h4><div class="menu-item__badges"><span class="menu-item__badge menu-item__badge--diet">vegan</span><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="PALTA THAI" data-piece-image="assets/piezas/niguiri_palta_thai.webp">VER PIEZA</button></div></div>
             </div>
@@ -263,29 +274,29 @@
       </article>
       <article class="menu-group" id="menu-sashimis" data-menu-group="sashimis" data-item-count="4" style="--menu-item-count:4">
         <h3 class="menu-group__heading">
-          <span class="menu-group__title-line"><span class="menu-group__title">SASHIMIS</span><span class="menu-group__quantity">5U</span></span>
+          <span class="menu-group__title-line menu-reveal menu-reveal--group" data-menu-reveal><span class="menu-group__title">SASHIMIS</span><span class="menu-group__quantity">5U</span></span>
         </h3>
         <div class="menu-group__items">
           <span class="menu-group__overlap-sentinel" aria-hidden="true"></span>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:0ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">SALMÓN</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="SALMÓN" data-piece-image="assets/piezas/sashimi_salmon.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="FINAS FETAS DE SALMÓN.">FINAS FETAS DE SALMÓN.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:45ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">SALMÓN AHUMADO</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="SALMÓN AHUMADO" data-piece-image="assets/piezas/sashimi_salmon_ahumado.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="FINAS FETAS DE SALMÓN AHUMADO.">FINAS FETAS DE SALMÓN AHUMADO.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">PULPO</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="PULPO" data-piece-image="assets/piezas/sashimi_pulpo.webp">VER PIEZA</button></div></div>
             </div>
             <p class="menu-item__description" data-balance-text="FINAS FETAS DE PULPO.">FINAS FETAS DE PULPO.</p>
           </article>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">ATÚN ROJO</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="ATÚN ROJO" data-piece-image="assets/piezas/sashimi_atun_rojo.webp">VER PIEZA</button></div></div>
             </div>
@@ -296,11 +307,11 @@
       </article>
       <article class="menu-group" id="menu-geisha" data-menu-group="geisha" data-item-count="1" style="--menu-item-count:1">
         <h3 class="menu-group__heading">
-          <span class="menu-group__title-line"><span class="menu-group__title">GEISHA</span><span class="menu-group__quantity">3U</span></span>
+          <span class="menu-group__title-line menu-reveal menu-reveal--group" data-menu-reveal><span class="menu-group__title">GEISHA</span><span class="menu-group__quantity">3U</span></span>
         </h3>
         <div class="menu-group__items">
           <span class="menu-group__overlap-sentinel" aria-hidden="true"></span>
-          <article class="menu-item">
+          <article class="menu-item menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:0ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">SALMÓN</h4><div class="menu-item__badges"><button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="SALMÓN" data-piece-image="assets/piezas/geisha_salmon.webp">VER PIEZA</button></div></div>
             </div>
@@ -311,21 +322,21 @@
       </article>
       <article class="menu-group" id="menu-bebidas" data-menu-group="bebidas" data-item-count="3" style="--menu-item-count:3">
         <h3 class="menu-group__heading">
-          <span class="menu-group__title-line"><span class="menu-group__title">BEBIDAS</span></span>
+          <span class="menu-group__title-line menu-reveal menu-reveal--group" data-menu-reveal><span class="menu-group__title">BEBIDAS</span></span>
         </h3>
         <div class="menu-group__items">
           <span class="menu-group__overlap-sentinel" aria-hidden="true"></span>
-          <article class="menu-item menu-item--simple">
+          <article class="menu-item menu-item--simple menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:0ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">AGUA CON/SIN GAS LIBRE</h4></div>
             </div>
           </article>
-          <article class="menu-item menu-item--simple">
+          <article class="menu-item menu-item--simple menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:45ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">&amp; LIMONADA CLÁSICA LIBRE</h4></div>
             </div>
           </article>
-          <article class="menu-item menu-item--simple">
+          <article class="menu-item menu-item--simple menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:90ms">
             <div class="menu-item__header">
               <div class="menu-item__identity"><h4 class="menu-item__name">+ CAFÉ NESPRESSO X PERSONA</h4></div>
             </div>
@@ -338,10 +349,13 @@
     </section>
     <dialog class="piece-viewer" id="piece-viewer" data-piece-viewer aria-label="Vista de pieza">
       <div class="piece-viewer__content">
-        <button class="piece-viewer__close" type="button" data-piece-viewer-close aria-label="Cerrar">×</button>
+        <button class="piece-viewer__close" type="button" data-piece-viewer-close aria-label="Cerrar"><span class="piece-viewer__close-icon" aria-hidden="true"></span></button>
         <img class="piece-viewer__image" data-piece-viewer-image alt="" decoding="async">
-        <p class="piece-viewer__status" data-piece-viewer-status>CARGANDO IMAGEN</p>
-        <p class="piece-viewer__disclaimer">La cantidad de piezas es la especificada en el menú. Imagen ilustrativa.</p>
+        <div class="piece-viewer__status" data-piece-viewer-status role="status" aria-live="polite">
+          <span class="piece-viewer__loader" aria-hidden="true"></span>
+          <span class="piece-viewer__status-text" data-piece-viewer-status-text>CARGANDO IMAGEN</span>
+        </div>
+        <p class="piece-viewer__disclaimer">Imagen ilustrativa. Cantidad de piezas según menú.</p>
       </div>
     </dialog>
   </main>

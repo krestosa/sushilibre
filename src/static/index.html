@@ -6,6 +6,17 @@
   <meta name="theme-color" content="#000000">
   <meta name="description" content="Sushi Libre — una experiencia exclusiva en SushiClub Puerto Madero.">
   <title>Sushi Libre — SushiClub Puerto Madero</title>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      root.classList.add('has-menu-reveal');
+      window.setTimeout(() => {
+        if (!root.hasAttribute('data-menu-reveal-ready')) {
+          root.classList.add('menu-reveal-fallback');
+        }
+      }, 1800);
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">

@@ -5,7 +5,7 @@ import test from 'node:test';
 import { parseMenuSource, renderStaticHtml } from '../scripts/menu-html.mjs';
 
 const EXPECTED_MENU_HASH = 'b95fc9f0e18df869c7e7786608fa6dc1982b47dab798f0e3e5a43b75aa68b1b7';
-const PIECE_IMAGE_PATTERN = /^assets\/piezas\/[a-z0-9_/-]+\.webp$/;
+const PIECE_IMAGE_PATTERN = /^assets\/piezas\/[a-z0-9_\/-]+\.webp$/;
 
 const sortValue = (value) => {
   if (Array.isArray(value)) return value.map(sortValue);
@@ -31,14 +31,17 @@ const assertStaticMenuMarkup = (html) => {
   assert.equal(countMatches(html, /<article class="menu-item(?:\s|\")/g), 36);
   assert.equal(countMatches(html, /class="menu-item__description"/g), 33);
   assert.equal(countMatches(html, /class="menu-group__exit-sentinel"/g), 5);
+  assert.equal(countMatches(html, /data-menu-reveal(?:\s|>)/g), 42);
   assert.equal(countMatches(html, /data-piece-viewer-open/g), 33);
   assert.equal(countMatches(html, /class="menu-item__badge menu-item__view"/g), 33);
   assert.equal(countMatches(html, /<dialog class="piece-viewer"/g), 1);
   assert.equal(countMatches(html, /data-piece-viewer-image/g), 1);
+  assert.equal(countMatches(html, /class="piece-viewer__loader"/g), 1);
+  assert.equal(countMatches(html, /data-piece-viewer-status-text/g), 1);
   assert.equal(countMatches(html, /class="piece-viewer__disclaimer"/g), 1);
   assert.match(html, /<div class="menu-item__badges">[^<]*(?:<[^>]+>[^<]*<\/[^>]+>)*<button class="menu-item__badge menu-item__view"/);
-  assert.match(html, /<button class="piece-viewer__close"[^>]*>×<\/button>/);
-  assert.match(html, /La cantidad de piezas es la especificada en el menú\. Imagen ilustrativa\./);
+  assert.match(html, /<button class="piece-viewer__close"[^>]*><span class="piece-viewer__close-icon" aria-hidden="true"><\/span><\/button>/);
+  assert.match(html, /Imagen ilustrativa\. Cantidad de piezas según menú\./);
   assert.doesNotMatch(html, /piece-viewer__caption|data-piece-viewer-title/);
   assert.match(html, /data-piece-image="assets\/piezas\/buenos_aires\.webp"/);
   assert.match(html, /data-piece-image="assets\/piezas\/niguiri_salmon\.webp"/);
@@ -104,6 +107,7 @@ test('build converts menu.json into normal HTML elements and one reusable viewer
   const generatedHtml = renderStaticHtml(template, parseMenuSource(rawMenu));
 
   assert.match(template, /<!--\s*MENU_SECTION\s*-->/);
+  assert.match(template, /classList\.add\('has-menu-reveal'\)/);
   assert.doesNotMatch(template, /id=["']menu-data["']/i);
   assertStaticMenuMarkup(generatedHtml);
 });

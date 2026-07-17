@@ -9,10 +9,11 @@ export const setupPieceViewer = (): void => {
   const dialog = query<HTMLDialogElement>('[data-piece-viewer]');
   const image = query<HTMLImageElement>('[data-piece-viewer-image]', dialog ?? undefined);
   const status = query<HTMLElement>('[data-piece-viewer-status]', dialog ?? undefined);
+  const statusText = query<HTMLElement>('[data-piece-viewer-status-text]', dialog ?? undefined);
   const closeButton = query<HTMLButtonElement>('[data-piece-viewer-close]', dialog ?? undefined);
   const openButtons = queryAll<HTMLButtonElement>('[data-piece-viewer-open]');
 
-  if (!dialog || !image || !status || !closeButton || !openButtons.length) return;
+  if (!dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let activeButton: HTMLButtonElement | null = null;
@@ -23,7 +24,7 @@ export const setupPieceViewer = (): void => {
   const setLoadingState = (): void => {
     if (imageFrame) window.cancelAnimationFrame(imageFrame);
     dialog.dataset.state = 'loading';
-    status.textContent = LOADING_MESSAGE;
+    statusText.textContent = LOADING_MESSAGE;
     status.hidden = false;
     image.hidden = true;
   };
@@ -43,7 +44,7 @@ export const setupPieceViewer = (): void => {
   const setErrorState = (): void => {
     if (!dialog.open || dialog.classList.contains('is-closing')) return;
     dialog.dataset.state = 'error';
-    status.textContent = ERROR_MESSAGE;
+    statusText.textContent = ERROR_MESSAGE;
     status.hidden = false;
     image.hidden = true;
   };
@@ -76,7 +77,7 @@ export const setupPieceViewer = (): void => {
     dialog.setAttribute('aria-label', 'Vista de pieza');
     image.removeAttribute('src');
     image.alt = '';
-    status.textContent = LOADING_MESSAGE;
+    statusText.textContent = LOADING_MESSAGE;
     status.hidden = false;
     image.hidden = true;
     delete dialog.dataset.state;
