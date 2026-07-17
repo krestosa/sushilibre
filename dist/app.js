@@ -520,9 +520,9 @@
   };
 
   // src/ts/features/proposal-reveal.ts
-  var REVEAL_ROOT_MARGIN = "0px 0px -10% 0px";
-  var REVEAL_THRESHOLD = 0.01;
-  var INITIAL_VIEWPORT_RATIO = 0.92;
+  var REVEAL_ROOT_MARGIN = "0px 0px -18% 0px";
+  var REVEAL_THRESHOLD = 0.08;
+  var INITIAL_VIEWPORT_RATIO = 0.84;
   var reveal = (element) => {
     if (element.classList.contains("is-visible")) return;
     element.classList.add("is-visible");
@@ -545,7 +545,7 @@
     }
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
+        if (!entry.isIntersecting || entry.intersectionRatio < REVEAL_THRESHOLD) return;
         const element = entry.target;
         reveal(element);
         observer.unobserve(element);
