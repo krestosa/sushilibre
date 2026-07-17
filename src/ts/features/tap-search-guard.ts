@@ -13,7 +13,8 @@ interface TouchGesture {
 
 const getElement = (target: EventTarget | Node | null): Element | null => {
   if (target instanceof Element) return target;
-  return target?.parentElement ?? null;
+  if (target instanceof Node) return target.parentElement;
+  return null;
 };
 
 const isEditableTarget = (target: Element | null): boolean => Boolean(target?.closest(
