@@ -10,6 +10,7 @@ const heroTitle = query<HTMLElement>('.title-lockup');
 
 if (dock && heroTitle) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const supportsIntersectionObserver = typeof globalThis.IntersectionObserver === 'function';
   const easeOut = 'cubic-bezier(.22, 1, .36, 1)';
   let resolved = false;
   let observer: IntersectionObserver | null = null;
@@ -140,17 +141,18 @@ if (dock && heroTitle) {
   });
 
   const activeDockAnimation = dock.getAnimations().some(
-    (animation) => animation.playState === 'running' || animation.playState === 'pending'
+    (animation) => animation.playState === 'running'
   );
 
   if (!activeDockAnimation && Number.parseFloat(getComputedStyle(dock).opacity) >= 0.99) {
     finishReveal({ fast: true });
-  } else if ('IntersectionObserver' in window) {
-    observer = new IntersectionObserver((entries) => {
+  } else if (supportsIntersectionObserver) {
+    const nextObserver = new IntersectionObserver((entries) => {
       const entry = entries[0];
       if (entry && !entry.isIntersecting && window.scrollY > 0) revealImmediately();
     }, { threshold: 0 });
-    observer.observe(heroTitle);
+    observer = nextObserver;
+    nextObserver.observe(heroTitle);
   } else {
     let frameId = 0;
     window.addEventListener('scroll', () => {
