@@ -3,12 +3,13 @@ import { queryAll } from '../shared/dom';
 const DESCRIPTION_SELECTOR = '.menu-item__description';
 const NON_BREAKING_SPACE = '\u00A0';
 const WIDTH_EPSILON = 0.5;
-const PREFERRED_MINIMUM_WORDS = 8;
+const TARGET_MINIMUM_WORDS = 8;
+const TARGET_IDEAL_WORDS = 9;
 const MAXIMUM_WORDS_PER_LINE = 10;
-const MINIMUM_WORDS_PER_WRAPPED_LINE = 2;
-const COHERENCE_LOWER_RATIO = 0.84;
-const COHERENCE_UPPER_RATIO = 1.18;
-const COHERENCE_WEIGHT = 1.35;
+const MINIMUM_NON_FINAL_WORDS = 2;
+const MINIMUM_FINAL_WORDS = 3;
+const COHERENCE_LOWER_RATIO = 0.82;
+const COHERENCE_UPPER_RATIO = 1.22;
 
 interface BalancedLine {
   words: string[];
@@ -17,7 +18,7 @@ interface BalancedLine {
 
 interface BalancedLayout {
   lines: BalancedLine[];
-  cost: number;
+  localCost: number;
   requiredWidth: number;
 }
 
@@ -39,9 +40,6 @@ type TextMeasure = (value: string) => number;
 
 let measurementNode: HTMLSpanElement | null = null;
 
-const clamp = (value: number, minimum: number, maximum: number): number =>
-  Math.min(maximum, Math.max(minimum, value));
-
 const median = (values: number[]): number => {
   if (!values.length) return 0;
 
@@ -51,8 +49,7 @@ const median = (values: number[]): number => {
   if (upper === undefined) return 0;
 
   if (sorted.length % 2 === 1) return upper;
-  const lower = sorted[middle - 1] ?? upper;
-  return (lower + upper) / 2;
+  return ((sorted[middle - 1] ?? upper) + upper) / 2;
 };
 
 const getMeasurementNode = (): HTMLSpanElement => {
@@ -105,12 +102,22 @@ const calculateLocalCost = (lines: BalancedLine[], maxWidth: number): number => 
   const widths = lines.map((line) => line.width);
   const wordCounts = lines.map((line) => line.words.length);
   const meanWidth = widths.reduce((total, width) => total + width, 0) / widths.length;
-  const meanWordCount = wordCounts.reduce((total, count) => total + count, 0) / wordCounts.length;
+  const meanWords = wordCounts.reduce((total, count) => total + count, 0) / wordCounts.length;
   const normalizeWidth = (value: number): number => value / Math.max(maxWidth, 1);
   const normalizeWords = (value: number): number => value / MAXIMUM_WORDS_PER_LINE;
 
+  const nonFinalTargetPenalty = wordCounts.slice(0, -1).reduce((total, count) => {
+    if (count >= TARGET_MINIMUM_WORDS) {
+      const distance = normalizeWords(count - TARGET_IDEAL_WORDS);
+      return total + distance * distance * 0.2;
+    }
+
+    const shortage = normalizeWords(TARGET_MINIMUM_WORDS - count);
+    return total + shortage * shortage * 8;
+  }, 0);
+
   const wordBalance = wordCounts.reduce((total, count) => {
-    const delta = normalizeWords(count - meanWordCount);
+    const delta = normalizeWords(count - meanWords);
     return total + delta * delta;
   }, 0) / wordCounts.length;
 
@@ -119,16 +126,6 @@ const calculateLocalCost = (lines: BalancedLine[], maxWidth: number): number => 
     return total + delta * delta;
   }, 0) / widths.length;
 
-  const preferredWordPenalty = wordCounts.reduce((total, count) => {
-    if (count >= PREFERRED_MINIMUM_WORDS) {
-      const delta = normalizeWords(count - 9);
-      return total + delta * delta * 0.2;
-    }
-
-    const shortage = normalizeWords(PREFERRED_MINIMUM_WORDS - count);
-    return total + shortage * shortage * 2.6;
-  }, 0) / wordCounts.length;
-
   const adjacentWidthDifference = widths.slice(1).reduce((total, width, index) => {
     const previous = widths[index];
     if (previous === undefined) return total;
@@ -136,18 +133,51 @@ const calculateLocalCost = (lines: BalancedLine[], maxWidth: number): number => 
     return total + delta * delta;
   }, 0) / Math.max(widths.length - 1, 1);
 
-  const lastWordCount = wordCounts[wordCounts.length - 1] ?? meanWordCount;
-  const lastLineShortfall = normalizeWords(Math.max(0, meanWordCount * 0.78 - lastWordCount));
-  const twoWordTailPenalty = lastWordCount === 2 && meanWordCount > 3 ? 1.8 : 0;
+  let tailPenalty = 0;
+  if (lines.length > 1) {
+    const previousCount = wordCounts[wordCounts.length - 2] ?? meanWords;
+    const finalCount = wordCounts[wordCounts.length - 1] ?? meanWords;
+    const previousWidth = widths[widths.length - 2] ?? meanWidth;
+    const finalWidth = widths[widths.length - 1] ?? meanWidth;
+    const countRatio = finalCount / Math.max(previousCount, 1);
+    const widthRatio = finalWidth / Math.max(previousWidth, 1);
+
+    if (countRatio < 0.5) {
+      const shortage = 0.5 - countRatio;
+      tailPenalty += shortage * shortage * 28;
+    }
+
+    if (widthRatio < 0.48) {
+      const shortage = 0.48 - widthRatio;
+      tailPenalty += shortage * shortage * 20;
+    }
+
+    if (finalCount > previousCount) {
+      const excess = normalizeWords(finalCount - previousCount);
+      tailPenalty += excess * excess * 8;
+    }
+
+    if (finalWidth > previousWidth) {
+      const excess = normalizeWidth(finalWidth - previousWidth);
+      tailPenalty += excess * excess * 8;
+    }
+
+    if (finalCount === MINIMUM_FINAL_WORDS) tailPenalty += 0.28;
+  }
 
   return (
-    wordBalance * 2.8 +
-    widthBalance * 1.35 +
-    preferredWordPenalty +
-    adjacentWidthDifference * 0.7 +
-    lastLineShortfall * lastLineShortfall * 4 +
-    twoWordTailPenalty
+    nonFinalTargetPenalty +
+    wordBalance * 1.35 +
+    widthBalance * 1.8 +
+    adjacentWidthDifference * 0.85 +
+    tailPenalty
   );
+};
+
+const minimumWordsRequired = (remainingLines: number): number => {
+  if (remainingLines <= 0) return 0;
+  if (remainingLines === 1) return MINIMUM_FINAL_WORDS;
+  return (remainingLines - 1) * MINIMUM_NON_FINAL_WORDS + MINIMUM_FINAL_WORDS;
 };
 
 const generateLayoutsForLineCount = (
@@ -158,18 +188,18 @@ const generateLayoutsForLineCount = (
 ): BalancedLayout[] => {
   const layouts: BalancedLayout[] = [];
   const current: BalancedLine[] = [];
-  const minimumWordsPerLine = lineCount > 1 ? MINIMUM_WORDS_PER_WRAPPED_LINE : 1;
 
   const visit = (start: number, remainingLines: number): void => {
     const remainingWords = words.length - start;
-    const minimumRequired = remainingLines * minimumWordsPerLine;
+    const minimumRequired = lineCount === 1 ? 1 : minimumWordsRequired(remainingLines);
     const maximumAllowed = remainingLines * MAXIMUM_WORDS_PER_LINE;
     if (remainingWords < minimumRequired || remainingWords > maximumAllowed) return;
 
     if (remainingLines === 1) {
       const finalWords = words.slice(start);
+      const minimumFinalWords = lineCount === 1 ? 1 : MINIMUM_FINAL_WORDS;
       if (
-        finalWords.length < minimumWordsPerLine ||
+        finalWords.length < minimumFinalWords ||
         finalWords.length > MAXIMUM_WORDS_PER_LINE
       ) {
         return;
@@ -181,22 +211,17 @@ const generateLayoutsForLineCount = (
       const lines = [...current, { words: finalWords, width }];
       layouts.push({
         lines,
-        cost: calculateLocalCost(lines, maxWidth),
+        localCost: calculateLocalCost(lines, maxWidth),
         requiredWidth: Math.max(...lines.map((line) => line.width))
       });
       return;
     }
 
     const followingLines = remainingLines - 1;
-    const minimumWordsForFollowingLines = followingLines * minimumWordsPerLine;
-    const maximumWordsForFollowingLines = followingLines * MAXIMUM_WORDS_PER_LINE;
-    const minimumEnd = Math.max(
-      start + minimumWordsPerLine,
-      words.length - maximumWordsForFollowingLines
-    );
+    const minimumEnd = start + MINIMUM_NON_FINAL_WORDS;
     const maximumEnd = Math.min(
       start + MAXIMUM_WORDS_PER_LINE,
-      words.length - minimumWordsForFollowingLines
+      words.length - minimumWordsRequired(followingLines)
     );
 
     for (let end = minimumEnd; end <= maximumEnd; end += 1) {
@@ -221,7 +246,10 @@ const generateIndividualCandidates = (metrics: DescriptionMetrics): BalancedLayo
   const minimumLineCount = Math.max(1, Math.ceil(words.length / MAXIMUM_WORDS_PER_LINE));
   const maximumLineCount = words.length === 1
     ? 1
-    : Math.max(minimumLineCount, Math.floor(words.length / MINIMUM_WORDS_PER_WRAPPED_LINE));
+    : Math.max(
+      minimumLineCount,
+      1 + Math.floor((words.length - MINIMUM_FINAL_WORDS) / MINIMUM_NON_FINAL_WORDS)
+    );
 
   for (let lineCount = minimumLineCount; lineCount <= maximumLineCount; lineCount += 1) {
     const layouts = generateLayoutsForLineCount(words, lineCount, maxWidth, measure);
@@ -231,11 +259,11 @@ const generateIndividualCandidates = (metrics: DescriptionMetrics): BalancedLayo
   return [];
 };
 
-const selectLowestCost = (layouts: BalancedLayout[]): BalancedLayout | null => {
+const selectLowestLocalCost = (layouts: BalancedLayout[]): BalancedLayout | null => {
   let selected: BalancedLayout | null = null;
 
   layouts.forEach((layout) => {
-    if (!selected || layout.cost < selected.cost) selected = layout;
+    if (!selected || layout.localCost < selected.localCost) selected = layout;
   });
 
   return selected;
@@ -253,13 +281,15 @@ const selectCoherentLayout = (
   let selectedCost = Number.POSITIVE_INFINITY;
 
   plan.candidates.forEach((candidate) => {
-    const normalizedDifference = (candidate.requiredWidth - referenceWidth) / referenceWidth;
+    if (candidate.localCost > plan.localBest.localCost + 0.9) return;
+
     const belowBand = Math.max(0, lowerGuide - candidate.requiredWidth) / referenceWidth;
     const aboveBand = Math.max(0, candidate.requiredWidth - upperGuide) / referenceWidth;
+    const distance = (candidate.requiredWidth - referenceWidth) / referenceWidth;
     const coherenceCost =
-      normalizedDifference * normalizedDifference * COHERENCE_WEIGHT +
-      (belowBand * belowBand + aboveBand * aboveBand) * 3;
-    const combinedCost = candidate.cost + coherenceCost;
+      distance * distance * 0.12 +
+      (belowBand * belowBand + aboveBand * aboveBand) * 1.1;
+    const combinedCost = candidate.localCost + coherenceCost;
 
     if (combinedCost < selectedCost) {
       selected = candidate;
@@ -270,27 +300,9 @@ const selectCoherentLayout = (
   return selected;
 };
 
-const calculateIndividualWidth = (
-  layout: BalancedLayout,
-  referenceWidth: number,
-  maxWidth: number
-): number => {
-  const naturalWidth = layout.requiredWidth + 1;
-  if (referenceWidth <= 0 || naturalWidth >= referenceWidth) {
-    return Math.min(maxWidth, naturalWidth);
-  }
-
-  const relativeWidth = naturalWidth / referenceWidth;
-  const pullStrength = relativeWidth < 0.7 ? 0.52 : 0.34;
-  const coherentWidth = naturalWidth + (referenceWidth - naturalWidth) * pullStrength;
-
-  return clamp(coherentWidth, naturalWidth, maxWidth);
-};
-
 const renderBalancedDescription = (
   metrics: DescriptionMetrics,
-  layout: BalancedLayout,
-  referenceWidth: number
+  layout: BalancedLayout
 ): void => {
   const fragment = document.createDocumentFragment();
 
@@ -300,9 +312,7 @@ const renderBalancedDescription = (
   });
 
   metrics.element.replaceChildren(fragment);
-  metrics.element.style.width = `${Math.ceil(
-    calculateIndividualWidth(layout, referenceWidth, metrics.maxWidth)
-  )}px`;
+  metrics.element.style.width = `${Math.ceil(Math.min(metrics.maxWidth, layout.requiredWidth + 1))}px`;
   metrics.element.setAttribute('aria-label', metrics.source);
 };
 
@@ -327,15 +337,26 @@ const collectMetrics = (descriptions: HTMLElement[]): DescriptionMetrics[] => {
 const createPlans = (metrics: DescriptionMetrics[]): DescriptionPlan[] =>
   metrics.flatMap((descriptionMetrics) => {
     const candidates = generateIndividualCandidates(descriptionMetrics);
-    const localBest = selectLowestCost(candidates);
+    const localBest = selectLowestLocalCost(candidates);
     if (!localBest) return [];
 
-    return [{
-      metrics: descriptionMetrics,
-      candidates,
-      localBest
-    }];
+    return [{ metrics: descriptionMetrics, candidates, localBest }];
   });
+
+const createReferenceWidthsByLineCount = (plans: DescriptionPlan[]): Map<number, number> => {
+  const groups = new Map<number, number[]>();
+
+  plans.forEach(({ localBest }) => {
+    const lineCount = localBest.lines.length;
+    const widths = groups.get(lineCount) ?? [];
+    widths.push(localBest.requiredWidth);
+    groups.set(lineCount, widths);
+  });
+
+  const references = new Map<number, number>();
+  groups.forEach((widths, lineCount) => references.set(lineCount, median(widths)));
+  return references;
+};
 
 export const observeBalancedMenuDescriptions = (root: ParentNode): void => {
   const descriptions = queryAll<HTMLElement>(DESCRIPTION_SELECTOR, root);
@@ -348,11 +369,13 @@ export const observeBalancedMenuDescriptions = (root: ParentNode): void => {
     const plans = createPlans(collectMetrics(descriptions));
     if (!plans.length) return;
 
-    const referenceWidth = median(plans.map(({ localBest }) => localBest.requiredWidth));
+    const referenceWidths = createReferenceWidthsByLineCount(plans);
 
     plans.forEach((plan) => {
+      const lineCount = plan.localBest.lines.length;
+      const referenceWidth = referenceWidths.get(lineCount) ?? plan.localBest.requiredWidth;
       const layout = selectCoherentLayout(plan, referenceWidth);
-      renderBalancedDescription(plan.metrics, layout, referenceWidth);
+      renderBalancedDescription(plan.metrics, layout);
     });
   };
 
@@ -377,15 +400,7 @@ export const observeBalancedMenuDescriptions = (root: ParentNode): void => {
       if (widthChanged) scheduleBalance();
     });
 
-    if (root instanceof Element) {
-      observer.observe(root);
-    } else {
-      const parents = new Set<Element>();
-      descriptions.forEach((description) => {
-        if (description.parentElement) parents.add(description.parentElement);
-      });
-      parents.forEach((parent) => observer.observe(parent));
-    }
+    if (root instanceof Element) observer.observe(root);
   } else {
     window.addEventListener('resize', scheduleBalance, { passive: true });
   }
