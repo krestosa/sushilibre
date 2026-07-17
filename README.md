@@ -6,11 +6,10 @@ La fuente mantenible vive en Sass y TypeScript. `dist/` es la distribución est�
 
 ## Estructura
 
-- `src/scss/sections/`: secciones específicas de la página, como hero, dock y menú.
-- `src/scss/components/`: unidades reutilizables y acotadas, como botón, countdown y chips.
-- `src/scss/breakpoints/_desktop.scss`: primera capa responsive y base de herencia.
+- `src/scss/breakpoints/_desktop.scss`: estilos completos de hero, dock y menú; constituye la base heredable.
 - `src/scss/breakpoints/_tablet.scss`: modificaciones heredadas para tablet.
 - `src/scss/breakpoints/_mobile.scss`: modificaciones finales para mobile.
+- `src/scss/components/`: únicamente unidades reutilizables y acotadas, como botón, countdown y chips.
 - `src/ts/`: fuente TypeScript organizada por responsabilidades.
 - `src/static/index.html`: plantilla HTML de producción.
 - `menu.json`: fuente de datos del menú.
@@ -19,7 +18,7 @@ La fuente mantenible vive en Sass y TypeScript. `dist/` es la distribución est�
 - `tests/menu-contract.test.mjs`: validación de categorías y valores del menú.
 - `tests/style-contract.test.mjs`: validación integral de selectores y declaraciones compiladas.
 
-`src/scss/main.scss` carga primero los estilos desktop, luego tablet y finalmente mobile. Las reglas de accesibilidad y capacidades del navegador se aplican después sin introducir breakpoints adicionales.
+`src/scss/main.scss` carga desktop, luego tablet y finalmente mobile. No existe una capa separada de secciones: toda la estructura visual vive dentro de esos tres breakpoints. Las reglas de accesibilidad y capacidades del navegador se aplican después sin introducir breakpoints adicionales.
 
 La raíz del repositorio redirige a `dist/`, que es también la ruta publicada por GitHub Pages.
 
