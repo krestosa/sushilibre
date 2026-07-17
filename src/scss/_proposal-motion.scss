@@ -39,6 +39,12 @@ html.has-proposal-reveal .proposal-reveal.is-visible {
   animation: proposal-reveal-in var(--proposal-reveal-duration) var(--ease-out) var(--proposal-reveal-delay, 0ms) both;
 }
 
+html.has-proposal-reveal .proposal-reveal.is-visible.is-reveal-bypassed {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
 html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
   opacity: 1;
   transform: none;
@@ -55,6 +61,10 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
   html.has-proposal-reveal .proposal-reveal.is-visible {
     animation-name: proposal-reveal-fade;
     animation-timing-function: linear;
+  }
+
+  html.has-proposal-reveal .proposal-reveal.is-visible.is-reveal-bypassed {
+    animation: none;
   }
 }
 
