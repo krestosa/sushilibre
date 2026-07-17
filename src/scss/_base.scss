@@ -1,0 +1,27 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #000;
+}
+
+body {
+  color: var(--white);
+  font-family: "Inter", Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: geometricPrecision;
+}
+
+img,
+video {
+  display: block;
+}
+
+.page {
+  position: relative;
+  min-height: 100svh;
+}
