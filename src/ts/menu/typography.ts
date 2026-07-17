@@ -83,7 +83,7 @@ const calculateLayoutCost = (lines: BalancedLine[], maxWidth: number): number =>
   const widest = Math.max(...widths);
   const narrowest = Math.min(...widths);
   const range = normalize(widest - narrowest);
-  const lastWidth = widths.at(-1) ?? mean;
+  const lastWidth = widths[widths.length - 1] ?? mean;
   const lastLineShortfall = normalize(Math.max(0, mean * 0.9 - lastWidth));
   const isolatedWordPenalty = lines.filter((line) => line.words.length === 1).length * 0.35;
 
