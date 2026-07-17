@@ -210,7 +210,8 @@ export const observeBalancedMenuDescriptions = (root: ParentNode): void => {
 
   scheduleBalance(true);
 
-  if ('ResizeObserver' in window) {
+  const supportsResizeObserver = typeof ResizeObserver !== 'undefined';
+  if (supportsResizeObserver) {
     const observer = new ResizeObserver(() => scheduleBalance());
     descriptions.forEach((description) => observer.observe(description));
   } else {
