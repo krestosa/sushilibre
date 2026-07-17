@@ -209,7 +209,7 @@
     let targetY = window.scrollY;
     let frameId = 0;
     const maximumScroll = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    const clamp = (value, minimum, maximum) => Math.min(Math.max(value, minimum), maximum);
+    const clamp2 = (value, minimum, maximum) => Math.min(Math.max(value, minimum), maximum);
     const stop = () => {
       if (frameId) window.cancelAnimationFrame(frameId);
       frameId = 0;
@@ -233,14 +233,14 @@
       event.preventDefault();
       if (!frameId) targetY = window.scrollY;
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
-      const delta = clamp(event.deltaY * unit, -240, 240);
-      targetY = clamp(targetY + delta * 0.9, 0, maximumScroll());
+      const delta = clamp2(event.deltaY * unit, -240, 240);
+      targetY = clamp2(targetY + delta * 0.9, 0, maximumScroll());
       if (!frameId) frameId = window.requestAnimationFrame(step);
     };
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("pointerdown", stop, { passive: true });
     window.addEventListener("resize", () => {
-      targetY = clamp(targetY, 0, maximumScroll());
+      targetY = clamp2(targetY, 0, maximumScroll());
     }, { passive: true });
     window.addEventListener("scroll", () => {
       if (!frameId) targetY = window.scrollY;
@@ -1067,12 +1067,17 @@
   var easeOut = "cubic-bezier(.22, 1, .36, 1)";
   var menuGroups2 = query("[data-menu-groups]");
   var menuIntroHeading = query(".menu-section__intro h2");
+  var clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
   if (menuGroups2) {
     query(".menu-mobile-sticky")?.remove();
     let revealObserver = null;
-    let exitObservers = [];
-    let resizeFrame = 0;
+    let stickyExitFrame = 0;
     const groups = queryAll("[data-menu-group]", menuGroups2);
+    const stickyExitTargets = groups.flatMap((group) => {
+      const heading = query(".menu-group__heading", group);
+      const sentinel = query(".menu-group__exit-sentinel", group);
+      return heading && sentinel ? [{ heading, sentinel }] : [];
+    });
     const animateOnce = (element, keyframes, options) => {
       const animation = element.animate(keyframes, {
         fill: "both",
@@ -1136,51 +1141,35 @@
       });
       candidates.forEach(({ element }) => revealObserver?.observe(element));
     };
-    const disconnectExitObservers = () => {
-      exitObservers.forEach((observer) => observer.disconnect());
-      exitObservers = [];
-      groups.forEach((group) => {
-        query(".menu-group__heading", group)?.classList.remove("is-leaving");
+    const updateStickyExitProgress = () => {
+      stickyExitFrame = 0;
+      stickyExitTargets.forEach(({ heading, sentinel }) => {
+        let progress = 0;
+        if (mobileQuery.matches) {
+          const computed = window.getComputedStyle(heading);
+          const stickyTop = Number.parseFloat(computed.top || "0") || 0;
+          const headingHeight = Math.max(1, heading.getBoundingClientRect().height);
+          const triggerLine = stickyTop + headingHeight;
+          const sentinelTop = sentinel.getBoundingClientRect().top;
+          progress = clamp((triggerLine - sentinelTop) / headingHeight, 0, 1);
+        }
+        heading.style.setProperty(
+          "--menu-heading-exit-offset",
+          `${(-progress * 100).toFixed(3)}%`
+        );
       });
     };
-    const setupStickyExitAnimations = () => {
-      disconnectExitObservers();
-      if (!mobileQuery.matches || !("IntersectionObserver" in window)) return;
-      groups.forEach((group) => {
-        const heading = query(".menu-group__heading", group);
-        const sentinel = query(".menu-group__exit-sentinel", group);
-        if (!heading || !sentinel) return;
-        const headingHeight = Math.ceil(heading.getBoundingClientRect().height);
-        const preExitBuffer = Math.max(12, Math.min(22, Math.round(window.innerHeight * 0.018)));
-        const handoffLine = headingHeight + preExitBuffer;
-        const bottomMargin = Math.max(0, window.innerHeight - handoffLine - 1);
-        const observer = new IntersectionObserver((entries) => {
-          const entry = entries[0];
-          if (!entry) return;
-          const leaving = entry.boundingClientRect.top <= handoffLine;
-          heading.classList.toggle("is-leaving", leaving);
-        }, {
-          root: null,
-          rootMargin: `-${handoffLine}px 0px -${bottomMargin}px 0px`,
-          threshold: 0
-        });
-        observer.observe(sentinel);
-        exitObservers.push(observer);
-      });
-    };
-    const scheduleStickySetup = () => {
-      if (resizeFrame) return;
-      resizeFrame = window.requestAnimationFrame(() => {
-        resizeFrame = 0;
-        setupStickyExitAnimations();
-      });
+    const scheduleStickyExitUpdate = () => {
+      if (stickyExitFrame) return;
+      stickyExitFrame = window.requestAnimationFrame(updateStickyExitProgress);
     };
     if (groups.length) {
       setupScrollReveals();
-      setupStickyExitAnimations();
+      scheduleStickyExitUpdate();
     }
-    mobileQuery.addEventListener("change", scheduleStickySetup);
-    window.addEventListener("resize", scheduleStickySetup, { passive: true });
-    document.fonts.ready.then(scheduleStickySetup).catch(() => void 0);
+    mobileQuery.addEventListener("change", scheduleStickyExitUpdate);
+    window.addEventListener("scroll", scheduleStickyExitUpdate, { passive: true });
+    window.addEventListener("resize", scheduleStickyExitUpdate, { passive: true });
+    document.fonts.ready.then(scheduleStickyExitUpdate).catch(() => void 0);
   }
 })();
