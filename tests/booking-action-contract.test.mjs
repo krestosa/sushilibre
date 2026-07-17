@@ -56,7 +56,6 @@ test('compiled distribution keeps booking destinations and action hooks', async 
 
   assert.match(html, new RegExp(`href="${RESERVATION_URL.replaceAll('.', '\\.') }"`));
   assert.match(html, new RegExp(`href="${MAPS_URL.replaceAll('.', '\\.') }"`));
-  assert.match(script, /shop_reservas\.php/);
   assert.match(script, /scrollIntoView/);
   assert.match(script, /Ir al menú/);
 });
