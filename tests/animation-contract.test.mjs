@@ -13,7 +13,7 @@ test('menu reveal motion is prepaint-safe, one-time and viewport driven', async 
     readSource('scripts/menu-html.mjs')
   ]);
 
-  assert.match(template, /classList\.add\('has-menu-reveal'\)/);
+  assert.match(template, /classList\.add\(\s*["']has-menu-reveal["']\s*\)/);
   assert.match(template, /data-menu-reveal-ready/);
   assert.match(generator, /data-menu-reveal/);
   assert.match(generator, /ITEM_REVEAL_STAGGER_MS = 45/);
@@ -22,7 +22,7 @@ test('menu reveal motion is prepaint-safe, one-time and viewport driven', async 
   assert.match(feature, /observer\.unobserve\(element\)/);
   assert.match(feature, /isInitiallyVisible/);
   assert.match(feature, /requestAnimationFrame/);
-  assert.match(feature, /setAttribute\('data-menu-reveal-ready'/);
+  assert.match(feature, /setAttribute\(\s*["']data-menu-reveal-ready["']/);
   assert.match(bootstrap, /setupMenuReveal\(menuRoot, groups\)/);
   assert.match(motion, /html\.has-menu-reveal \.menu-reveal/);
   assert.match(motion, /animation: menu-reveal-in/);
