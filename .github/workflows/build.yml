@@ -49,7 +49,7 @@ jobs:
       - name: Compile static distribution
         run: npm run build
 
-      - name: Verify menu contract
+      - name: Verify menu and style contracts
         run: npm test
 
       - name: Upload static distribution artifact
