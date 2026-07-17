@@ -33,6 +33,18 @@ video {
   display: block;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .page {
   position: relative;
   min-height: 100svh;
@@ -1486,6 +1498,10 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
     display: none;
   }
 }
+.menu-section {
+  --menu-background-image: url("assets/menu_bg.webp");
+}
+
 @media (hover: hover) and (pointer: fine) {
   .booking-dock__cta:hover {
     filter: brightness(1.06);
