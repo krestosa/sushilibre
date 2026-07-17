@@ -6,22 +6,29 @@ const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), 'u
 
 const legal = 'BASES, CONDICIONES Y LOCALES ADHERIDOS EN SUSHICLUB.COM.AR/BENEFICIOS.';
 
+const assertCommercialContent = (html) => {
+  assert.match(html, /class="proposal__payment-logo"[^>]*assets\/galicia-eminent-visa\.svg/);
+  assert.match(html, /width="245" height="32"/);
+  assert.ok(html.includes(legal));
+};
+
 test('proposal is static, precedes the menu and includes complete commercial information', async () => {
   const [template, generated] = await Promise.all([
     readSource('src/static/index.html'),
     readSource('dist/index.html')
   ]);
 
-  for (const html of [template, generated]) {
-    const proposalIndex = html.indexOf('<section class="proposal"');
-    const menuIndex = html.indexOf('<section class="menu-section"');
+  const sourceProposalIndex = template.indexOf('<section class="proposal"');
+  const sourceMenuMarkerIndex = template.indexOf('<!-- MENU_SECTION -->');
+  assert.ok(sourceProposalIndex >= 0, 'source proposal section must exist');
+  assert.ok(sourceMenuMarkerIndex > sourceProposalIndex, 'source proposal must precede the menu marker');
+  assertCommercialContent(template);
 
-    assert.ok(proposalIndex >= 0, 'proposal section must exist');
-    assert.ok(menuIndex > proposalIndex, 'proposal section must precede the menu');
-    assert.match(html, /class="proposal__payment-logo"[^>]*assets\/galicia-eminent-visa\.svg/);
-    assert.match(html, /width="245" height="32"/);
-    assert.ok(html.includes(legal));
-  }
+  const generatedProposalIndex = generated.indexOf('<section class="proposal"');
+  const generatedMenuIndex = generated.indexOf('<section class="menu-section"');
+  assert.ok(generatedProposalIndex >= 0, 'generated proposal section must exist');
+  assert.ok(generatedMenuIndex > generatedProposalIndex, 'generated proposal must precede the menu');
+  assertCommercialContent(generated);
 });
 
 test('proposal reuses the menu column split and avoids artificial section height', async () => {
