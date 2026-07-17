@@ -1,8 +1,8 @@
 import { query, queryAll } from '../shared/dom';
 
-const REVEAL_ROOT_MARGIN = '0px 0px -10% 0px';
-const REVEAL_THRESHOLD = 0.01;
-const INITIAL_VIEWPORT_RATIO = 0.92;
+const REVEAL_ROOT_MARGIN = '0px 0px -18% 0px';
+const REVEAL_THRESHOLD = 0.08;
+const INITIAL_VIEWPORT_RATIO = 0.84;
 
 const reveal = (element: HTMLElement): void => {
   if (element.classList.contains('is-visible')) return;
@@ -33,7 +33,7 @@ export const setupProposalReveal = (): void => {
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
+      if (!entry.isIntersecting || entry.intersectionRatio < REVEAL_THRESHOLD) return;
       const element = entry.target as HTMLElement;
       reveal(element);
       observer.unobserve(element);
