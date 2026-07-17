@@ -41,7 +41,7 @@ test('mobile menu overlap shadow remains stable during continuous resize', async
   assert.doesNotMatch(observers, /disconnectObservers|observers\.forEach\(\(observer\) => observer\.disconnect/);
 });
 
-test('hero title entrance completes once and cannot replay across breakpoints', async () => {
+test('hero title completion preserves the exact final rasterized state', async () => {
   const [feature, application, motion, tablet] = await Promise.all([
     readSource('src/ts/features/hero-intro-motion.ts'),
     readSource('src/ts/application.ts'),
@@ -54,11 +54,27 @@ test('hero title entrance completes once and cannot replay across breakpoints', 
   assert.match(feature, /animationend/);
   assert.match(feature, /animationcancel/);
   assert.match(feature, /COMPLETION_FALLBACK_MS/);
-  assert.match(motion, /html\.hero-intro-complete/);
   assert.match(motion, /filter: blur\(var\(--title-intro-blur, 5px\)\)/);
+  assert.match(motion, /filter: blur\(0\)/);
+  assert.doesNotMatch(motion, /html\.hero-intro-complete/);
+  assert.doesNotMatch(motion, /filter:\s*none[\s\S]*animation:\s*none/);
   assert.match(tablet, /--title-intro-blur: 0px/);
   assert.doesNotMatch(tablet, /animation-name:\s*stage-title-in-lite/);
   assert.doesNotMatch(motion, /@keyframes stage-title-in-lite/);
+});
+
+test('desktop masthead animation cannot move or resize its logo geometry', async () => {
+  const [motion, desktop] = await Promise.all([
+    readSource('src/scss/_motion.scss'),
+    readSource('src/scss/breakpoints/_desktop.scss')
+  ]);
+
+  const mastheadKeyframes = /@keyframes stage-masthead-in\s*\{([\s\S]*?)\n\}/.exec(motion)?.[1] ?? '';
+  assert.match(mastheadKeyframes, /opacity:\s*0/);
+  assert.match(mastheadKeyframes, /opacity:\s*1/);
+  assert.doesNotMatch(mastheadKeyframes, /translate|transform|scale|width|height/);
+  assert.match(desktop, /\.masthead__sushiclub\s*\{[\s\S]*?display: block;[\s\S]*?flex: 0 0 auto;[\s\S]*?aspect-ratio: 234 \/ 34;/);
+  assert.match(desktop, /\.masthead__anniversary\s*\{[\s\S]*?display: block;[\s\S]*?flex: 0 0 auto;[\s\S]*?aspect-ratio: 147 \/ 113;/);
 });
 
 test('booking dock enters as one complete unit', async () => {
@@ -153,7 +169,7 @@ test('compiled distribution contains synchronized animation and popup hooks', as
   assert.doesNotMatch(script, /piece-viewer-scroll-offset|piece-viewer-document-height/);
   assert.doesNotMatch(script, /revealDockContent|booking-dock__meta.*opacity/);
   assert.match(styles, /html\.has-menu-reveal \.menu-reveal/);
-  assert.match(styles, /html\.hero-intro-complete/);
+  assert.doesNotMatch(styles, /html\.hero-intro-complete/);
   assert.match(styles, /@keyframes menu-reveal-in/);
   assert.match(styles, /@keyframes piece-viewer-loader/);
   assert.match(styles, /html\.has-piece-viewer/);
