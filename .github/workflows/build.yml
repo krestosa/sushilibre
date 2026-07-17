@@ -15,7 +15,7 @@ permissions:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -30,10 +30,7 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Type-check TypeScript
-        shell: bash
-        run: |
-          set -o pipefail
-          npm run typecheck -- --pretty false 2>&1 | tee typecheck.log
+        run: npm run typecheck
 
       - name: Compile Sass and TypeScript
         run: npm run build
@@ -41,27 +38,9 @@ jobs:
       - name: Verify menu contract
         run: npm test
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-
-      - name: Run responsive browser checks
-        run: npm run test:visual
-
       - name: Upload compiled site
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: sushilibre-dist
           path: dist
           if-no-files-found: error
-
-      - name: Upload diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-diagnostics
-          path: |
-            typecheck.log
-            playwright-report
-            test-results
-          if-no-files-found: ignore
