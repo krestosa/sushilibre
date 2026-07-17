@@ -176,7 +176,7 @@
 
   .title-word--sushi,
   .title-word--libre {
-    animation-name: stage-title-in-lite !important;
+    --title-intro-blur: 0px;
   }
 
   .booking-dock__cta > i[aria-hidden="true"] {
