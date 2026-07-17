@@ -113,10 +113,13 @@
 
 .proposal__payment-logo {
   display: block;
-  width: min(290px, 90%);
+  width: 290px;
+  max-width: 100%;
   height: auto;
   margin-top: 18px;
   aspect-ratio: 245 / 32;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .proposal__conditions {
@@ -194,7 +197,7 @@
   }
 
   .proposal__payment-logo {
-    width: min(270px, 100%);
+    width: 270px;
   }
 }
 
@@ -289,7 +292,7 @@
   }
 
   .proposal__payment-logo {
-    width: min(290px, 82vw);
+    width: 290px;
     margin-top: 16px;
   }
 
