@@ -224,6 +224,46 @@
     }, 1e3);
   };
 
+  // src/ts/features/hero-intro-motion.ts
+  var HERO_TITLE_ANIMATIONS = /* @__PURE__ */ new Set(["stage-title-in", "quiet-fade"]);
+  var COMPLETION_FALLBACK_MS = 2400;
+  var setupHeroIntroMotion = () => {
+    const root = document.documentElement;
+    const titleWords = queryAll(".title-word");
+    if (!titleWords.length) return;
+    let pending = new Set(titleWords);
+    let fallbackTimer = 0;
+    const cleanupListeners = () => {
+      titleWords.forEach((element) => {
+        element.removeEventListener("animationend", handleAnimationCompletion);
+        element.removeEventListener("animationcancel", handleAnimationCompletion);
+      });
+    };
+    const complete = () => {
+      if (root.classList.contains("hero-intro-complete")) return;
+      root.classList.add("hero-intro-complete");
+      if (fallbackTimer) window.clearTimeout(fallbackTimer);
+      cleanupListeners();
+    };
+    function handleAnimationCompletion(event) {
+      if (!HERO_TITLE_ANIMATIONS.has(event.animationName)) return;
+      pending.delete(event.currentTarget);
+      if (!pending.size) complete();
+    }
+    titleWords.forEach((element) => {
+      element.addEventListener("animationend", handleAnimationCompletion);
+      element.addEventListener("animationcancel", handleAnimationCompletion);
+    });
+    window.requestAnimationFrame(() => {
+      const animated = titleWords.filter(
+        (element) => window.getComputedStyle(element).animationName.split(",").map((name) => name.trim()).some((name) => HERO_TITLE_ANIMATIONS.has(name))
+      );
+      pending = new Set(animated);
+      if (!pending.size) complete();
+    });
+    fallbackTimer = window.setTimeout(complete, COMPLETION_FALLBACK_MS);
+  };
+
   // src/ts/features/piece-viewer.ts
   var LOADING_MESSAGE = "CARGANDO IMAGEN";
   var ERROR_MESSAGE = "IMAGEN NO DISPONIBLE";
@@ -1072,6 +1112,7 @@
   setupCountdown();
   setupBookingDockLayout();
   setupBookingCtaSheen(runtime);
+  setupHeroIntroMotion();
   setupPieceViewer();
   setupTapSearchGuard();
   setupEfficientSmoothScroll(runtime);
@@ -1219,47 +1260,43 @@
   // src/ts/menu/observers.ts
   var configureMobileOverlapShadows = (groups) => {
     const mobileQuery2 = window.matchMedia("(max-width: 720px)");
-    let observers = [];
-    let resizeFrame = 0;
-    const disconnectObservers = () => {
-      observers.forEach((observer) => observer.disconnect());
-      observers = [];
-      groups.forEach((group) => {
-        query(".menu-group__heading", group)?.classList.remove("is-overlapping");
+    const targets = groups.flatMap((group) => {
+      const heading = query(".menu-group__heading", group);
+      const sentinel = query(".menu-group__overlap-sentinel", group);
+      return heading && sentinel ? [{ heading, sentinel }] : [];
+    });
+    let updateFrame = 0;
+    let resizeTimer = 0;
+    const updateOverlapState = () => {
+      updateFrame = 0;
+      const mobile = mobileQuery2.matches;
+      targets.forEach(({ heading, sentinel }) => {
+        if (!mobile) {
+          heading.classList.remove("is-overlapping");
+          return;
+        }
+        const headingBounds = heading.getBoundingClientRect();
+        const sentinelBounds = sentinel.getBoundingClientRect();
+        const overlaps = sentinelBounds.top <= headingBounds.bottom;
+        heading.classList.toggle("is-overlapping", overlaps);
       });
     };
-    const configure = () => {
-      disconnectObservers();
-      if (!mobileQuery2.matches || !("IntersectionObserver" in window)) return;
-      groups.forEach((group) => {
-        const heading = query(".menu-group__heading", group);
-        const sentinel = query(".menu-group__overlap-sentinel", group);
-        if (!heading || !sentinel) return;
-        const headingHeight = Math.ceil(heading.getBoundingClientRect().height);
-        const observer = new IntersectionObserver((entries) => {
-          const entry = entries[0];
-          if (!entry) return;
-          const overlaps = !entry.isIntersecting && entry.boundingClientRect.top <= headingHeight;
-          heading.classList.toggle("is-overlapping", overlaps);
-        }, {
-          rootMargin: `-${headingHeight}px 0px 0px 0px`,
-          threshold: 0
-        });
-        observer.observe(sentinel);
-        observers.push(observer);
-      });
+    const scheduleUpdate = () => {
+      if (updateFrame) return;
+      updateFrame = window.requestAnimationFrame(updateOverlapState);
     };
-    const scheduleConfigure = () => {
-      if (resizeFrame) return;
-      resizeFrame = window.requestAnimationFrame(() => {
-        resizeFrame = 0;
-        configure();
-      });
+    const scheduleResizeSettlement = () => {
+      if (resizeTimer) window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        resizeTimer = 0;
+        scheduleUpdate();
+      }, 140);
     };
-    configure();
-    mobileQuery2.addEventListener("change", scheduleConfigure);
-    window.addEventListener("resize", scheduleConfigure, { passive: true });
-    document.fonts.ready.then(scheduleConfigure).catch(() => void 0);
+    scheduleUpdate();
+    mobileQuery2.addEventListener("change", scheduleUpdate);
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleResizeSettlement, { passive: true });
+    document.fonts.ready.then(scheduleUpdate).catch(() => void 0);
   };
   var observeActiveMenuGroup = (menuRoot2, groups) => {
     const firstGroup = groups[0];
