@@ -828,10 +828,13 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
 
 .proposal__payment-logo {
   display: block;
-  width: min(290px, 90%);
+  width: 290px;
+  max-width: 100%;
   height: auto;
   margin-top: 18px;
   aspect-ratio: 245/32;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .proposal__conditions {
@@ -899,7 +902,7 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
     column-gap: clamp(36px, 6vw, 72px);
   }
   .proposal__payment-logo {
-    width: min(270px, 100%);
+    width: 270px;
   }
 }
 @media (max-width: 720px) {
@@ -974,7 +977,7 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
     font-size: clamp(48px, 15vw, 64px);
   }
   .proposal__payment-logo {
-    width: min(290px, 82vw);
+    width: 290px;
     margin-top: 16px;
   }
   .proposal__conditions {
@@ -1020,8 +1023,9 @@ html.has-proposal-reveal .proposal-reveal--chips {
 }
 
 html.has-proposal-reveal .proposal-reveal--prices {
-  --proposal-reveal-distance: 14px;
+  --proposal-reveal-distance: 0px;
   --proposal-reveal-duration: 480ms;
+  transform: none;
 }
 
 html.has-proposal-reveal .proposal-reveal--conditions {
@@ -1036,6 +1040,10 @@ html.has-proposal-reveal .proposal-reveal--legal {
 
 html.has-proposal-reveal .proposal-reveal.is-visible {
   animation: proposal-reveal-in var(--proposal-reveal-duration) var(--ease-out) var(--proposal-reveal-delay, 0ms) both;
+}
+
+html.has-proposal-reveal .proposal-reveal--prices.is-visible {
+  animation-name: proposal-reveal-fade;
 }
 
 html.has-proposal-reveal .proposal-reveal.is-visible.is-reveal-bypassed {
