@@ -5,6 +5,7 @@
 @use "components/chips";
 @use "components/piece-viewer";
 @use "motion";
+@use "proposal";
 
 // Herencia responsive: desktop define la base, tablet la modifica y mobile cierra la cascada.
 @use "breakpoints/desktop";
