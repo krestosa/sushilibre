@@ -4,8 +4,27 @@ const LOADING_MESSAGE = 'CARGANDO IMAGEN';
 const ERROR_MESSAGE = 'IMAGEN NO DISPONIBLE';
 const CLOSE_FALLBACK_MS = 320;
 const REDUCED_CLOSE_FALLBACK_MS = 170;
+const SCROLL_KEYS = new Set([
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowUp',
+  'End',
+  'Home',
+  'PageDown',
+  'PageUp',
+  ' ',
+  'Spacebar'
+]);
+
+const isInteractiveTarget = (target: EventTarget | null): boolean =>
+  target instanceof Element && Boolean(target.closest(
+    'a[href], button, input, textarea, select, [contenteditable="true"]'
+  ));
 
 export const setupPieceViewer = (): void => {
+  const root = document.documentElement;
+  const page = query<HTMLElement>('.page');
   const dialog = query<HTMLDialogElement>('[data-piece-viewer]');
   const image = query<HTMLImageElement>('[data-piece-viewer-image]', dialog ?? undefined);
   const status = query<HTMLElement>('[data-piece-viewer-status]', dialog ?? undefined);
@@ -13,13 +32,61 @@ export const setupPieceViewer = (): void => {
   const closeButton = query<HTMLButtonElement>('[data-piece-viewer-close]', dialog ?? undefined);
   const openButtons = queryAll<HTMLButtonElement>('[data-piece-viewer-open]');
 
-  if (!dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
+  if (!page || !dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let activeButton: HTMLButtonElement | null = null;
   let closeTimer = 0;
   let openFrame = 0;
   let imageFrame = 0;
+  let lockedScrollY = 0;
+  let backgroundLocked = false;
+
+  const preventBackgroundScroll = (event: Event): void => {
+    if (event.cancelable) event.preventDefault();
+  };
+
+  const preventBackgroundScrollKey = (event: KeyboardEvent): void => {
+    if (!SCROLL_KEYS.has(event.key) || isInteractiveTarget(event.target)) return;
+    event.preventDefault();
+  };
+
+  const lockBackground = (): void => {
+    if (backgroundLocked) return;
+
+    lockedScrollY = window.scrollY;
+    const documentHeight = Math.max(
+      root.scrollHeight,
+      document.body.scrollHeight,
+      window.innerHeight
+    );
+
+    root.style.setProperty('--piece-viewer-scroll-offset', `${-lockedScrollY}px`);
+    root.style.setProperty('--piece-viewer-document-height', `${documentHeight}px`);
+    root.classList.add('has-piece-viewer');
+
+    window.addEventListener('wheel', preventBackgroundScroll, { passive: false });
+    window.addEventListener('touchmove', preventBackgroundScroll, { passive: false });
+    document.addEventListener('keydown', preventBackgroundScrollKey, true);
+    backgroundLocked = true;
+  };
+
+  const unlockBackground = (): void => {
+    if (!backgroundLocked) return;
+
+    window.removeEventListener('wheel', preventBackgroundScroll);
+    window.removeEventListener('touchmove', preventBackgroundScroll);
+    document.removeEventListener('keydown', preventBackgroundScrollKey, true);
+
+    const previousScrollBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    root.classList.remove('has-piece-viewer');
+    root.style.removeProperty('--piece-viewer-scroll-offset');
+    root.style.removeProperty('--piece-viewer-document-height');
+    window.scrollTo(0, lockedScrollY);
+    root.style.scrollBehavior = previousScrollBehavior;
+    backgroundLocked = false;
+  };
 
   const setLoadingState = (): void => {
     if (imageFrame) window.cancelAnimationFrame(imageFrame);
@@ -72,7 +139,7 @@ export const setupPieceViewer = (): void => {
 
   const cleanup = (): void => {
     clearMotionSchedules();
-    document.documentElement.classList.remove('has-piece-viewer');
+    unlockBackground();
     dialog.classList.remove('is-open', 'is-closing');
     dialog.setAttribute('aria-label', 'Vista de pieza');
     image.removeAttribute('src');
@@ -127,7 +194,7 @@ export const setupPieceViewer = (): void => {
     dialog.setAttribute('aria-label', `Imagen de ${name}`);
     image.alt = name;
     setLoadingState();
-    document.documentElement.classList.add('has-piece-viewer');
+    lockBackground();
     dialog.classList.remove('is-open', 'is-closing');
     openDialog();
 
