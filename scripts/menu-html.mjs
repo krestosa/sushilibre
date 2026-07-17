@@ -148,8 +148,8 @@ const renderMenuGroup = (section) => {
     '        <div class="menu-group__items">',
     '          <span class="menu-group__overlap-sentinel" aria-hidden="true"></span>',
     items,
+    '          <span class="menu-group__exit-sentinel" aria-hidden="true"></span>',
     '        </div>',
-    '        <span class="menu-group__exit-sentinel" aria-hidden="true"></span>',
     '      </article>'
   ].join('\n');
 };
