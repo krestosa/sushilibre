@@ -1,29 +1,31 @@
 name: Build, validate and publish
 
 on:
-  push:
+  pull_request:
     branches:
-      - refactor/sass-typescript
-    paths-ignore:
-      - dist/**
+      - design/video-hero-sticky-countdown
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: sushilibre-${{ github.workflow }}-${{ github.ref_name }}
+  group: sushilibre-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout source branch
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.TARGET_BRANCH }}
           fetch-depth: 0
 
       - name: Set up Node.js
@@ -70,8 +72,8 @@ jobs:
             exit 0
           fi
 
-          remote_sha="$(git ls-remote origin "refs/heads/${GITHUB_REF_NAME}" | cut -f1)"
-          if [[ "${remote_sha}" != "${GITHUB_SHA}" ]]; then
+          remote_sha="$(git ls-remote origin "refs/heads/${TARGET_BRANCH}" | cut -f1)"
+          if [[ "${remote_sha}" != "${SOURCE_SHA}" ]]; then
             echo "A newer source commit exists; its workflow will publish the matching distribution."
             exit 0
           fi
@@ -79,4 +81,4 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Publish static distribution"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push origin "HEAD:${TARGET_BRANCH}"
