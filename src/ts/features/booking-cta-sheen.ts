@@ -6,9 +6,10 @@ export const setupBookingCtaSheen = ({
   compactViewport,
   coarsePointer
 }: RuntimeContext): void => {
-  const cta = query<HTMLAnchorElement>('[data-booking-cta]');
-  if (!cta || reducedMotion.matches || typeof cta.animate !== 'function') return;
+  const selectedCta = query<HTMLAnchorElement>('[data-booking-cta]');
+  if (!selectedCta || reducedMotion.matches || typeof selectedCta.animate !== 'function') return;
 
+  const cta = selectedCta;
   cta.style.filter = 'none';
   cta.classList.add('has-runtime-sheen');
 
