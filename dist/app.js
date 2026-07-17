@@ -238,6 +238,93 @@
     }, 1e3);
   };
 
+  // src/ts/features/piece-viewer.ts
+  var LOADING_MESSAGE = "CARGANDO IMAGEN";
+  var ERROR_MESSAGE = "IMAGEN NO DISPONIBLE";
+  var setupPieceViewer = () => {
+    const dialog = query("[data-piece-viewer]");
+    const image = query("[data-piece-viewer-image]", dialog ?? void 0);
+    const title = query("[data-piece-viewer-title]", dialog ?? void 0);
+    const status = query("[data-piece-viewer-status]", dialog ?? void 0);
+    const closeButton = query("[data-piece-viewer-close]", dialog ?? void 0);
+    const openButtons = queryAll("[data-piece-viewer-open]");
+    if (!dialog || !image || !title || !status || !closeButton || !openButtons.length) return;
+    let activeButton = null;
+    const setLoadingState = () => {
+      dialog.dataset.state = "loading";
+      status.textContent = LOADING_MESSAGE;
+      status.hidden = false;
+      image.hidden = true;
+    };
+    const setReadyState = () => {
+      dialog.dataset.state = "ready";
+      status.hidden = true;
+      image.hidden = false;
+    };
+    const setErrorState = () => {
+      dialog.dataset.state = "error";
+      status.textContent = ERROR_MESSAGE;
+      status.hidden = false;
+      image.hidden = true;
+    };
+    const openDialog = () => {
+      if (dialog.open) return;
+      if (typeof dialog.showModal === "function") {
+        dialog.showModal();
+        return;
+      }
+      dialog.setAttribute("open", "");
+    };
+    const closeDialog = () => {
+      if (!dialog.open) return;
+      if (typeof dialog.close === "function") dialog.close();
+      else dialog.removeAttribute("open");
+    };
+    const openPiece = (button) => {
+      const name = button.dataset.pieceName?.trim();
+      const source = button.dataset.pieceImage?.trim();
+      if (!name || !source) return;
+      activeButton = button;
+      title.textContent = name;
+      image.alt = `${name} \u2014 SushiClub`;
+      setLoadingState();
+      document.documentElement.classList.add("has-piece-viewer");
+      openDialog();
+      image.removeAttribute("src");
+      window.requestAnimationFrame(() => {
+        image.src = source;
+      });
+    };
+    const cleanup = () => {
+      document.documentElement.classList.remove("has-piece-viewer");
+      image.removeAttribute("src");
+      image.alt = "";
+      title.textContent = "";
+      status.textContent = LOADING_MESSAGE;
+      status.hidden = false;
+      image.hidden = true;
+      delete dialog.dataset.state;
+      const button = activeButton;
+      activeButton = null;
+      button?.focus({ preventScroll: true });
+    };
+    openButtons.forEach((button) => {
+      button.addEventListener("click", () => openPiece(button));
+    });
+    image.addEventListener("load", setReadyState);
+    image.addEventListener("error", setErrorState);
+    closeButton.addEventListener("click", closeDialog);
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) closeDialog();
+    });
+    dialog.addEventListener("close", cleanup);
+    dialog.addEventListener("cancel", () => {
+      window.requestAnimationFrame(() => {
+        if (!dialog.open) cleanup();
+      });
+    });
+  };
+
   // src/ts/features/smooth-scroll.ts
   var setupEfficientSmoothScroll = ({
     isFirefox,
@@ -896,6 +983,7 @@
   setupCountdown();
   setupBookingDockLayout();
   setupBookingCtaSheen(runtime);
+  setupPieceViewer();
   setupTapSearchGuard();
   setupEfficientSmoothScroll(runtime);
   setupVideoLoop(runtime);
