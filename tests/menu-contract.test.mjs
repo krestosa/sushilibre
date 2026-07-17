@@ -107,7 +107,7 @@ test('build converts menu.json into normal HTML elements and one reusable viewer
   const generatedHtml = renderStaticHtml(template, parseMenuSource(rawMenu));
 
   assert.match(template, /<!--\s*MENU_SECTION\s*-->/);
-  assert.match(template, /classList\.add\('has-menu-reveal'\)/);
+  assert.match(template, /classList\.add\(\s*["']has-menu-reveal["']\s*\)/);
   assert.doesNotMatch(template, /id=["']menu-data["']/i);
   assertStaticMenuMarkup(generatedHtml);
 });
