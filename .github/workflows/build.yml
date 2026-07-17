@@ -1,4 +1,4 @@
-name: Build, validate and deploy
+name: Build, validate and publish
 
 on:
   push:
@@ -10,12 +10,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: github-pages-${{ github.event_name }}
+  group: sushilibre-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
@@ -51,26 +49,21 @@ jobs:
           path: dist
           if-no-files-found: error
 
-      - name: Configure GitHub Pages
-        if: github.event_name != 'pull_request'
-        uses: actions/configure-pages@v5
+      - name: Publish compiled assets for GitHub Pages
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dist/app.css app.css
+          cp dist/app.js app.js
 
-      - name: Upload GitHub Pages artifact
-        if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: dist
+          git add -f app.css app.js
+          if git diff --cached --quiet; then
+            echo "Compiled assets are already current."
+            exit 0
+          fi
 
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Publish compiled site assets [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
