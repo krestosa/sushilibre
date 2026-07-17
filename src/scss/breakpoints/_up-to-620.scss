@@ -1,0 +1,134 @@
+@media (max-width: 620px) {
+  :root {
+    --dock-height: 174px;
+    --dock-bottom: max(14px, env(safe-area-inset-bottom));
+  }
+
+  .hero {
+    min-height: 820px;
+  }
+
+  .hero__video {
+    object-position: 53% center;
+  }
+
+  .masthead {
+    top: 22px;
+    font-size: 8px;
+  }
+
+  .masthead__venue {
+    grid-column: 1 / span 3;
+  }
+
+  .masthead__brands {
+    grid-column: 4 / span 6;
+    gap: 12px;
+  }
+
+  .masthead__sushiclub {
+    width: 92px;
+  }
+
+  .masthead__anniversary {
+    width: 43px;
+  }
+
+  .masthead__reservation {
+    grid-column: 10 / span 3;
+  }
+
+  .title-lockup {
+    top: 25.5%;
+    width: calc(100% - 32px);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto auto auto;
+    row-gap: 7px;
+  }
+
+  .title-word {
+    font-size: 23.5vw;
+  }
+
+  .title-word--sushi {
+    grid-column: 1 / span 9;
+    grid-row: 1;
+  }
+
+  .title-kicker {
+    grid-column: 4 / span 9;
+    grid-row: 2;
+    align-self: auto;
+    justify-self: end;
+    margin: 0;
+    font-size: 4.55vw;
+  }
+
+  .title-word--libre {
+    grid-column: 3 / span 10;
+    grid-row: 3;
+    justify-self: end;
+  }
+
+  .hero-copy {
+    top: 59%;
+    width: 88vw;
+
+    h2 {
+      font-size: 13px;
+    }
+
+    p {
+      font-size: 9px;
+      line-height: 1.26;
+    }
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .booking-dock {
+    width: calc(100vw - 24px);
+    grid-template-columns: 1fr 1fr 96px;
+    grid-template-rows: 48px 96px;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .booking-dock__meta {
+    padding: 0 6px;
+
+    strong {
+      font-size: 12px;
+    }
+  }
+
+  .booking-dock__label {
+    margin-bottom: 4px;
+    font-size: 9px;
+  }
+
+  .countdown {
+    grid-column: 1 / span 2;
+    grid-row: 2;
+    gap: 6px;
+  }
+
+  .booking-dock__cta {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    font-size: 14px;
+  }
+
+  .countdown__unit {
+    strong {
+      font-size: 27px;
+    }
+
+    span {
+      margin-top: 7px;
+      font-size: 5px;
+    }
+  }
+}
