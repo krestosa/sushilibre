@@ -1,11 +1,33 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import {
+  attributeValue,
+  findOpeningTag,
+  hasClass
+} from './html-contract-helpers.mjs';
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 const RESERVATION_URL = 'https://www.sushiclub.com.ar/shop_reservas.php';
 const MAPS_URL = 'https://maps.app.goo.gl/N6UjNEoETLvo1ucRA';
+
+const assertBookingDestinations = (html) => {
+  const reservationLink = findOpeningTag(html, 'a', (tag) => (
+    hasClass(tag, 'booking-dock__cta')
+    && attributeValue(tag, 'href') === RESERVATION_URL
+  ));
+  assert.ok(reservationLink, 'reservation link must exist');
+  assert.match(reservationLink, /\bdata-booking-cta(?:\s|>|=)/i);
+
+  const locationLink = findOpeningTag(html, 'a', (tag) => (
+    hasClass(tag, 'booking-dock__meta--location')
+    && attributeValue(tag, 'href') === MAPS_URL
+  ));
+  assert.ok(locationLink, 'Maps link must exist');
+  assert.equal(attributeValue(locationLink, 'target'), '_blank');
+  assert.equal(attributeValue(locationLink, 'rel'), 'noopener noreferrer');
+};
 
 test('booking dock exposes reservation and Maps destinations', async () => {
   const [template, styles] = await Promise.all([
@@ -13,14 +35,9 @@ test('booking dock exposes reservation and Maps destinations', async () => {
     readSource('src/scss/components/_booking-button.scss')
   ]);
 
-  assert.match(template, new RegExp(`href="${RESERVATION_URL.replaceAll('.', '\\.') }"`));
-  assert.match(template, /data-booking-cta/);
+  assertBookingDestinations(template);
   assert.match(template, /data-booking-cta-label/);
-  assert.match(template, new RegExp(`href="${MAPS_URL.replaceAll('.', '\\.') }"`));
-  assert.match(template, /class="booking-dock__meta booking-dock__meta--location"/);
-  assert.match(template, /class="booking-dock__external-arrow" aria-hidden="true">↗<\/span>/);
-  assert.match(template, /target="_blank"/);
-  assert.match(template, /rel="noopener noreferrer"/);
+  assert.match(template, /booking-dock__external-arrow/);
   assert.match(styles, /\.booking-dock__meta--location/);
   assert.match(styles, /\.booking-dock__external-arrow/);
   assert.match(styles, /translate3d\(2px, -2px, 0\)/);
@@ -61,8 +78,7 @@ test('compiled distribution keeps booking destinations and action hooks', async 
     readSource('dist/app.js')
   ]);
 
-  assert.match(html, new RegExp(`href="${RESERVATION_URL.replaceAll('.', '\\.') }"`));
-  assert.match(html, new RegExp(`href="${MAPS_URL.replaceAll('.', '\\.') }"`));
+  assertBookingDestinations(html);
   assert.match(html, /booking-dock__external-arrow/);
   assert.match(script, /data-booking-cta/);
   assert.match(script, /scrollIntoView/);
