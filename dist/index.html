@@ -10,9 +10,13 @@
     (() => {
       const root = document.documentElement;
       root.classList.add('has-menu-reveal');
+      root.classList.add('has-proposal-reveal');
       window.setTimeout(() => {
         if (!root.hasAttribute('data-menu-reveal-ready')) {
           root.classList.add('menu-reveal-fallback');
+        }
+        if (!root.hasAttribute('data-proposal-reveal-ready')) {
+          root.classList.add('proposal-reveal-fallback');
         }
       }, 1800);
     })();
@@ -20,8 +24,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="app.css?v=13f599ae64cc">
-  <script src="app.js?v=13f599ae64cc" defer></script>
+  <link rel="stylesheet" href="app.css?v=5bd06c876a68">
+  <script src="app.js?v=5bd06c876a68" defer></script>
 </head>
 <body>
   <main class="page">
@@ -81,22 +85,22 @@
       </div>
     </section>
 
-    <section class="proposal" id="propuesta" aria-labelledby="proposal-heading">
+    <section class="proposal" id="propuesta" data-proposal-root aria-labelledby="proposal-heading">
       <div class="proposal__shell">
         <header class="proposal__header">
-          <h2 id="proposal-heading">NUESTRA PROPUESTA</h2>
+          <h2 class="proposal-reveal proposal-reveal--heading" data-proposal-reveal style="--proposal-reveal-delay:0ms" id="proposal-heading">NUESTRA PROPUESTA</h2>
         </header>
 
         <div class="proposal__content">
-          <p class="proposal__intro">VIVÍ UNA EXPERIENCIA DONDE EL SABOR, LA FRESCURA Y LA DEDICACIÓN SE ENCUENTRAN EN CADA PIEZA. SUSHI PREPARADO EN EL MOMENTO, INGREDIENTES DE CALIDAD Y UNA NOCHE PENSADA PARA DISFRUTAR DE PRINCIPIO A FIN.</p>
+          <p class="proposal__intro proposal-reveal proposal-reveal--intro" data-proposal-reveal style="--proposal-reveal-delay:70ms">VIVÍ UNA EXPERIENCIA DONDE EL SABOR, LA FRESCURA Y LA DEDICACIÓN SE ENCUENTRAN EN CADA PIEZA. SUSHI PREPARADO EN EL MOMENTO, INGREDIENTES DE CALIDAD Y UNA NOCHE PENSADA PARA DISFRUTAR DE PRINCIPIO A FIN.</p>
 
-          <ul class="proposal__chips" aria-label="Características de la experiencia">
+          <ul class="proposal__chips proposal-reveal proposal-reveal--chips" data-proposal-reveal style="--proposal-reveal-delay:120ms" aria-label="Características de la experiencia">
             <li>INCLUYE CUBIERTO</li>
             <li>PIEZAS ILIMITADAS</li>
             <li>EXPERIENCIA EXCLUSIVA</li>
           </ul>
 
-          <div class="proposal__prices">
+          <div class="proposal__prices proposal-reveal proposal-reveal--prices" data-proposal-reveal>
             <article class="proposal__price">
               <p class="proposal__eyebrow">PRECIO X PERSONA</p>
               <p class="proposal__amount"><span aria-hidden="true">$</span>110.000</p>
@@ -109,7 +113,7 @@
             </article>
           </div>
 
-          <div class="proposal__conditions">
+          <div class="proposal__conditions proposal-reveal proposal-reveal--conditions" data-proposal-reveal>
             <article class="proposal__condition">
               <h3>PIEZAS SOBRANTES</h3>
               <p>HASTA 4 PIEZAS POR PERSONA, SIN CARGO. DESDE LA 5.ª, $2.900 POR PIEZA.</p>
@@ -121,7 +125,7 @@
             </article>
           </div>
 
-          <p class="proposal__legal">BASES, CONDICIONES Y LOCALES ADHERIDOS EN SUSHICLUB.COM.AR/BENEFICIOS. GALICIA ÉMINENT VISA SIGNATURE EN SALÓN: ÚNICAMENTE PARA COMPRAS REALIZADAS A TRAVÉS DE APPLE PAY Y GOOGLE PAY UTILIZANDO TECNOLOGÍA NFC (SIN CONTACTO).</p>
+          <p class="proposal__legal proposal-reveal proposal-reveal--legal" data-proposal-reveal>BASES, CONDICIONES Y LOCALES ADHERIDOS EN SUSHICLUB.COM.AR/BENEFICIOS. GALICIA ÉMINENT VISA SIGNATURE EN SALÓN: ÚNICAMENTE PARA COMPRAS REALIZADAS A TRAVÉS DE APPLE PAY Y GOOGLE PAY UTILIZANDO TECNOLOGÍA NFC (SIN CONTACTO).</p>
         </div>
       </div>
     </section>

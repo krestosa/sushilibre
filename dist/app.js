@@ -519,6 +519,49 @@
     });
   };
 
+  // src/ts/features/proposal-reveal.ts
+  var REVEAL_ROOT_MARGIN = "0px 0px -10% 0px";
+  var REVEAL_THRESHOLD = 0.01;
+  var INITIAL_VIEWPORT_RATIO = 0.92;
+  var reveal = (element) => {
+    if (element.classList.contains("is-visible")) return;
+    element.classList.add("is-visible");
+  };
+  var isInitiallyVisible = (element) => {
+    const bounds = element.getBoundingClientRect();
+    return bounds.bottom > 0 && bounds.top < window.innerHeight * INITIAL_VIEWPORT_RATIO;
+  };
+  var setupProposalReveal = () => {
+    const root = document.documentElement;
+    const proposalRoot = query("[data-proposal-root]");
+    root.setAttribute("data-proposal-reveal-ready", "");
+    if (!proposalRoot) return;
+    const targets = queryAll("[data-proposal-reveal]", proposalRoot);
+    const fallbackActive = root.classList.contains("proposal-reveal-fallback");
+    if (!targets.length) return;
+    if (fallbackActive || !("IntersectionObserver" in window)) {
+      targets.forEach(reveal);
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const element = entry.target;
+        reveal(element);
+        observer.unobserve(element);
+      });
+    }, {
+      rootMargin: REVEAL_ROOT_MARGIN,
+      threshold: REVEAL_THRESHOLD
+    });
+    window.requestAnimationFrame(() => {
+      targets.forEach((target2) => {
+        if (isInitiallyVisible(target2)) reveal(target2);
+        else observer.observe(target2);
+      });
+    });
+  };
+
   // src/ts/features/smooth-scroll.ts
   var setupEfficientSmoothScroll = ({
     isFirefox,
@@ -1178,6 +1221,7 @@
   setupBookingDockLayout();
   setupBookingCtaSheen(runtime);
   setupHeroIntroMotion();
+  setupProposalReveal();
   setupPieceViewer();
   setupTapSearchGuard();
   setupEfficientSmoothScroll(runtime);
@@ -1282,16 +1326,16 @@
   }
 
   // src/ts/features/menu-reveal.ts
-  var REVEAL_ROOT_MARGIN = "0px 0px -8% 0px";
-  var REVEAL_THRESHOLD = 0.01;
-  var INITIAL_VIEWPORT_RATIO = 0.92;
-  var reveal = (element) => {
+  var REVEAL_ROOT_MARGIN2 = "0px 0px -8% 0px";
+  var REVEAL_THRESHOLD2 = 0.01;
+  var INITIAL_VIEWPORT_RATIO2 = 0.92;
+  var reveal2 = (element) => {
     if (element.classList.contains("is-visible")) return;
     element.classList.add("is-visible");
   };
-  var isInitiallyVisible = (element) => {
+  var isInitiallyVisible2 = (element) => {
     const bounds = element.getBoundingClientRect();
-    return bounds.bottom > 0 && bounds.top < window.innerHeight * INITIAL_VIEWPORT_RATIO;
+    return bounds.bottom > 0 && bounds.top < window.innerHeight * INITIAL_VIEWPORT_RATIO2;
   };
   var setupMenuReveal = (menuRoot2, _groups) => {
     const root = document.documentElement;
@@ -1300,23 +1344,23 @@
     root.setAttribute("data-menu-reveal-ready", "");
     if (!targets.length) return;
     if (fallbackActive || !("IntersectionObserver" in window)) {
-      targets.forEach(reveal);
+      targets.forEach(reveal2);
       return;
     }
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         const element = entry.target;
-        reveal(element);
+        reveal2(element);
         observer.unobserve(element);
       });
     }, {
-      rootMargin: REVEAL_ROOT_MARGIN,
-      threshold: REVEAL_THRESHOLD
+      rootMargin: REVEAL_ROOT_MARGIN2,
+      threshold: REVEAL_THRESHOLD2
     });
     window.requestAnimationFrame(() => {
       targets.forEach((target2) => {
-        if (isInitiallyVisible(target2)) reveal(target2);
+        if (isInitiallyVisible2(target2)) reveal2(target2);
         else observer.observe(target2);
       });
     });
