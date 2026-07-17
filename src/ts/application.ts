@@ -10,11 +10,11 @@ import { setupVideoLoop } from './features/video-loop';
 import { createRuntimeContext } from './shared/runtime';
 
 const runtime = createRuntimeContext();
+setupProposalReveal();
 setupCountdown();
 setupBookingDockLayout();
 setupBookingCtaSheen(runtime);
 setupHeroIntroMotion();
-setupProposalReveal();
 setupPieceViewer();
 setupTapSearchGuard();
 setupEfficientSmoothScroll(runtime);
