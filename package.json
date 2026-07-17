@@ -1,0 +1,20 @@
+{
+  "name": "sushilibre",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/menu-contract.test.mjs",
+    "test:visual": "playwright test",
+    "ci": "npm run typecheck && npm run build && npm test && npm run test:visual"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "esbuild": "^0.25.5",
+    "sass": "^1.89.0",
+    "typescript": "^5.8.3"
+  }
+}
