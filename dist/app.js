@@ -233,9 +233,10 @@
     const dialog = query("[data-piece-viewer]");
     const image = query("[data-piece-viewer-image]", dialog ?? void 0);
     const status = query("[data-piece-viewer-status]", dialog ?? void 0);
+    const statusText = query("[data-piece-viewer-status-text]", dialog ?? void 0);
     const closeButton = query("[data-piece-viewer-close]", dialog ?? void 0);
     const openButtons = queryAll("[data-piece-viewer-open]");
-    if (!dialog || !image || !status || !closeButton || !openButtons.length) return;
+    if (!dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
     const reducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)");
     let activeButton = null;
     let closeTimer = 0;
@@ -244,7 +245,7 @@
     const setLoadingState = () => {
       if (imageFrame) window.cancelAnimationFrame(imageFrame);
       dialog.dataset.state = "loading";
-      status.textContent = LOADING_MESSAGE;
+      statusText.textContent = LOADING_MESSAGE;
       status.hidden = false;
       image.hidden = true;
     };
@@ -261,7 +262,7 @@
     const setErrorState = () => {
       if (!dialog.open || dialog.classList.contains("is-closing")) return;
       dialog.dataset.state = "error";
-      status.textContent = ERROR_MESSAGE;
+      statusText.textContent = ERROR_MESSAGE;
       status.hidden = false;
       image.hidden = true;
     };
@@ -289,7 +290,7 @@
       dialog.setAttribute("aria-label", "Vista de pieza");
       image.removeAttribute("src");
       image.alt = "";
-      status.textContent = LOADING_MESSAGE;
+      statusText.textContent = LOADING_MESSAGE;
       status.hidden = false;
       image.hidden = true;
       delete dialog.dataset.state;
@@ -1158,38 +1159,24 @@
   }
 
   // src/ts/features/menu-reveal.ts
-  var REVEAL_ROOT_MARGIN = "0px 0px -12% 0px";
-  var REVEAL_THRESHOLD = 0.12;
-  var ITEM_STAGGER_MS = 40;
-  var MAX_ITEM_STAGGER_MS = 120;
+  var REVEAL_ROOT_MARGIN = "0px 0px -8% 0px";
+  var REVEAL_THRESHOLD = 0.01;
+  var INITIAL_VIEWPORT_RATIO = 0.92;
   var reveal = (element) => {
+    if (element.classList.contains("is-visible")) return;
     element.classList.add("is-visible");
   };
-  var prepareReveal = (element, kind, delay = 0) => {
-    element.classList.add("menu-reveal", `menu-reveal--${kind}`);
-    element.style.setProperty("--menu-reveal-delay", `${delay}ms`);
+  var isInitiallyVisible = (element) => {
+    const bounds = element.getBoundingClientRect();
+    return bounds.bottom > 0 && bounds.top < window.innerHeight * INITIAL_VIEWPORT_RATIO;
   };
-  var setupMenuReveal = (menuRoot2, groups) => {
-    const intro = query(".menu-section__intro h2", menuRoot2);
-    const targets = [];
-    if (intro) {
-      prepareReveal(intro, "intro");
-      targets.push(intro);
-    }
-    groups.forEach((group) => {
-      const title = query(".menu-group__title-line", group);
-      if (title) {
-        prepareReveal(title, "group");
-        targets.push(title);
-      }
-      queryAll(".menu-item", group).forEach((item, index) => {
-        const delay = Math.min(index * ITEM_STAGGER_MS, MAX_ITEM_STAGGER_MS);
-        prepareReveal(item, "item", delay);
-        targets.push(item);
-      });
-    });
+  var setupMenuReveal = (menuRoot2, _groups) => {
+    const root = document.documentElement;
+    const targets = queryAll("[data-menu-reveal]", menuRoot2);
+    const fallbackActive = root.classList.contains("menu-reveal-fallback");
+    root.setAttribute("data-menu-reveal-ready", "");
     if (!targets.length) return;
-    if (!("IntersectionObserver" in window)) {
+    if (fallbackActive || !("IntersectionObserver" in window)) {
       targets.forEach(reveal);
       return;
     }
@@ -1204,7 +1191,12 @@
       rootMargin: REVEAL_ROOT_MARGIN,
       threshold: REVEAL_THRESHOLD
     });
-    targets.forEach((target2) => observer.observe(target2));
+    window.requestAnimationFrame(() => {
+      targets.forEach((target2) => {
+        if (isInitiallyVisible(target2)) reveal(target2);
+        else observer.observe(target2);
+      });
+    });
   };
 
   // src/ts/menu/observers.ts
