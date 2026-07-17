@@ -52,6 +52,14 @@ jobs:
       - name: Verify menu and style contracts
         run: npm test
 
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-diagnostics
+          path: build-diagnostics
+          if-no-files-found: warn
+
       - name: Upload static distribution artifact
         uses: actions/upload-artifact@v4
         with:
