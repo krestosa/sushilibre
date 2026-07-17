@@ -20,6 +20,11 @@ const createTextElement = <K extends keyof HTMLElementTagNameMap>(
   return element;
 };
 
+const keepLastTwoWordsTogether = (value: string): string => {
+  const normalized = value.trim();
+  return normalized.replace(/\s+(\S+)$/, '\u00A0$1');
+};
+
 const parseSectionPieces = (quantity: string): number | null => {
   const value = Number.parseInt(quantity, 10);
   return Number.isFinite(value) ? value : null;
@@ -52,7 +57,13 @@ const renderItem = (entry: MenuItemData, sectionPieces: number | null): HTMLElem
   item.append(itemHeader);
 
   if (entry.description) {
-    item.append(createTextElement('p', 'menu-item__description', entry.description));
+    item.append(
+      createTextElement(
+        'p',
+        'menu-item__description',
+        keepLastTwoWordsTogether(entry.description)
+      )
+    );
   }
 
   return item;
