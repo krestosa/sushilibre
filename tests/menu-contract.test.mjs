@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { parseMenuSource, renderStaticHtml } from '../scripts/menu-html.mjs';
 
-const EXPECTED_MENU_HASH = '199aa4f9c9ea8f757fa5f854a18a62d04cb9cbdd06e5abe5c8a07def4d1bab0f';
+const EXPECTED_MENU_HASH = '801ef99f4b9b1a84fb42276e42db80dc7d72db54babe3473cba0fb2f5dedba5a';
 
 const sortValue = (value) => {
   if (Array.isArray(value)) return value.map(sortValue);
@@ -27,10 +27,13 @@ const assertStaticMenuMarkup = (html) => {
   assert.doesNotMatch(html, /type=["']application\/json["']/i);
   assert.doesNotMatch(html, /<!--\s*MENU_SECTION\s*-->/);
   assert.equal(countMatches(html, /<article class="menu-group"/g), 5);
-  assert.equal(countMatches(html, /<article class="menu-item(?:\s|\")/g), 35);
-  assert.equal(countMatches(html, /class="menu-item__description"/g), 32);
+  assert.equal(countMatches(html, /<article class="menu-item(?:\s|\")/g), 36);
+  assert.equal(countMatches(html, /class="menu-item__description"/g), 33);
   assert.equal(countMatches(html, /class="menu-group__exit-sentinel"/g), 5);
   assert.match(html, /<h4 class="menu-item__name">BUENOS AIRES<\/h4>/);
+  assert.match(html, /<h4 class="menu-item__name">FUTURAMA2<\/h4>/);
+  assert.match(html, /<h4 class="menu-item__name">SALMÓN<\/h4>/);
+  assert.match(html, /FINAS FETAS DE SALMÓN SOBRE BOCADITOS DE ARROZ\./);
   assert.match(html, /<h4 class="menu-item__name">PALTA THAI<\/h4>/);
   assert.match(html, /<h4 class="menu-item__name">\+ CAFÉ NESPRESSO X PERSONA<\/h4>/);
 };
@@ -47,10 +50,23 @@ test('menu values and categories remain unchanged', async () => {
     count: items.length
   })), [
     { id: 'piezas', title: 'PIEZAS', quantity: '4U', count: 19 },
-    { id: 'niguiris', title: 'NIGUIRIS', quantity: '3U', count: 8 },
+    { id: 'niguiris', title: 'NIGUIRIS', quantity: '3U', count: 9 },
     { id: 'sashimis', title: 'SASHIMIS', quantity: '5U', count: 4 },
-    { id: 'geisha', title: 'GEISHA', quantity: '4U', count: 1 },
+    { id: 'geisha', title: 'GEISHA', quantity: '3U', count: 1 },
     { id: 'bebidas', title: 'BEBIDAS', quantity: '', count: 3 }
+  ]);
+
+  const niguiris = menu.sections.find(({ id }) => id === 'niguiris');
+  assert.deepEqual(niguiris.items.map(({ name }) => name), [
+    'SALMÓN',
+    'SALMÓN AHUMADO',
+    'ATÚN ROJO',
+    'PULPO',
+    'ANTICUCHERO',
+    'FUEGO THAI',
+    'LANGOSTINO FUEGO THAI',
+    'CRISPY WHITE',
+    'PALTA THAI'
   ]);
 });
 
