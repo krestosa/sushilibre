@@ -778,6 +778,10 @@
     element.textContent = value;
     return element;
   };
+  var keepLastTwoWordsTogether = (value) => {
+    const normalized = value.trim();
+    return normalized.replace(/\s+(\S+)$/, "\xA0$1");
+  };
   var parseSectionPieces = (quantity) => {
     const value = Number.parseInt(quantity, 10);
     return Number.isFinite(value) ? value : null;
@@ -801,7 +805,13 @@
     if (badges.childElementCount) itemHeader.append(badges);
     item.append(itemHeader);
     if (entry.description) {
-      item.append(createTextElement("p", "menu-item__description", entry.description));
+      item.append(
+        createTextElement(
+          "p",
+          "menu-item__description",
+          keepLastTwoWordsTogether(entry.description)
+        )
+      );
     }
     return item;
   };
