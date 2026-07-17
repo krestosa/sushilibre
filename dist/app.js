@@ -248,6 +248,195 @@
   };
 
   // src/ts/features/video-loop.ts
+  var STALL_RECOVERY_DELAY = 2400;
+  var HARD_STALL_THRESHOLD = 6500;
+  var WATCHDOG_INTERVAL = 2e3;
+  var PLAY_START_TIMEOUT = 4500;
+  var MAX_SOFT_RELOADS = 2;
+  var ensureVideoSource = (video) => {
+    if (video.currentSrc || video.hasAttribute("src") || Boolean(video.querySelector("source[src]"))) {
+      return true;
+    }
+    const source = video.dataset.videoSource;
+    if (!source) return false;
+    video.src = source;
+    video.load();
+    return true;
+  };
+  var releaseVideoSource = (video) => {
+    video.pause();
+    video.removeAttribute("src");
+    queryAll("source", video).forEach((source) => source.removeAttribute("src"));
+    video.load();
+  };
+  var setCurrentTimeSafely = (video, requestedTime) => {
+    const applyTime = () => {
+      const duration = video.duration;
+      const maximum = Number.isFinite(duration) && duration > 0 ? Math.max(0, duration - 0.05) : Math.max(0, requestedTime);
+      const nextTime = Math.min(Math.max(0, requestedTime), maximum);
+      try {
+        video.currentTime = nextTime;
+      } catch {
+      }
+    };
+    if (video.readyState >= HTMLMediaElement.HAVE_METADATA) applyTime();
+    else video.addEventListener("loadedmetadata", applyTime, { once: true });
+  };
+  var playWithTimeout = async (video, timeout = PLAY_START_TIMEOUT) => {
+    let timeoutId = 0;
+    try {
+      await Promise.race([
+        video.play(),
+        new Promise((_resolve, reject) => {
+          timeoutId = window.setTimeout(
+            () => reject(new Error("Video playback did not start in time.")),
+            timeout
+          );
+        })
+      ]);
+    } finally {
+      if (timeoutId) window.clearTimeout(timeoutId);
+    }
+  };
+  var setupSingleVideoLoop = (video, unusedVideos, hero) => {
+    unusedVideos.forEach((unusedVideo) => {
+      unusedVideo.hidden = true;
+      unusedVideo.classList.remove("is-active", "is-mixing-in");
+      releaseVideoSource(unusedVideo);
+    });
+    video.hidden = false;
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+    video.classList.add("is-active");
+    video.classList.remove("is-mixing-in");
+    ensureVideoSource(video);
+    let heroVisible = true;
+    let suspendedTime = 0;
+    let recoveryTimer = 0;
+    let recoveryInProgress = false;
+    let reloadAttempts = 0;
+    let lastMediaTime = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+    let lastProgressAt = performance.now();
+    const canPlay = () => !document.hidden && heroVisible && navigator.onLine !== false;
+    const clearRecoveryTimer = () => {
+      if (!recoveryTimer) return;
+      window.clearTimeout(recoveryTimer);
+      recoveryTimer = 0;
+    };
+    const noteProgress = () => {
+      const currentTime = Number.isFinite(video.currentTime) ? video.currentTime : lastMediaTime;
+      const advanced = Math.abs(currentTime - lastMediaTime) >= 0.04;
+      if (advanced || currentTime < lastMediaTime) {
+        lastMediaTime = currentTime;
+        lastProgressAt = performance.now();
+        reloadAttempts = 0;
+      }
+    };
+    const rebuildBuffer = () => {
+      const duration = video.duration;
+      const nearBoundary = Number.isFinite(duration) && duration > 0 ? duration - video.currentTime < 0.45 : false;
+      const resumeTime = reloadAttempts >= MAX_SOFT_RELOADS || nearBoundary ? 0 : Number.isFinite(video.currentTime) ? video.currentTime : suspendedTime;
+      reloadAttempts += 1;
+      video.load();
+      setCurrentTimeSafely(video, resumeTime);
+    };
+    const recoverPlayback = async (forceReload = false) => {
+      clearRecoveryTimer();
+      if (!canPlay() || recoveryInProgress) return;
+      recoveryInProgress = true;
+      try {
+        ensureVideoSource(video);
+        const duration = video.duration;
+        const reachedBoundary = video.ended || Number.isFinite(duration) && duration > 0 && duration - video.currentTime < 0.12;
+        if (reachedBoundary) setCurrentTimeSafely(video, 0);
+        if (forceReload || video.error || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+          rebuildBuffer();
+        }
+        await playWithTimeout(video);
+        lastProgressAt = performance.now();
+      } catch {
+        if (canPlay()) {
+          recoveryTimer = window.setTimeout(() => {
+            recoveryTimer = 0;
+            void recoverPlayback(true);
+          }, STALL_RECOVERY_DELAY);
+        }
+      } finally {
+        recoveryInProgress = false;
+      }
+    };
+    const scheduleRecovery = (forceReload = false) => {
+      if (!canPlay() || recoveryTimer || recoveryInProgress) return;
+      recoveryTimer = window.setTimeout(() => {
+        recoveryTimer = 0;
+        void recoverPlayback(forceReload);
+      }, STALL_RECOVERY_DELAY);
+    };
+    const suspendPlayback = () => {
+      clearRecoveryTimer();
+      suspendedTime = Number.isFinite(video.currentTime) ? video.currentTime : suspendedTime;
+      video.pause();
+    };
+    const resumePlayback = () => {
+      if (!canPlay()) return;
+      if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+        setCurrentTimeSafely(video, suspendedTime);
+      }
+      void recoverPlayback(false);
+    };
+    video.addEventListener("timeupdate", noteProgress, { passive: true });
+    video.addEventListener("playing", () => {
+      clearRecoveryTimer();
+      lastProgressAt = performance.now();
+      noteProgress();
+    }, { passive: true });
+    video.addEventListener("canplay", () => {
+      clearRecoveryTimer();
+      if (canPlay() && video.paused) void recoverPlayback(false);
+    }, { passive: true });
+    video.addEventListener("waiting", () => scheduleRecovery(false), { passive: true });
+    video.addEventListener("stalled", () => scheduleRecovery(true), { passive: true });
+    video.addEventListener("suspend", () => {
+      if (!video.paused && video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) {
+        scheduleRecovery(false);
+      }
+    }, { passive: true });
+    video.addEventListener("ended", () => {
+      setCurrentTimeSafely(video, 0);
+      void recoverPlayback(false);
+    }, { passive: true });
+    video.addEventListener("error", () => scheduleRecovery(true), { passive: true });
+    if (hero && "IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        heroVisible = entry.isIntersecting;
+        if (heroVisible && !document.hidden) resumePlayback();
+        else suspendPlayback();
+      }, { rootMargin: "80px 0px", threshold: 0 });
+      observer.observe(hero);
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) suspendPlayback();
+      else resumePlayback();
+    });
+    window.addEventListener("pagehide", suspendPlayback, { passive: true });
+    window.addEventListener("pageshow", resumePlayback, { passive: true });
+    window.addEventListener("online", resumePlayback, { passive: true });
+    window.setInterval(() => {
+      if (!canPlay()) return;
+      noteProgress();
+      const stalledFor = performance.now() - lastProgressAt;
+      const unexpectedlyPaused = video.paused && !video.ended;
+      const bufferStarved = video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA;
+      if (unexpectedlyPaused || stalledFor >= HARD_STALL_THRESHOLD) {
+        scheduleRecovery(bufferStarved || stalledFor >= HARD_STALL_THRESHOLD);
+      }
+    }, WATCHDOG_INTERVAL);
+    void recoverPlayback(false);
+  };
   var setupVideoLoop = ({
     root,
     compactViewport,
@@ -255,56 +444,36 @@
   }) => {
     const hero = query(".hero");
     const videos = queryAll("[data-loop-video]");
-    if (!videos.length) return;
+    const firstVideo = videos[0];
+    if (!firstVideo) return;
     const compactPlayback = compactViewport.matches || coarsePointer.matches;
     const mixDuration = compactPlayback ? 650 : 900;
     const mixLead = mixDuration / 1e3 + 0.24;
     root.style.setProperty("--video-mix-duration", `${mixDuration}ms`);
+    if (compactPlayback || videos.length < 2) {
+      setupSingleVideoLoop(firstVideo, videos.slice(1), hero);
+      return;
+    }
     videos.forEach((video, index) => {
-      video.loop = videos.length < 2;
+      video.hidden = false;
+      video.loop = false;
       video.muted = true;
       video.playsInline = true;
-      video.preload = index === 0 ? "auto" : "metadata";
+      video.preload = index === 0 ? "metadata" : "none";
       video.classList.toggle("is-active", index === 0);
       video.classList.remove("is-mixing-in");
     });
-    if (videos.length < 2) {
-      const video = videos[0];
-      if (!video) return;
-      let suspendedTime = 0;
-      let heroVisible2 = true;
-      const syncPlayback = () => {
-        if (!document.hidden && heroVisible2) {
-          try {
-            video.currentTime = suspendedTime;
-          } catch {
-          }
-          void video.play().catch(() => void 0);
-        } else {
-          suspendedTime = Number.isFinite(video.currentTime) ? video.currentTime : suspendedTime;
-          video.pause();
-        }
-      };
-      if (hero && "IntersectionObserver" in window) {
-        new IntersectionObserver((entries) => {
-          const entry = entries[0];
-          if (!entry) return;
-          heroVisible2 = entry.isIntersecting;
-          syncPlayback();
-        }, { rootMargin: "80px 0px", threshold: 0 }).observe(hero);
-      }
-      document.addEventListener("visibilitychange", syncPlayback);
-      void video.play().catch(() => void 0);
-      return;
-    }
     let activeIndex = 0;
     let transitionInProgress = false;
     let boundaryTimerId = 0;
     let mixTimerId = 0;
+    let recoveryTimerId = 0;
     let mixGeneration = 0;
     let suspendedState = null;
     let heroVisible = true;
-    const canPlay = () => !document.hidden && heroVisible;
+    let lastMediaTime = 0;
+    let lastProgressAt = performance.now();
+    const canPlay = () => !document.hidden && heroVisible && navigator.onLine !== false;
     const getVideo = (index) => videos[index] ?? null;
     const clearBoundaryTimer = () => {
       if (!boundaryTimerId) return;
@@ -316,18 +485,10 @@
       window.clearTimeout(mixTimerId);
       mixTimerId = 0;
     };
-    const setCurrentTimeSafely = (video, requestedTime) => {
-      const applyTime = () => {
-        const duration = video.duration;
-        const maximum = Number.isFinite(duration) && duration > 0 ? Math.max(0, duration - 0.05) : Math.max(0, requestedTime);
-        const nextTime = Math.min(Math.max(0, requestedTime), maximum);
-        try {
-          video.currentTime = nextTime;
-        } catch {
-        }
-      };
-      if (video.readyState >= 1) applyTime();
-      else video.addEventListener("loadedmetadata", applyTime, { once: true });
+    const clearRecoveryTimer = () => {
+      if (!recoveryTimerId) return;
+      window.clearTimeout(recoveryTimerId);
+      recoveryTimerId = 0;
     };
     const activateSingleVideo = (index, time) => {
       clearBoundaryTimer();
@@ -340,6 +501,7 @@
       });
       const activeVideo = getVideo(index);
       if (!activeVideo) return null;
+      ensureVideoSource(activeVideo);
       activeIndex = index;
       activeVideo.classList.add("is-active");
       setCurrentTimeSafely(activeVideo, time);
@@ -365,21 +527,55 @@
         else scheduleBoundary();
       }, delay);
     };
+    const recoverActiveVideo = async (forceReload = false) => {
+      clearRecoveryTimer();
+      if (!canPlay()) return;
+      const currentVideo = getVideo(activeIndex);
+      if (!currentVideo) return;
+      const duration = currentVideo.duration;
+      const nearBoundary = Number.isFinite(duration) && duration > 0 ? duration - currentVideo.currentTime < 0.35 : false;
+      const resumeTime = nearBoundary ? 0 : Number.isFinite(currentVideo.currentTime) ? currentVideo.currentTime : 0;
+      const activeVideo = activateSingleVideo(activeIndex, resumeTime);
+      if (!activeVideo) return;
+      if (forceReload || activeVideo.error) {
+        activeVideo.load();
+        setCurrentTimeSafely(activeVideo, resumeTime);
+      }
+      try {
+        await playWithTimeout(activeVideo);
+        lastMediaTime = activeVideo.currentTime;
+        lastProgressAt = performance.now();
+        scheduleBoundary();
+      } catch {
+        recoveryTimerId = window.setTimeout(() => {
+          recoveryTimerId = 0;
+          void recoverActiveVideo(true);
+        }, STALL_RECOVERY_DELAY);
+      }
+    };
+    const scheduleRecovery = (forceReload = false) => {
+      if (!canPlay() || recoveryTimerId) return;
+      recoveryTimerId = window.setTimeout(() => {
+        recoveryTimerId = 0;
+        void recoverActiveVideo(forceReload);
+      }, STALL_RECOVERY_DELAY);
+    };
     async function mixLoopBoundary() {
       if (transitionInProgress || !canPlay()) return;
       const outgoing = getVideo(activeIndex);
       const nextIndex = (activeIndex + 1) % videos.length;
       const incoming = getVideo(nextIndex);
-      if (!outgoing || !incoming) return;
+      if (!outgoing || !incoming || !ensureVideoSource(incoming)) return;
       transitionInProgress = true;
       clearBoundaryTimer();
+      clearRecoveryTimer();
       const generation = ++mixGeneration;
       try {
         incoming.pause();
         setCurrentTimeSafely(incoming, 0);
         incoming.classList.remove("is-active");
         incoming.classList.add("is-mixing-in");
-        await incoming.play();
+        await playWithTimeout(incoming);
         if (generation !== mixGeneration || !canPlay()) {
           incoming.pause();
           incoming.classList.remove("is-mixing-in");
@@ -397,16 +593,18 @@
           activeIndex = nextIndex;
           transitionInProgress = false;
           mixTimerId = 0;
+          lastMediaTime = incoming.currentTime;
+          lastProgressAt = performance.now();
           scheduleBoundary();
         }, mixDuration + 50);
       } catch {
         incoming.pause();
         incoming.classList.remove("is-active", "is-mixing-in");
         if (generation !== mixGeneration) return;
+        transitionInProgress = false;
         setCurrentTimeSafely(outgoing, 0);
         outgoing.classList.add("is-active");
-        transitionInProgress = false;
-        void outgoing.play().then(scheduleBoundary).catch(() => void 0);
+        void recoverActiveVideo(false);
       }
     }
     const suspendPlayback = () => {
@@ -432,14 +630,44 @@
       };
       suspendedState = null;
       const activeVideo = activateSingleVideo(state.index, state.time);
-      if (activeVideo) void activeVideo.play().then(scheduleBoundary).catch(() => void 0);
+      if (activeVideo) void playWithTimeout(activeVideo).then(scheduleBoundary).catch(() => scheduleRecovery(true));
     };
-    videos.forEach((video) => {
-      video.addEventListener("playing", scheduleBoundary, { passive: true });
+    videos.forEach((video, index) => {
+      video.addEventListener("timeupdate", () => {
+        if (index !== activeIndex) return;
+        const currentTime = video.currentTime;
+        if (Math.abs(currentTime - lastMediaTime) >= 0.04 || currentTime < lastMediaTime) {
+          lastMediaTime = currentTime;
+          lastProgressAt = performance.now();
+        }
+      }, { passive: true });
+      video.addEventListener("playing", () => {
+        clearRecoveryTimer();
+        lastProgressAt = performance.now();
+        scheduleBoundary();
+      }, { passive: true });
       video.addEventListener("seeked", scheduleBoundary, { passive: true });
       video.addEventListener("ratechange", scheduleBoundary, { passive: true });
-      video.addEventListener("waiting", clearBoundaryTimer, { passive: true });
+      video.addEventListener("waiting", () => {
+        clearBoundaryTimer();
+        if (index === activeIndex) scheduleRecovery(false);
+      }, { passive: true });
+      video.addEventListener("stalled", () => {
+        if (index === activeIndex) scheduleRecovery(true);
+      }, { passive: true });
+      video.addEventListener("error", () => {
+        if (index === activeIndex) scheduleRecovery(true);
+      }, { passive: true });
+      video.addEventListener("ended", () => {
+        if (index === activeIndex) void mixLoopBoundary();
+      }, { passive: true });
     });
+    firstVideo.addEventListener("canplay", () => {
+      const secondaryVideo = getVideo(1);
+      if (!secondaryVideo) return;
+      secondaryVideo.preload = "metadata";
+      ensureVideoSource(secondaryVideo);
+    }, { once: true, passive: true });
     if (hero && "IntersectionObserver" in window) {
       const heroObserver = new IntersectionObserver((entries) => {
         const entry = entries[0];
@@ -452,20 +680,25 @@
       }, { rootMargin: "80px 0px", threshold: 0 });
       heroObserver.observe(hero);
     }
-    const firstVideo = getVideo(activeIndex);
-    if (firstVideo) void firstVideo.play().then(scheduleBoundary).catch(() => void 0);
+    window.setInterval(() => {
+      if (!canPlay()) return;
+      const activeVideo = getVideo(activeIndex);
+      if (!activeVideo) return;
+      const stalledFor = performance.now() - lastProgressAt;
+      const unexpectedlyPaused = activeVideo.paused && !activeVideo.ended;
+      if (unexpectedlyPaused || stalledFor >= HARD_STALL_THRESHOLD) {
+        scheduleRecovery(activeVideo.readyState < HTMLMediaElement.HAVE_CURRENT_DATA);
+      }
+    }, WATCHDOG_INTERVAL);
+    ensureVideoSource(firstVideo);
+    void playWithTimeout(firstVideo).then(scheduleBoundary).catch(() => scheduleRecovery(true));
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) suspendPlayback();
       else resumePlayback();
     });
-    window.addEventListener("pagehide", suspendPlayback);
-    window.addEventListener("pageshow", () => {
-      if (!document.hidden) resumePlayback();
-    });
-    document.addEventListener("freeze", suspendPlayback);
-    document.addEventListener("resume", () => {
-      if (!document.hidden) resumePlayback();
-    });
+    window.addEventListener("pagehide", suspendPlayback, { passive: true });
+    window.addEventListener("pageshow", resumePlayback, { passive: true });
+    window.addEventListener("online", resumePlayback, { passive: true });
   };
 
   // src/ts/shared/runtime.ts
