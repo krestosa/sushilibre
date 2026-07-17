@@ -80,6 +80,29 @@ video {
   line-height: 1;
 }
 
+.booking-dock__location {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 3px;
+  color: inherit;
+  text-decoration: none;
+}
+.booking-dock__location .booking-dock__value {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: color 160ms ease-out, text-decoration-color 160ms ease-out;
+}
+.booking-dock__location:hover .booking-dock__value, .booking-dock__location:focus-visible .booking-dock__value {
+  color: var(--orange);
+  text-decoration-color: currentColor;
+}
+.booking-dock__location:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
 .booking-dock__cta {
   position: relative;
   isolation: isolate;
@@ -96,11 +119,14 @@ video {
   letter-spacing: -0.04em;
   text-align: center;
   text-decoration: none;
-  transition: transform 150ms ease-out, filter 150ms ease-out;
+  transition: transform 180ms ease-out, filter 180ms ease-out, box-shadow 240ms ease-out;
 }
 .booking-dock__cta > span {
   position: relative;
   z-index: 2;
+}
+.booking-dock__cta:hover {
+  filter: brightness(1.045);
 }
 .booking-dock__cta:focus-visible {
   outline: 2px solid #fff;
@@ -113,15 +139,15 @@ video {
   content: "";
   position: absolute;
   z-index: 1;
-  top: -42%;
-  bottom: -42%;
-  left: -92%;
-  width: 72%;
+  top: -48%;
+  bottom: -48%;
+  left: -104%;
+  width: 88%;
   opacity: 0;
   pointer-events: none;
   transform: skewX(-18deg);
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 12%, rgba(255, 255, 255, 0.14) 26%, rgba(255, 255, 255, 0.36) 42%, rgba(255, 255, 255, 0.58) 50%, rgba(255, 255, 255, 0.36) 58%, rgba(255, 255, 255, 0.14) 74%, rgba(255, 255, 255, 0.04) 88%, transparent 100%);
-  filter: blur(5px);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 10%, rgba(255, 255, 255, 0.18) 24%, rgba(255, 255, 255, 0.46) 42%, rgba(255, 255, 255, 0.82) 50%, rgba(255, 255, 255, 0.46) 58%, rgba(255, 255, 255, 0.18) 76%, rgba(255, 255, 255, 0.05) 90%, transparent 100%);
+  filter: blur(6px);
   will-change: left, opacity;
 }
 .booking-dock__cta.has-runtime-sheen::before {
@@ -131,15 +157,15 @@ video {
 .booking-dock__cta > i[aria-hidden=true] {
   position: absolute;
   z-index: 1;
-  top: -42%;
-  bottom: -42%;
+  top: -48%;
+  bottom: -48%;
   left: 0;
-  width: 72%;
+  width: 88%;
   opacity: 0;
   pointer-events: none;
-  transform: translate3d(-135%, 0, 0) skewX(-18deg);
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.04) 12%, rgba(255, 255, 255, 0.14) 26%, rgba(255, 255, 255, 0.36) 42%, rgba(255, 255, 255, 0.58) 50%, rgba(255, 255, 255, 0.36) 58%, rgba(255, 255, 255, 0.14) 74%, rgba(255, 255, 255, 0.04) 88%, transparent 100%);
-  filter: blur(5px);
+  transform: translate3d(-145%, 0, 0) skewX(-18deg);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 10%, rgba(255, 255, 255, 0.18) 24%, rgba(255, 255, 255, 0.46) 42%, rgba(255, 255, 255, 0.82) 50%, rgba(255, 255, 255, 0.46) 58%, rgba(255, 255, 255, 0.18) 76%, rgba(255, 255, 255, 0.05) 90%, transparent 100%);
+  filter: blur(6px);
   will-change: transform, opacity;
 }
 
@@ -497,7 +523,7 @@ html.hero-intro-complete .title-word--libre {
 
 @media (prefers-reduced-motion: no-preference) {
   .booking-dock__cta::before {
-    animation: cta-sheen 5.9s ease-in-out 2.35s infinite;
+    animation: cta-sheen 8.8s ease-in-out 1.5s infinite;
   }
   .hero__video-stack {
     animation: video-settle 850ms var(--ease-soft) both;
@@ -634,22 +660,19 @@ html.hero-intro-complete .title-word--libre {
   }
 }
 @keyframes cta-sheen {
-  0% {
-    left: -92%;
+  0%, 10% {
+    left: -104%;
     opacity: 0;
   }
-  3% {
-    opacity: 0;
+  16% {
+    opacity: 0.82;
   }
-  7% {
-    opacity: 0.68;
+  34% {
+    left: 152%;
+    opacity: 0.58;
   }
-  22% {
-    left: 138%;
-    opacity: 0.46;
-  }
-  28%, 100% {
-    left: 138%;
+  42%, 100% {
+    left: 152%;
     opacity: 0;
   }
 }

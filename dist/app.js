@@ -13,8 +13,9 @@
     compactViewport,
     coarsePointer
   }) => {
-    const cta = query(".booking-dock__cta");
-    if (!cta || reducedMotion2.matches || typeof cta.animate !== "function") return;
+    const selectedCta = query("[data-booking-cta]");
+    if (!selectedCta || reducedMotion2.matches || typeof selectedCta.animate !== "function") return;
+    const cta = selectedCta;
     cta.style.filter = "none";
     cta.classList.add("has-runtime-sheen");
     const sheen = document.createElement("i");
@@ -22,23 +23,24 @@
     setStyles(sheen, {
       position: "absolute",
       zIndex: "1",
-      top: "-42%",
-      bottom: "-42%",
+      top: "-48%",
+      bottom: "-48%",
       left: "0",
-      width: "72%",
+      width: "88%",
       opacity: "0",
       pointerEvents: "none",
-      transform: "translate3d(-135%, 0, 0) skewX(-18deg)",
-      background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,.04) 12%, rgba(255,255,255,.14) 26%, rgba(255,255,255,.36) 42%, rgba(255,255,255,.58) 50%, rgba(255,255,255,.36) 58%, rgba(255,255,255,.14) 74%, rgba(255,255,255,.04) 88%, transparent 100%)",
-      filter: "blur(5px)",
+      transform: "translate3d(-145%, 0, 0) skewX(-18deg)",
+      background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,.05) 10%, rgba(255,255,255,.18) 24%, rgba(255,255,255,.46) 42%, rgba(255,255,255,.82) 50%, rgba(255,255,255,.46) 58%, rgba(255,255,255,.18) 76%, rgba(255,255,255,.05) 90%, transparent 100%)",
+      filter: "blur(6px)",
       willChange: "transform, opacity"
     });
     cta.prepend(sheen);
-    const initialDelay = 2350;
-    const regularDelay = 4700;
-    const duration = compactViewport.matches || coarsePointer.matches ? 850 : 1050;
+    const initialDelay = 1500;
+    const regularDelay = 7400;
+    const duration = compactViewport.matches || coarsePointer.matches ? 1450 : 1800;
     let timerId = 0;
     let activeAnimation = null;
+    let activeGlow = null;
     let interactionArmed = true;
     let initialPending = true;
     const clearTimer = () => {
@@ -56,20 +58,33 @@
     function runSheen() {
       clearTimer();
       activeAnimation?.cancel();
+      activeGlow?.cancel();
       const animation = sheen.animate([
-        { transform: "translate3d(-135%, 0, 0) skewX(-18deg)", opacity: 0 },
-        { transform: "translate3d(-112%, 0, 0) skewX(-18deg)", opacity: 0, offset: 0.08 },
-        { transform: "translate3d(-72%, 0, 0) skewX(-18deg)", opacity: 0.68, offset: 0.24 },
-        { transform: "translate3d(170%, 0, 0) skewX(-18deg)", opacity: 0.46, offset: 0.82 },
-        { transform: "translate3d(205%, 0, 0) skewX(-18deg)", opacity: 0 }
+        { transform: "translate3d(-145%, 0, 0) skewX(-18deg)", opacity: 0 },
+        { transform: "translate3d(-122%, 0, 0) skewX(-18deg)", opacity: 0, offset: 0.1 },
+        { transform: "translate3d(-78%, 0, 0) skewX(-18deg)", opacity: 0.82, offset: 0.28 },
+        { transform: "translate3d(172%, 0, 0) skewX(-18deg)", opacity: 0.58, offset: 0.82 },
+        { transform: "translate3d(215%, 0, 0) skewX(-18deg)", opacity: 0 }
       ], {
         duration,
         easing: "cubic-bezier(.22, 1, .36, 1)",
         fill: "none"
       });
+      const glow = cta.animate([
+        { boxShadow: "0 0 0 rgba(231,112,43,0)", filter: "brightness(1)" },
+        { boxShadow: "0 0 0 rgba(231,112,43,0)", filter: "brightness(1)", offset: 0.18 },
+        { boxShadow: "0 0 28px rgba(231,112,43,.34)", filter: "brightness(1.08)", offset: 0.55 },
+        { boxShadow: "0 0 0 rgba(231,112,43,0)", filter: "brightness(1)" }
+      ], {
+        duration,
+        easing: "ease-in-out",
+        fill: "none"
+      });
       activeAnimation = animation;
+      activeGlow = glow;
       animation.addEventListener("finish", () => {
         if (activeAnimation === animation) activeAnimation = null;
+        if (activeGlow === glow) activeGlow = null;
         scheduleRegularLoop();
       }, { once: true });
     }
@@ -96,7 +111,9 @@
       if (document.hidden) {
         clearTimer();
         activeAnimation?.cancel();
+        activeGlow?.cancel();
         activeAnimation = null;
+        activeGlow = null;
         return;
       }
       scheduleRegularLoop(initialPending ? 650 : regularDelay);
@@ -195,12 +212,45 @@
   // src/ts/features/countdown.ts
   var keys = ["days", "hours", "minutes", "seconds"];
   var target = (/* @__PURE__ */ new Date("2026-07-30T20:00:00-03:00")).getTime();
+  var replaceCtaLabel = (label, firstLine, secondLine) => {
+    label.replaceChildren(
+      document.createTextNode(firstLine),
+      document.createElement("br"),
+      document.createTextNode(secondLine)
+    );
+  };
   var setupCountdown = () => {
+    const countdown = query(".countdown");
+    const cta = query("[data-booking-cta]");
+    const ctaLabel = query("[data-booking-cta-label]", cta ?? void 0);
+    const menu = query("#menu");
+    const reducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let menuMode = false;
     const nodes = {
       days: query('[data-countdown="days"]'),
       hours: query('[data-countdown="hours"]'),
       minutes: query('[data-countdown="minutes"]'),
       seconds: query('[data-countdown="seconds"]')
+    };
+    const handleMenuClick = (event) => {
+      if (!menu) return;
+      event.preventDefault();
+      menu.scrollIntoView({
+        behavior: reducedMotion2.matches ? "auto" : "smooth",
+        block: "start"
+      });
+      window.history.replaceState(null, "", "#menu");
+    };
+    const activateMenuMode = () => {
+      if (menuMode || !cta || !ctaLabel) return;
+      menuMode = true;
+      cta.href = "#menu";
+      cta.dataset.destination = "menu";
+      cta.setAttribute("aria-label", "Ir al men\xFA");
+      replaceCtaLabel(ctaLabel, "IR A", "MEN\xDA");
+      cta.addEventListener("click", handleMenuClick);
+      countdown?.setAttribute("aria-label", "El evento comenz\xF3");
+      countdown?.setAttribute("data-state", "complete");
     };
     const pad = (value) => String(value).padStart(2, "0");
     const render = () => {
@@ -216,6 +266,7 @@
         const nextValue = pad(values[key]);
         if (node && node.textContent !== nextValue) node.textContent = nextValue;
       });
+      if (remaining === 0) activateMenuMode();
       return remaining;
     };
     if (render() <= 0) return;
