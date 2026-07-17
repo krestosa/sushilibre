@@ -10,12 +10,13 @@ La fuente mantenible vive en Sass y TypeScript. `dist/` es la distribución est�
 - `src/scss/breakpoints/_tablet.scss`: modificaciones heredadas para tablet.
 - `src/scss/breakpoints/_mobile.scss`: modificaciones finales para mobile.
 - `src/scss/components/`: únicamente unidades reutilizables y acotadas, como botón, countdown y chips.
-- `src/ts/`: fuente TypeScript organizada por responsabilidades.
-- `src/static/index.html`: plantilla HTML de producción; el bloque `#menu-data` se genera durante build.
-- `menu.json`: única fuente editable de datos del menú.
+- `src/ts/`: comportamiento TypeScript para layout, animaciones e interacción; no genera los campos del menú.
+- `src/static/index.html`: plantilla HTML de producción con el marcador de compilación del menú.
+- `menu.json`: fuente de desarrollo del menú; no se distribuye en producción.
+- `scripts/menu-html.mjs`: valida `menu.json` y lo convierte en elementos HTML normales durante build y desarrollo.
 - `dist/assets/`: única ubicación de imágenes, videos y archivos gráficos.
-- `dist/`: sitio estático final con HTML, CSS, JavaScript, JSON y assets.
-- `tests/menu-contract.test.mjs`: validación de categorías, valores y sincronización del menú embebido.
+- `dist/`: sitio estático final con HTML, CSS, JavaScript y assets; no contiene `menu.json`.
+- `tests/menu-contract.test.mjs`: valida categorías, valores, HTML generado y ausencia de renderizado dinámico en producción.
 - `tests/style-contract.test.mjs`: validación integral de selectores y declaraciones compiladas.
 
 `src/scss/main.scss` carga desktop, luego tablet y finalmente mobile. No existe una capa separada de secciones: toda la estructura visual vive dentro de esos tres breakpoints. Las reglas de accesibilidad y capacidades del navegador se aplican después sin introducir breakpoints adicionales.
@@ -37,7 +38,7 @@ Durante `npm run dev`:
 
 - los cambios de SCSS se recompilan y se aplican sin recargar la página;
 - los cambios de TypeScript se recompilan y recargan la página automáticamente;
-- cada cambio en `menu.json` regenera `dist/menu.json` y el `<script id="menu-data" type="application/json">` de `dist/index.html`, y luego recarga la página;
+- cada cambio en `menu.json` regenera los elementos del menú dentro de `dist/index.html` y recarga la página;
 - los cambios de la plantilla o los assets recargan la página automáticamente.
 
 ## Build estático
@@ -50,7 +51,7 @@ npm test
 npm run serve
 ```
 
-`npm run build` valida `menu.json`, lo copia a `dist/menu.json` y genera desde ese mismo contenido el fallback JSON embebido en `dist/index.html`.
+`npm run build` valida `menu.json`, genera categorías, productos, chips y descripciones como DOM estático dentro de `dist/index.html`, elimina cualquier `dist/menu.json` residual y compila un `app.js` sin cargador ni renderer de datos del menú.
 
 `npm run clean` elimina solamente los archivos generados y preserva `dist/assets/`.
 
