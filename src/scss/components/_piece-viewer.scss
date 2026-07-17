@@ -1,3 +1,8 @@
+.menu-item .menu-item__header {
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}
+
 .menu-item__identity {
   display: flex;
   flex: 1 1 auto;
@@ -22,6 +27,7 @@
   line-height: 1;
   letter-spacing: 0.045em;
   text-transform: uppercase;
+  white-space: nowrap;
   cursor: pointer;
   transition: color 160ms ease-out, border-color 160ms ease-out, transform 160ms ease-out;
 
