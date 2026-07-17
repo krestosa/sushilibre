@@ -24,7 +24,6 @@ const isInteractiveTarget = (target: EventTarget | null): boolean =>
 
 export const setupPieceViewer = (): void => {
   const root = document.documentElement;
-  const page = query<HTMLElement>('.page');
   const dialog = query<HTMLDialogElement>('[data-piece-viewer]');
   const image = query<HTMLImageElement>('[data-piece-viewer-image]', dialog ?? undefined);
   const status = query<HTMLElement>('[data-piece-viewer-status]', dialog ?? undefined);
@@ -32,13 +31,14 @@ export const setupPieceViewer = (): void => {
   const closeButton = query<HTMLButtonElement>('[data-piece-viewer-close]', dialog ?? undefined);
   const openButtons = queryAll<HTMLButtonElement>('[data-piece-viewer-open]');
 
-  if (!page || !dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
+  if (!dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let activeButton: HTMLButtonElement | null = null;
   let closeTimer = 0;
   let openFrame = 0;
   let imageFrame = 0;
+  let scrollCorrectionFrame = 0;
   let lockedScrollY = 0;
   let backgroundLocked = false;
 
@@ -51,41 +51,47 @@ export const setupPieceViewer = (): void => {
     event.preventDefault();
   };
 
+  const enforceLockedScroll = (): void => {
+    if (!backgroundLocked || scrollCorrectionFrame) return;
+
+    scrollCorrectionFrame = window.requestAnimationFrame(() => {
+      scrollCorrectionFrame = 0;
+      if (!backgroundLocked || Math.abs(window.scrollY - lockedScrollY) < 0.5) return;
+      window.scrollTo(0, lockedScrollY);
+    });
+  };
+
   const lockBackground = (): void => {
     if (backgroundLocked) return;
 
     lockedScrollY = window.scrollY;
-    const documentHeight = Math.max(
-      root.scrollHeight,
-      document.body.scrollHeight,
-      window.innerHeight
-    );
-
-    root.style.setProperty('--piece-viewer-scroll-offset', `${-lockedScrollY}px`);
-    root.style.setProperty('--piece-viewer-document-height', `${documentHeight}px`);
+    backgroundLocked = true;
     root.classList.add('has-piece-viewer');
 
     window.addEventListener('wheel', preventBackgroundScroll, { passive: false });
     window.addEventListener('touchmove', preventBackgroundScroll, { passive: false });
+    window.addEventListener('scroll', enforceLockedScroll, { passive: true });
     document.addEventListener('keydown', preventBackgroundScrollKey, true);
-    backgroundLocked = true;
+    enforceLockedScroll();
   };
 
   const unlockBackground = (): void => {
     if (!backgroundLocked) return;
 
+    backgroundLocked = false;
     window.removeEventListener('wheel', preventBackgroundScroll);
     window.removeEventListener('touchmove', preventBackgroundScroll);
+    window.removeEventListener('scroll', enforceLockedScroll);
     document.removeEventListener('keydown', preventBackgroundScrollKey, true);
+
+    if (scrollCorrectionFrame) window.cancelAnimationFrame(scrollCorrectionFrame);
+    scrollCorrectionFrame = 0;
 
     const previousScrollBehavior = root.style.scrollBehavior;
     root.style.scrollBehavior = 'auto';
     root.classList.remove('has-piece-viewer');
-    root.style.removeProperty('--piece-viewer-scroll-offset');
-    root.style.removeProperty('--piece-viewer-document-height');
     window.scrollTo(0, lockedScrollY);
     root.style.scrollBehavior = previousScrollBehavior;
-    backgroundLocked = false;
   };
 
   const setLoadingState = (): void => {
@@ -203,6 +209,7 @@ export const setupPieceViewer = (): void => {
       openFrame = 0;
       dialog.classList.add('is-open');
       image.src = source;
+      enforceLockedScroll();
     });
   };
 
