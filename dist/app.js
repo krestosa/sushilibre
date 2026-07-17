@@ -209,7 +209,7 @@
     let targetY = window.scrollY;
     let frameId = 0;
     const maximumScroll = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    const clamp = (value, minimum, maximum) => Math.min(Math.max(value, minimum), maximum);
+    const clamp2 = (value, minimum, maximum) => Math.min(Math.max(value, minimum), maximum);
     const stop = () => {
       if (frameId) window.cancelAnimationFrame(frameId);
       frameId = 0;
@@ -233,14 +233,14 @@
       event.preventDefault();
       if (!frameId) targetY = window.scrollY;
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
-      const delta = clamp(event.deltaY * unit, -240, 240);
-      targetY = clamp(targetY + delta * 0.9, 0, maximumScroll());
+      const delta = clamp2(event.deltaY * unit, -240, 240);
+      targetY = clamp2(targetY + delta * 0.9, 0, maximumScroll());
       if (!frameId) frameId = window.requestAnimationFrame(step);
     };
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("pointerdown", stop, { passive: true });
     window.addEventListener("resize", () => {
-      targetY = clamp(targetY, 0, maximumScroll());
+      targetY = clamp2(targetY, 0, maximumScroll());
     }, { passive: true });
     window.addEventListener("scroll", () => {
       if (!frameId) targetY = window.scrollY;
@@ -859,7 +859,21 @@
   var DESCRIPTION_SELECTOR = ".menu-item__description";
   var NON_BREAKING_SPACE = "\xA0";
   var WIDTH_EPSILON = 0.5;
+  var MINIMUM_FILL_RATIO = 0.62;
+  var MAXIMUM_FILL_RATIO = 0.78;
+  var PREFERRED_FILL_RATIO = 0.72;
   var measurementNode = null;
+  var clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
+  var median = (values) => {
+    if (!values.length) return 0;
+    const sorted = [...values].sort((left, right) => left - right);
+    const middle = Math.floor(sorted.length / 2);
+    const upper = sorted[middle];
+    if (upper === void 0) return 0;
+    if (sorted.length % 2 === 1) return upper;
+    const lower = sorted[middle - 1] ?? upper;
+    return (lower + upper) / 2;
+  };
   var getMeasurementNode = () => {
     if (measurementNode) return measurementNode;
     measurementNode = document.createElement("span");
@@ -879,65 +893,93 @@
   var createTextMeasure = (element) => {
     const computed = window.getComputedStyle(element);
     const node = getMeasurementNode();
-    node.style.fontFamily = computed.fontFamily;
-    node.style.fontSize = computed.fontSize;
-    node.style.fontStyle = computed.fontStyle;
-    node.style.fontStretch = computed.fontStretch;
-    node.style.fontVariant = computed.fontVariant;
-    node.style.fontWeight = computed.fontWeight;
-    node.style.letterSpacing = computed.letterSpacing;
-    node.style.wordSpacing = computed.wordSpacing;
-    node.style.textTransform = computed.textTransform;
+    const styles = {
+      fontFamily: computed.fontFamily,
+      fontSize: computed.fontSize,
+      fontStyle: computed.fontStyle,
+      fontStretch: computed.fontStretch,
+      fontVariant: computed.fontVariant,
+      fontWeight: computed.fontWeight,
+      letterSpacing: computed.letterSpacing,
+      wordSpacing: computed.wordSpacing,
+      textTransform: computed.textTransform
+    };
     const cache = /* @__PURE__ */ new Map();
     return (value) => {
       const cached = cache.get(value);
       if (cached !== void 0) return cached;
+      Object.assign(node.style, styles);
       node.textContent = value;
       const width = node.getBoundingClientRect().width;
       cache.set(value, width);
       return width;
     };
   };
-  var calculateLayoutCost = (lines, maxWidth) => {
+  var calculateGlobalTargetWidth = (metrics) => {
+    const commonMaximumWidth = median(metrics.map(({ maxWidth }) => maxWidth));
+    if (commonMaximumWidth <= 0) return 0;
+    const individualIdealWidths = metrics.map(({ words, totalWidth, maxWidth }) => {
+      const minimumLineCount = words.length >= 4 ? 2 : 1;
+      const maximumLineCount = Math.max(minimumLineCount, Math.floor(words.length / 2));
+      const estimatedLineCount = clamp(
+        Math.round(totalWidth / Math.max(maxWidth * PREFERRED_FILL_RATIO, 1)),
+        minimumLineCount,
+        maximumLineCount
+      );
+      return totalWidth / Math.max(estimatedLineCount, 1);
+    });
+    return clamp(
+      median(individualIdealWidths),
+      commonMaximumWidth * MINIMUM_FILL_RATIO,
+      commonMaximumWidth * MAXIMUM_FILL_RATIO
+    );
+  };
+  var calculateLayoutCost = (lines, maxWidth, targetWidth) => {
     const widths = lines.map((line) => line.width);
     const mean = widths.reduce((total, width) => total + width, 0) / widths.length;
-    const normalize = (value) => value / Math.max(maxWidth, 1);
-    const variance = widths.reduce((total, width) => {
-      const delta = normalize(width - mean);
+    const normalizeByMaximum = (value) => value / Math.max(maxWidth, 1);
+    const normalizeByTarget = (value) => value / Math.max(targetWidth, 1);
+    const localVariance = widths.reduce((total, width) => {
+      const delta = normalizeByMaximum(width - mean);
       return total + delta * delta;
-    }, 0);
+    }, 0) / widths.length;
     const adjacentDifference = widths.slice(1).reduce((total, width, index) => {
       const previous = widths[index];
       if (previous === void 0) return total;
-      const delta = normalize(previous - width);
+      const delta = normalizeByMaximum(previous - width);
       return total + delta * delta;
-    }, 0);
+    }, 0) / Math.max(widths.length - 1, 1);
+    const targetDeviation = widths.reduce((total, width) => {
+      const delta = normalizeByTarget(width - targetWidth);
+      return total + delta * delta;
+    }, 0) / widths.length;
+    const meanTargetDeviation = normalizeByTarget(mean - targetWidth);
     const widest = Math.max(...widths);
     const narrowest = Math.min(...widths);
-    const range = normalize(widest - narrowest);
+    const range = normalizeByMaximum(widest - narrowest);
     const lastWidth = widths[widths.length - 1] ?? mean;
-    const lastLineShortfall = normalize(Math.max(0, mean * 0.9 - lastWidth));
-    const isolatedWordPenalty = lines.filter((line) => line.words.length === 1).length * 0.35;
-    return variance + adjacentDifference * 0.45 + range * range * 0.75 + lastLineShortfall * lastLineShortfall * 2 + isolatedWordPenalty;
+    const lastLineShortfall = normalizeByTarget(Math.max(0, targetWidth * 0.82 - lastWidth));
+    return targetDeviation * 3.2 + meanTargetDeviation * meanTargetDeviation * 2.4 + localVariance * 0.75 + adjacentDifference * 0.4 + range * range * 0.65 + lastLineShortfall * lastLineShortfall * 2.2;
   };
-  var findBalancedLayout = (words, lineCount, maxWidth, measure) => {
+  var findBalancedLayout = (words, lineCount, maxWidth, targetWidth, measure) => {
     let best = null;
     const current = [];
+    const minimumWordsPerLine = lineCount > 1 ? 2 : 1;
     const visit = (start, remainingLines) => {
       if (remainingLines === 1) {
         const finalWords = words.slice(start);
-        if (lineCount > 1 && finalWords.length < 2) return;
+        if (finalWords.length < minimumWordsPerLine) return;
         const value = finalWords.join(" ");
         const width = measure(value);
         if (width > maxWidth + WIDTH_EPSILON) return;
         const lines = [...current, { words: finalWords, width }];
-        const cost = calculateLayoutCost(lines, maxWidth);
+        const cost = calculateLayoutCost(lines, maxWidth, targetWidth);
         if (!best || cost < best.cost) best = { lines, cost };
         return;
       }
-      const minimumWordsForRemainingLines = remainingLines;
+      const minimumWordsForRemainingLines = remainingLines * minimumWordsPerLine;
       const maximumEnd = words.length - minimumWordsForRemainingLines;
-      for (let end = start + 1; end <= maximumEnd; end += 1) {
+      for (let end = start + minimumWordsPerLine; end <= maximumEnd; end += 1) {
         const lineWords = words.slice(start, end);
         const value = lineWords.join(" ");
         const width = measure(value);
@@ -950,14 +992,30 @@
     visit(0, lineCount);
     return best;
   };
-  var calculateBalancedLines = (value, maxWidth, measure) => {
-    const words = value.trim().split(/\s+/).filter(Boolean);
+  var calculateBalancedLines = (metrics, globalTargetWidth) => {
+    const { words, maxWidth, totalWidth, measure } = metrics;
     if (words.length <= 1) return [words];
-    for (let lineCount = 1; lineCount < words.length; lineCount += 1) {
-      const layout = findBalancedLayout(words, lineCount, maxWidth, measure);
-      if (layout) return layout.lines.map((line) => line.words);
+    const targetWidth = Math.min(globalTargetWidth, maxWidth * MAXIMUM_FILL_RATIO);
+    const minimumLineCount = words.length >= 4 ? 2 : 1;
+    const maximumLineCount = Math.max(minimumLineCount, Math.floor(words.length / 2));
+    const preferredLineCount = clamp(
+      Math.round(totalWidth / Math.max(targetWidth, 1)),
+      minimumLineCount,
+      maximumLineCount
+    );
+    let best = null;
+    for (let lineCount = minimumLineCount; lineCount <= maximumLineCount; lineCount += 1) {
+      const layout = findBalancedLayout(words, lineCount, maxWidth, targetWidth, measure);
+      if (!layout) continue;
+      const lineCountDistance = lineCount - preferredLineCount;
+      const lineCountPenalty = lineCountDistance * lineCountDistance * 0.18;
+      const candidate = {
+        lines: layout.lines,
+        cost: layout.cost + lineCountPenalty
+      };
+      if (!best || candidate.cost < best.cost) best = candidate;
     }
-    return [words];
+    return best ? best.lines.map((line) => line.words) : [words];
   };
   var renderBalancedLines = (element, lines) => {
     const fragment = document.createDocumentFragment();
@@ -967,15 +1025,21 @@
     });
     element.replaceChildren(fragment);
   };
-  var balanceDescription = (element) => {
+  var collectMetrics = (descriptions) => descriptions.flatMap((element) => {
     const source = element.dataset.balanceText?.trim();
     const maxWidth = element.getBoundingClientRect().width;
-    if (!source || maxWidth <= 0) return;
+    if (!source || maxWidth <= 0) return [];
+    const words = source.split(/\s+/).filter(Boolean);
     const measure = createTextMeasure(element);
-    const lines = calculateBalancedLines(source, maxWidth, measure);
-    renderBalancedLines(element, lines);
-    element.setAttribute("aria-label", source);
-  };
+    return [{
+      element,
+      source,
+      words,
+      maxWidth,
+      totalWidth: measure(words.join(" ")),
+      measure
+    }];
+  });
   var observeBalancedMenuDescriptions = (root) => {
     const descriptions = queryAll(DESCRIPTION_SELECTOR, root);
     if (!descriptions.length) return;
@@ -986,14 +1050,20 @@
       animationFrame = 0;
       const force = forceNextPass;
       forceNextPass = false;
-      descriptions.forEach((description) => {
+      const widthChanged = descriptions.some((description) => {
         const width = description.getBoundingClientRect().width;
         const previousWidth = measuredWidths.get(description);
-        if (!force && previousWidth !== void 0 && Math.abs(previousWidth - width) < WIDTH_EPSILON) {
-          return;
-        }
         measuredWidths.set(description, width);
-        balanceDescription(description);
+        return previousWidth === void 0 || Math.abs(previousWidth - width) >= WIDTH_EPSILON;
+      });
+      if (!force && !widthChanged) return;
+      const metrics = collectMetrics(descriptions);
+      const globalTargetWidth = calculateGlobalTargetWidth(metrics);
+      if (globalTargetWidth <= 0) return;
+      metrics.forEach((descriptionMetrics) => {
+        const lines = calculateBalancedLines(descriptionMetrics, globalTargetWidth);
+        renderBalancedLines(descriptionMetrics.element, lines);
+        descriptionMetrics.element.setAttribute("aria-label", descriptionMetrics.source);
       });
     };
     const scheduleBalance = (force = false) => {
