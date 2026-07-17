@@ -1,6 +1,7 @@
 import { setupBookingCtaSheen } from './features/booking-cta-sheen';
 import { setupBookingDockLayout } from './features/booking-dock-layout';
 import { setupCountdown } from './features/countdown';
+import { setupHeroIntroMotion } from './features/hero-intro-motion';
 import { setupPieceViewer } from './features/piece-viewer';
 import { setupEfficientSmoothScroll } from './features/smooth-scroll';
 import { setupTapSearchGuard } from './features/tap-search-guard';
@@ -11,6 +12,7 @@ const runtime = createRuntimeContext();
 setupCountdown();
 setupBookingDockLayout();
 setupBookingCtaSheen(runtime);
+setupHeroIntroMotion();
 setupPieceViewer();
 setupTapSearchGuard();
 setupEfficientSmoothScroll(runtime);
