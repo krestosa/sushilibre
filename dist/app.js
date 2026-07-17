@@ -104,6 +104,9 @@
   };
 
   // src/ts/features/booking-dock-layout.ts
+  var MOBILE_DOCK_QUERY = "(max-width: 820px)";
+  var VIEWPORT_SETTLE_DURATION = 900;
+  var VIEWPORT_EPSILON = 0.1;
   var setupBookingDockLayout = () => {
     const dock2 = query(".booking-dock");
     const metadata = queryAll(".booking-dock__meta");
@@ -112,8 +115,15 @@
     const firstMeta = metadata[0];
     const secondMeta = metadata[1];
     if (!dock2 || !firstMeta || !secondMeta || !countdown || !cta) return;
+    const mobileDock = window.matchMedia(MOBILE_DOCK_QUERY);
+    const visualViewport = window.visualViewport;
     let stacked = null;
-    let scheduledFrame = 0;
+    let layoutFrame = 0;
+    let viewportFrame = 0;
+    let viewportPollUntil = 0;
+    let viewportModeActive = false;
+    let lastViewportHeight = -1;
+    let lastViewportOffsetTop = -1;
     const clearResponsiveStyles = () => {
       dock2.style.gridTemplateColumns = "";
       dock2.style.gridTemplateRows = "";
@@ -146,25 +156,115 @@
     };
     const syncLayout = () => {
       const shouldStack = window.matchMedia("(min-width: 621px)").matches && dock2.clientWidth < 760;
-      if (shouldStack === stacked) return;
-      stacked = shouldStack;
-      if (shouldStack) applyStackedLayout();
-      else clearResponsiveStyles();
+      if (shouldStack !== stacked) {
+        stacked = shouldStack;
+        if (shouldStack) applyStackedLayout();
+        else clearResponsiveStyles();
+      }
+      scheduleViewportSync(false);
     };
-    const scheduleSync = () => {
-      if (scheduledFrame) return;
-      scheduledFrame = window.requestAnimationFrame(() => {
-        scheduledFrame = 0;
+    const scheduleLayoutSync = () => {
+      if (layoutFrame) return;
+      layoutFrame = window.requestAnimationFrame(() => {
+        layoutFrame = 0;
         syncLayout();
       });
     };
+    const clearViewportPositioning = () => {
+      if (!viewportModeActive) return;
+      viewportModeActive = false;
+      lastViewportHeight = -1;
+      lastViewportOffsetTop = -1;
+      dock2.style.removeProperty("--dock-visual-height");
+      dock2.style.removeProperty("--dock-visual-offset-top");
+      dock2.style.position = "";
+      dock2.style.top = "";
+      dock2.style.right = "";
+      dock2.style.bottom = "";
+      dock2.style.left = "";
+      dock2.style.margin = "";
+      dock2.style.transform = "";
+      dock2.style.willChange = "";
+    };
+    const applyViewportPositioning = () => {
+      if (!viewportModeActive) {
+        viewportModeActive = true;
+        dock2.style.position = "fixed";
+        dock2.style.top = "0";
+        dock2.style.right = "auto";
+        dock2.style.bottom = "auto";
+        dock2.style.left = "50%";
+        dock2.style.margin = "0";
+        dock2.style.transform = "translate3d(-50%, calc(var(--dock-visual-offset-top) + var(--dock-visual-height) - var(--dock-height) - var(--dock-bottom)), 0)";
+        dock2.style.willChange = "transform";
+      }
+      const viewportHeight = visualViewport?.height ?? window.innerHeight;
+      const viewportOffsetTop = visualViewport?.offsetTop ?? 0;
+      if (Math.abs(viewportHeight - lastViewportHeight) >= VIEWPORT_EPSILON) {
+        lastViewportHeight = viewportHeight;
+        dock2.style.setProperty("--dock-visual-height", `${viewportHeight.toFixed(3)}px`);
+      }
+      if (Math.abs(viewportOffsetTop - lastViewportOffsetTop) >= VIEWPORT_EPSILON) {
+        lastViewportOffsetTop = viewportOffsetTop;
+        dock2.style.setProperty("--dock-visual-offset-top", `${viewportOffsetTop.toFixed(3)}px`);
+      }
+    };
+    const syncViewportDock = () => {
+      viewportFrame = 0;
+      if (!mobileDock.matches) {
+        clearViewportPositioning();
+        return;
+      }
+      applyViewportPositioning();
+      if (performance.now() < viewportPollUntil) {
+        viewportFrame = window.requestAnimationFrame(syncViewportDock);
+      }
+    };
+    function scheduleViewportSync(keepPolling = true) {
+      if (keepPolling) {
+        viewportPollUntil = Math.max(
+          viewportPollUntil,
+          performance.now() + VIEWPORT_SETTLE_DURATION
+        );
+      }
+      if (viewportFrame) return;
+      viewportFrame = window.requestAnimationFrame(syncViewportDock);
+    }
+    const scheduleInteractionSync = () => {
+      scheduleViewportSync(true);
+    };
     syncLayout();
-    window.addEventListener("resize", scheduleSync, { passive: true });
+    scheduleViewportSync(true);
+    window.addEventListener("resize", () => {
+      scheduleLayoutSync();
+      scheduleViewportSync(true);
+    }, { passive: true });
+    window.addEventListener("scroll", scheduleInteractionSync, { passive: true });
+    window.addEventListener("orientationchange", scheduleInteractionSync, { passive: true });
+    window.addEventListener("pageshow", scheduleInteractionSync, { passive: true });
+    window.addEventListener("touchstart", scheduleInteractionSync, { passive: true });
+    window.addEventListener("touchmove", scheduleInteractionSync, { passive: true });
+    window.addEventListener("touchend", scheduleInteractionSync, { passive: true });
+    visualViewport?.addEventListener("resize", scheduleInteractionSync, { passive: true });
+    visualViewport?.addEventListener("scroll", scheduleInteractionSync, { passive: true });
+    mobileDock.addEventListener("change", () => {
+      scheduleLayoutSync();
+      scheduleViewportSync(true);
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) scheduleViewportSync(true);
+    });
     if ("ResizeObserver" in window) {
-      const observer = new ResizeObserver(scheduleSync);
+      const observer = new ResizeObserver(() => {
+        scheduleLayoutSync();
+        scheduleViewportSync(true);
+      });
       observer.observe(dock2);
     }
-    document.fonts.ready.then(scheduleSync).catch(() => void 0);
+    document.fonts.ready.then(() => {
+      scheduleLayoutSync();
+      scheduleViewportSync(true);
+    }).catch(() => void 0);
   };
 
   // src/ts/features/countdown.ts
