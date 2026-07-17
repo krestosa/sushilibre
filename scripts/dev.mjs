@@ -91,9 +91,9 @@ function scheduleRebuild(path = '*') {
   rebuildTimer = setTimeout(rebuild, 80);
 }
 
-function watchPath(path, prefix = '') {
-  const watcher = watch(path, { recursive: true }, (_eventType, filename) => {
-    const normalized = filename ? `${prefix}${String(filename)}` : '*';
+function watchPath(path, { label = '', recursive = true } = {}) {
+  const watcher = watch(path, { recursive }, (_eventType, filename) => {
+    const normalized = label || (filename ? String(filename) : '*');
     scheduleRebuild(normalized);
   });
   watchers.push(watcher);
@@ -102,7 +102,7 @@ function watchPath(path, prefix = '') {
 await buildAll();
 
 watchPath(resolve(root, 'src'));
-watchPath(resolve(root, 'menu.json'), 'menu.json');
+watchPath(resolve(root, 'menu.json'), { label: 'menu.json', recursive: false });
 
 try {
   const assetWatcher = watch(resolve(dist, 'assets'), { recursive: true }, () => {
