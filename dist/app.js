@@ -520,16 +520,44 @@
   };
 
   // src/ts/features/proposal-reveal.ts
-  var REVEAL_ROOT_MARGIN = "0px 0px -18% 0px";
-  var REVEAL_THRESHOLD = 0.08;
-  var INITIAL_VIEWPORT_RATIO = 0.84;
+  var RESPONSIVE_REVEAL_QUERY = "(max-width: 840px)";
+  var DESKTOP_REVEAL_RATIO = 0.82;
+  var REVEAL_DOCK_GAP_PX = 16;
+  var MIN_VISIBLE_PX = 12;
+  var MAX_VISIBLE_PX = 28;
+  var VISIBLE_RATIO = 0.08;
   var reveal = (element) => {
     if (element.classList.contains("is-visible")) return;
+    element.classList.remove("is-reveal-bypassed");
     element.classList.add("is-visible");
   };
-  var isInitiallyVisible = (element) => {
+  var bypassReveal = (element) => {
+    element.classList.add("is-visible", "is-reveal-bypassed");
+  };
+  var getViewportBottom = () => {
+    const viewport = window.visualViewport;
+    return viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
+  };
+  var getRevealBoundary = (dock2, responsiveReveal) => {
+    const viewportBottom = getViewportBottom();
+    if (!responsiveReveal.matches || !dock2) {
+      return viewportBottom * DESKTOP_REVEAL_RATIO;
+    }
+    const dockBounds = dock2.getBoundingClientRect();
+    const dockIsFixed = window.getComputedStyle(dock2).position === "fixed";
+    const dockOverlapsViewport = dockBounds.bottom > 0 && dockBounds.top < viewportBottom;
+    if (!dockIsFixed || !dockOverlapsViewport) {
+      return viewportBottom * DESKTOP_REVEAL_RATIO;
+    }
+    return Math.max(0, dockBounds.top - REVEAL_DOCK_GAP_PX);
+  };
+  var hasCrossedRevealBoundary = (element, boundary) => {
     const bounds = element.getBoundingClientRect();
-    return bounds.bottom > 0 && bounds.top < window.innerHeight * INITIAL_VIEWPORT_RATIO;
+    const visibleDistance = Math.min(
+      MAX_VISIBLE_PX,
+      Math.max(MIN_VISIBLE_PX, bounds.height * VISIBLE_RATIO)
+    );
+    return bounds.bottom > 0 && bounds.top + visibleDistance <= boundary;
   };
   var setupProposalReveal = () => {
     const root = document.documentElement;
@@ -537,28 +565,54 @@
     root.setAttribute("data-proposal-reveal-ready", "");
     if (!proposalRoot) return;
     const targets = queryAll("[data-proposal-reveal]", proposalRoot);
-    const fallbackActive = root.classList.contains("proposal-reveal-fallback");
     if (!targets.length) return;
-    if (fallbackActive || !("IntersectionObserver" in window)) {
-      targets.forEach(reveal);
-      return;
-    }
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting || entry.intersectionRatio < REVEAL_THRESHOLD) return;
-        const element = entry.target;
+    const dock2 = query(".booking-dock");
+    const responsiveReveal = window.matchMedia(RESPONSIVE_REVEAL_QUERY);
+    const visualViewport = window.visualViewport;
+    const pendingTargets = new Set(targets);
+    let updateFrame = 0;
+    const revealVisibleTargets = () => {
+      updateFrame = 0;
+      const boundary = getRevealBoundary(dock2, responsiveReveal);
+      pendingTargets.forEach((element) => {
+        if (element.classList.contains("is-visible")) {
+          pendingTargets.delete(element);
+          return;
+        }
+        if (!hasCrossedRevealBoundary(element, boundary)) return;
         reveal(element);
-        observer.unobserve(element);
+        pendingTargets.delete(element);
       });
-    }, {
-      rootMargin: REVEAL_ROOT_MARGIN,
-      threshold: REVEAL_THRESHOLD
-    });
+      if (!pendingTargets.size) removeListeners();
+    };
+    const scheduleUpdate = () => {
+      if (updateFrame) return;
+      updateFrame = window.requestAnimationFrame(revealVisibleTargets);
+    };
+    const removeListeners = () => {
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      responsiveReveal.removeEventListener("change", scheduleUpdate);
+      visualViewport?.removeEventListener("resize", scheduleUpdate);
+      visualViewport?.removeEventListener("scroll", scheduleUpdate);
+    };
+    if (root.classList.contains("proposal-reveal-fallback")) {
+      const boundary = getRevealBoundary(dock2, responsiveReveal);
+      pendingTargets.forEach((element) => {
+        if (!hasCrossedRevealBoundary(element, boundary)) return;
+        bypassReveal(element);
+        pendingTargets.delete(element);
+      });
+      root.classList.remove("proposal-reveal-fallback");
+    }
+    if (!pendingTargets.size) return;
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    responsiveReveal.addEventListener("change", scheduleUpdate);
+    visualViewport?.addEventListener("resize", scheduleUpdate, { passive: true });
+    visualViewport?.addEventListener("scroll", scheduleUpdate, { passive: true });
     window.requestAnimationFrame(() => {
-      targets.forEach((target2) => {
-        if (isInitiallyVisible(target2)) reveal(target2);
-        else observer.observe(target2);
-      });
+      window.requestAnimationFrame(revealVisibleTargets);
     });
   };
 
@@ -1217,11 +1271,11 @@
 
   // src/ts/application.ts
   var runtime = createRuntimeContext();
+  setupProposalReveal();
   setupCountdown();
   setupBookingDockLayout();
   setupBookingCtaSheen(runtime);
   setupHeroIntroMotion();
-  setupProposalReveal();
   setupPieceViewer();
   setupTapSearchGuard();
   setupEfficientSmoothScroll(runtime);
@@ -1326,16 +1380,16 @@
   }
 
   // src/ts/features/menu-reveal.ts
-  var REVEAL_ROOT_MARGIN2 = "0px 0px -8% 0px";
-  var REVEAL_THRESHOLD2 = 0.01;
-  var INITIAL_VIEWPORT_RATIO2 = 0.92;
+  var REVEAL_ROOT_MARGIN = "0px 0px -8% 0px";
+  var REVEAL_THRESHOLD = 0.01;
+  var INITIAL_VIEWPORT_RATIO = 0.92;
   var reveal2 = (element) => {
     if (element.classList.contains("is-visible")) return;
     element.classList.add("is-visible");
   };
-  var isInitiallyVisible2 = (element) => {
+  var isInitiallyVisible = (element) => {
     const bounds = element.getBoundingClientRect();
-    return bounds.bottom > 0 && bounds.top < window.innerHeight * INITIAL_VIEWPORT_RATIO2;
+    return bounds.bottom > 0 && bounds.top < window.innerHeight * INITIAL_VIEWPORT_RATIO;
   };
   var setupMenuReveal = (menuRoot2, _groups) => {
     const root = document.documentElement;
@@ -1355,12 +1409,12 @@
         observer.unobserve(element);
       });
     }, {
-      rootMargin: REVEAL_ROOT_MARGIN2,
-      threshold: REVEAL_THRESHOLD2
+      rootMargin: REVEAL_ROOT_MARGIN,
+      threshold: REVEAL_THRESHOLD
     });
     window.requestAnimationFrame(() => {
       targets.forEach((target2) => {
-        if (isInitiallyVisible2(target2)) reveal2(target2);
+        if (isInitiallyVisible(target2)) reveal2(target2);
         else observer.observe(target2);
       });
     });
