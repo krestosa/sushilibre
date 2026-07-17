@@ -49,7 +49,8 @@ test('proposal reuses the menu column split and avoids artificial section height
   assert.match(styles, /column-gap:\s*clamp\(56px, 9vw, 164px\);/);
   assert.match(styles, /@media \(max-width: 980px\)[\s\S]*?grid-template-columns:\s*minmax\(220px, 0\.78fr\) minmax\(360px, 1fr\);/);
   assert.match(styles, /\.proposal \+ \.menu-section \.menu-section__shell\s*\{[\s\S]*?padding-top:/);
-  assert.match(styles, /\.proposal__payment-logo\s*\{[\s\S]*?width:\s*min\(290px, 90%\);/);
+  assert.match(styles, /\.proposal__payment-logo\s*\{[\s\S]*?width:\s*290px;[\s\S]*?max-width:\s*100%;[\s\S]*?transform:\s*translateZ\(0\);/);
+  assert.doesNotMatch(styles, /\.proposal__payment-logo\s*\{[^}]*\bvw\b/);
   assert.match(styles, /\.proposal__legal\s*\{/);
   assert.doesNotMatch(styles, /\.proposal\s*\{[^}]*min-height:\s*100svh;/);
   assert.doesNotMatch(styles, /position:\s*sticky/);
