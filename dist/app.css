@@ -80,27 +80,46 @@ video {
   line-height: 1;
 }
 
-.booking-dock__location {
-  display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-  border-radius: 3px;
+.booking-dock__meta--location {
+  position: relative;
+  border-radius: 6px;
   color: inherit;
   text-decoration: none;
+  cursor: pointer;
 }
-.booking-dock__location .booking-dock__value {
+.booking-dock__meta--location .booking-dock__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+}
+.booking-dock__meta--location .booking-dock__value {
   text-decoration: underline;
   text-decoration-color: transparent;
   text-underline-offset: 3px;
   transition: color 160ms ease-out, text-decoration-color 160ms ease-out;
 }
-.booking-dock__location:hover .booking-dock__value, .booking-dock__location:focus-visible .booking-dock__value {
+.booking-dock__meta--location:hover .booking-dock__value, .booking-dock__meta--location:focus-visible .booking-dock__value {
   color: var(--orange);
   text-decoration-color: currentColor;
 }
-.booking-dock__location:focus-visible {
+.booking-dock__meta--location:hover .booking-dock__external-arrow, .booking-dock__meta--location:focus-visible .booking-dock__external-arrow {
+  color: var(--orange);
+  transform: translate3d(2px, -2px, 0);
+}
+.booking-dock__meta--location:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 3px;
+}
+
+.booking-dock__external-arrow {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 1.08em;
+  font-weight: 600;
+  line-height: 1;
+  transform: translate3d(0, -1px, 0);
+  transition: color 160ms ease-out, transform 160ms ease-out;
 }
 
 .booking-dock__cta {
@@ -250,16 +269,7 @@ html.has-piece-viewer {
   overscroll-behavior: none;
 }
 html.has-piece-viewer body {
-  height: var(--piece-viewer-document-height, auto);
-  min-height: var(--piece-viewer-document-height, 100%);
   overscroll-behavior: none;
-}
-html.has-piece-viewer .page {
-  position: fixed;
-  top: var(--piece-viewer-scroll-offset, 0px);
-  right: 0;
-  left: 0;
-  width: auto;
 }
 
 .piece-viewer {
@@ -278,7 +288,7 @@ html.has-piece-viewer .page {
   transition: opacity 220ms ease-out, scale 260ms var(--ease-out);
 }
 .piece-viewer::backdrop {
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(0, 0, 0, 0.62);
   opacity: 0;
   transition: opacity 200ms ease-out;
 }

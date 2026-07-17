@@ -337,19 +337,19 @@
   ));
   var setupPieceViewer = () => {
     const root = document.documentElement;
-    const page = query(".page");
     const dialog = query("[data-piece-viewer]");
     const image = query("[data-piece-viewer-image]", dialog ?? void 0);
     const status = query("[data-piece-viewer-status]", dialog ?? void 0);
     const statusText = query("[data-piece-viewer-status-text]", dialog ?? void 0);
     const closeButton = query("[data-piece-viewer-close]", dialog ?? void 0);
     const openButtons = queryAll("[data-piece-viewer-open]");
-    if (!page || !dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
+    if (!dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
     const reducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)");
     let activeButton = null;
     let closeTimer = 0;
     let openFrame = 0;
     let imageFrame = 0;
+    let scrollCorrectionFrame = 0;
     let lockedScrollY = 0;
     let backgroundLocked = false;
     const preventBackgroundScroll = (event) => {
@@ -359,35 +359,39 @@
       if (!SCROLL_KEYS.has(event.key) || isInteractiveTarget(event.target)) return;
       event.preventDefault();
     };
+    const enforceLockedScroll = () => {
+      if (!backgroundLocked || scrollCorrectionFrame) return;
+      scrollCorrectionFrame = window.requestAnimationFrame(() => {
+        scrollCorrectionFrame = 0;
+        if (!backgroundLocked || Math.abs(window.scrollY - lockedScrollY) < 0.5) return;
+        window.scrollTo(0, lockedScrollY);
+      });
+    };
     const lockBackground = () => {
       if (backgroundLocked) return;
       lockedScrollY = window.scrollY;
-      const documentHeight = Math.max(
-        root.scrollHeight,
-        document.body.scrollHeight,
-        window.innerHeight
-      );
-      root.style.setProperty("--piece-viewer-scroll-offset", `${-lockedScrollY}px`);
-      root.style.setProperty("--piece-viewer-document-height", `${documentHeight}px`);
+      backgroundLocked = true;
       root.classList.add("has-piece-viewer");
       window.addEventListener("wheel", preventBackgroundScroll, { passive: false });
       window.addEventListener("touchmove", preventBackgroundScroll, { passive: false });
+      window.addEventListener("scroll", enforceLockedScroll, { passive: true });
       document.addEventListener("keydown", preventBackgroundScrollKey, true);
-      backgroundLocked = true;
+      enforceLockedScroll();
     };
     const unlockBackground = () => {
       if (!backgroundLocked) return;
+      backgroundLocked = false;
       window.removeEventListener("wheel", preventBackgroundScroll);
       window.removeEventListener("touchmove", preventBackgroundScroll);
+      window.removeEventListener("scroll", enforceLockedScroll);
       document.removeEventListener("keydown", preventBackgroundScrollKey, true);
+      if (scrollCorrectionFrame) window.cancelAnimationFrame(scrollCorrectionFrame);
+      scrollCorrectionFrame = 0;
       const previousScrollBehavior = root.style.scrollBehavior;
       root.style.scrollBehavior = "auto";
       root.classList.remove("has-piece-viewer");
-      root.style.removeProperty("--piece-viewer-scroll-offset");
-      root.style.removeProperty("--piece-viewer-document-height");
       window.scrollTo(0, lockedScrollY);
       root.style.scrollBehavior = previousScrollBehavior;
-      backgroundLocked = false;
     };
     const setLoadingState = () => {
       if (imageFrame) window.cancelAnimationFrame(imageFrame);
@@ -487,6 +491,7 @@
         openFrame = 0;
         dialog.classList.add("is-open");
         image.src = source;
+        enforceLockedScroll();
       });
     };
     openButtons.forEach((button) => {
