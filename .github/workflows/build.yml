@@ -6,7 +6,6 @@ on:
       - refactor/sass-typescript
     paths-ignore:
       - dist/**
-      - assets/**
   pull_request:
     branches:
       - design/video-hero-sticky-countdown
@@ -35,16 +34,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Prepare canonical assets
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ -d assets ]]; then
-            mkdir -p dist
-            rm -rf dist/assets
-            mv assets dist/assets
-          fi
-          test -d dist/assets
+      - name: Verify static assets
+        run: test -d dist/assets
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
@@ -73,7 +64,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add -A dist assets
+          git add -A dist
           if git diff --cached --quiet; then
             echo "Static distribution is already current."
             exit 0
