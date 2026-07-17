@@ -805,13 +805,13 @@
     if (badges.childElementCount) itemHeader.append(badges);
     item.append(itemHeader);
     if (entry.description) {
-      item.append(
-        createTextElement(
-          "p",
-          "menu-item__description",
-          keepLastTwoWordsTogether(entry.description)
-        )
+      const description = createTextElement(
+        "p",
+        "menu-item__description",
+        keepLastTwoWordsTogether(entry.description)
       );
+      description.dataset.balanceText = entry.description;
+      item.append(description);
     }
     return item;
   };
@@ -855,6 +855,163 @@
     return queryAll("[data-menu-group]", elements.groups);
   };
 
+  // src/ts/menu/typography.ts
+  var DESCRIPTION_SELECTOR = ".menu-item__description";
+  var NON_BREAKING_SPACE = "\xA0";
+  var WIDTH_EPSILON = 0.5;
+  var measurementNode = null;
+  var getMeasurementNode = () => {
+    if (measurementNode) return measurementNode;
+    measurementNode = document.createElement("span");
+    Object.assign(measurementNode.style, {
+      position: "fixed",
+      top: "0",
+      left: "-100000px",
+      visibility: "hidden",
+      pointerEvents: "none",
+      whiteSpace: "nowrap",
+      contain: "layout style paint"
+    });
+    measurementNode.setAttribute("aria-hidden", "true");
+    document.body.append(measurementNode);
+    return measurementNode;
+  };
+  var createTextMeasure = (element) => {
+    const computed = window.getComputedStyle(element);
+    const node = getMeasurementNode();
+    node.style.fontFamily = computed.fontFamily;
+    node.style.fontSize = computed.fontSize;
+    node.style.fontStyle = computed.fontStyle;
+    node.style.fontStretch = computed.fontStretch;
+    node.style.fontVariant = computed.fontVariant;
+    node.style.fontWeight = computed.fontWeight;
+    node.style.letterSpacing = computed.letterSpacing;
+    node.style.wordSpacing = computed.wordSpacing;
+    node.style.textTransform = computed.textTransform;
+    const cache = /* @__PURE__ */ new Map();
+    return (value) => {
+      const cached = cache.get(value);
+      if (cached !== void 0) return cached;
+      node.textContent = value;
+      const width = node.getBoundingClientRect().width;
+      cache.set(value, width);
+      return width;
+    };
+  };
+  var calculateLayoutCost = (lines, maxWidth) => {
+    const widths = lines.map((line) => line.width);
+    const mean = widths.reduce((total, width) => total + width, 0) / widths.length;
+    const normalize = (value) => value / Math.max(maxWidth, 1);
+    const variance = widths.reduce((total, width) => {
+      const delta = normalize(width - mean);
+      return total + delta * delta;
+    }, 0);
+    const adjacentDifference = widths.slice(1).reduce((total, width, index) => {
+      const previous = widths[index];
+      if (previous === void 0) return total;
+      const delta = normalize(previous - width);
+      return total + delta * delta;
+    }, 0);
+    const widest = Math.max(...widths);
+    const narrowest = Math.min(...widths);
+    const range = normalize(widest - narrowest);
+    const lastWidth = widths[widths.length - 1] ?? mean;
+    const lastLineShortfall = normalize(Math.max(0, mean * 0.9 - lastWidth));
+    const isolatedWordPenalty = lines.filter((line) => line.words.length === 1).length * 0.35;
+    return variance + adjacentDifference * 0.45 + range * range * 0.75 + lastLineShortfall * lastLineShortfall * 2 + isolatedWordPenalty;
+  };
+  var findBalancedLayout = (words, lineCount, maxWidth, measure) => {
+    let best = null;
+    const current = [];
+    const visit = (start, remainingLines) => {
+      if (remainingLines === 1) {
+        const finalWords = words.slice(start);
+        if (lineCount > 1 && finalWords.length < 2) return;
+        const value = finalWords.join(" ");
+        const width = measure(value);
+        if (width > maxWidth + WIDTH_EPSILON) return;
+        const lines = [...current, { words: finalWords, width }];
+        const cost = calculateLayoutCost(lines, maxWidth);
+        if (!best || cost < best.cost) best = { lines, cost };
+        return;
+      }
+      const minimumWordsForRemainingLines = remainingLines;
+      const maximumEnd = words.length - minimumWordsForRemainingLines;
+      for (let end = start + 1; end <= maximumEnd; end += 1) {
+        const lineWords = words.slice(start, end);
+        const value = lineWords.join(" ");
+        const width = measure(value);
+        if (width > maxWidth + WIDTH_EPSILON) break;
+        current.push({ words: lineWords, width });
+        visit(end, remainingLines - 1);
+        current.pop();
+      }
+    };
+    visit(0, lineCount);
+    return best;
+  };
+  var calculateBalancedLines = (value, maxWidth, measure) => {
+    const words = value.trim().split(/\s+/).filter(Boolean);
+    if (words.length <= 1) return [words];
+    for (let lineCount = 1; lineCount < words.length; lineCount += 1) {
+      const layout = findBalancedLayout(words, lineCount, maxWidth, measure);
+      if (layout) return layout.lines.map((line) => line.words);
+    }
+    return [words];
+  };
+  var renderBalancedLines = (element, lines) => {
+    const fragment = document.createDocumentFragment();
+    lines.forEach((words, index) => {
+      if (index > 0) fragment.append(document.createElement("br"));
+      fragment.append(document.createTextNode(words.join(NON_BREAKING_SPACE)));
+    });
+    element.replaceChildren(fragment);
+  };
+  var balanceDescription = (element) => {
+    const source = element.dataset.balanceText?.trim();
+    const maxWidth = element.getBoundingClientRect().width;
+    if (!source || maxWidth <= 0) return;
+    const measure = createTextMeasure(element);
+    const lines = calculateBalancedLines(source, maxWidth, measure);
+    renderBalancedLines(element, lines);
+    element.setAttribute("aria-label", source);
+  };
+  var observeBalancedMenuDescriptions = (root) => {
+    const descriptions = queryAll(DESCRIPTION_SELECTOR, root);
+    if (!descriptions.length) return;
+    const measuredWidths = /* @__PURE__ */ new WeakMap();
+    let animationFrame = 0;
+    let forceNextPass = true;
+    const balanceAll = () => {
+      animationFrame = 0;
+      const force = forceNextPass;
+      forceNextPass = false;
+      descriptions.forEach((description) => {
+        const width = description.getBoundingClientRect().width;
+        const previousWidth = measuredWidths.get(description);
+        if (!force && previousWidth !== void 0 && Math.abs(previousWidth - width) < WIDTH_EPSILON) {
+          return;
+        }
+        measuredWidths.set(description, width);
+        balanceDescription(description);
+      });
+    };
+    const scheduleBalance = (force = false) => {
+      forceNextPass || (forceNextPass = force);
+      if (animationFrame) return;
+      animationFrame = window.requestAnimationFrame(balanceAll);
+    };
+    scheduleBalance(true);
+    const supportsResizeObserver = typeof ResizeObserver !== "undefined";
+    if (supportsResizeObserver) {
+      const observer = new ResizeObserver(() => scheduleBalance());
+      descriptions.forEach((description) => observer.observe(description));
+    } else {
+      window.addEventListener("resize", () => scheduleBalance(), { passive: true });
+    }
+    void document.fonts.ready.then(() => scheduleBalance(true));
+  };
+
   // src/ts/menu-bootstrap.ts
   var menuRoot = query("[data-menu-root]");
   var menuHeading = query("[data-menu-heading]");
@@ -869,6 +1026,7 @@
         status: menuStatus
       });
       if (!groups.length) return;
+      observeBalancedMenuDescriptions(menuGroups);
       configureMobileOverlapShadows(groups);
       observeActiveMenuGroup(menuRoot, groups);
     }).catch((error) => {
