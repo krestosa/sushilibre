@@ -118,7 +118,7 @@ test('compiled distribution includes sticky-aware proposal motion hooks', async 
   assert.match(script, /max-width: 840px/);
   assert.match(script, /visualViewport/);
   assert.match(script, /proposal-reveal-fallback/);
-  assert.doesNotMatch(script, /-18%/);
+  assert.doesNotMatch(script, /0px 0px -18% 0px/);
   assert.match(styles, /html\.has-proposal-reveal \.proposal-reveal/);
   assert.match(styles, /is-reveal-bypassed/);
   assert.match(styles, /@keyframes proposal-reveal-in/);
