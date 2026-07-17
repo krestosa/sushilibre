@@ -104,7 +104,7 @@
   left: var(--page-x);
   right: var(--page-x);
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  align-items: start;
+  align-items: center;
   text-transform: uppercase;
   font-size: clamp(10px, 0.72vw, 14px);
   font-weight: 650;
@@ -227,10 +227,9 @@
   height: var(--dock-height);
   margin: 0 auto calc(-1 * var(--dock-height));
   display: grid;
-  grid-template-columns: minmax(158px, 1.16fr) minmax(150px, 1.08fr) minmax(
-      0,
-      2.55fr
-    ) 108px;
+  grid-template-columns:
+    minmax(158px, 1.16fr) minmax(150px, 1.08fr) minmax(0, 2.55fr)
+    108px;
   align-items: stretch;
   gap: 9px;
   padding: 9px;
