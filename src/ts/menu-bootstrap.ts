@@ -2,6 +2,7 @@ import { query } from './shared/dom';
 import { loadMenuData } from './menu/data';
 import { configureMobileOverlapShadows, observeActiveMenuGroup } from './menu/observers';
 import { renderMenu } from './menu/render';
+import { observeBalancedMenuDescriptions } from './menu/typography';
 
 const menuRoot = query<HTMLElement>('[data-menu-root]');
 const menuHeading = query<HTMLElement>('[data-menu-heading]');
@@ -19,6 +20,7 @@ if (menuRoot && menuHeading && menuGroups && menuStatus) {
       });
 
       if (!groups.length) return;
+      observeBalancedMenuDescriptions(menuGroups);
       configureMobileOverlapShadows(groups);
       observeActiveMenuGroup(menuRoot, groups);
     })
