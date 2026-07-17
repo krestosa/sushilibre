@@ -1,0 +1,64 @@
+name: Build and validate
+
+on:
+  push:
+    branches:
+      - refactor/sass-typescript
+  pull_request:
+    branches:
+      - design/video-hero-sticky-countdown
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Type-check TypeScript
+        run: npm run typecheck
+
+      - name: Compile Sass and TypeScript
+        run: npm run build
+
+      - name: Verify menu contract
+        run: npm test
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run responsive browser checks
+        run: npm run test:visual
+
+      - name: Upload compiled site
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sushilibre-dist
+          path: dist
+          if-no-files-found: error
+
+      - name: Upload browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-diagnostics
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
