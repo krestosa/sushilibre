@@ -65,6 +65,8 @@ test('proposal layout is responsive, menu-aligned and never sticky', async () =>
   assert.match(scss, /@media \(max-width: 980px\)/);
   assert.match(scss, /@media \(max-width: 620px\)/);
   assert.match(scss, /\.proposal__prices,[\s\S]*?\.proposal__conditions\s*\{[\s\S]*?grid-template-columns:\s*1fr;/);
+  assert.match(scss, /\.proposal__payment-logo\s*\{[\s\S]*?width:\s*290px;[\s\S]*?max-width:\s*100%;[\s\S]*?aspect-ratio:\s*245 \/ 32;[\s\S]*?transform:\s*translateZ\(0\);/);
+  assert.doesNotMatch(scss, /\.proposal__payment-logo\s*\{[^}]*\bvw\b/);
   assert.match(scss, /\.proposal__legal\s*\{/);
   assert.doesNotMatch(scss, /\.proposal\s*\{[^}]*min-height:\s*100svh;/);
   assert.doesNotMatch(scss, /position:\s*sticky/);
