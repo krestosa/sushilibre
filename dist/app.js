@@ -227,6 +227,8 @@
   // src/ts/features/piece-viewer.ts
   var LOADING_MESSAGE = "CARGANDO IMAGEN";
   var ERROR_MESSAGE = "IMAGEN NO DISPONIBLE";
+  var CLOSE_FALLBACK_MS = 320;
+  var REDUCED_CLOSE_FALLBACK_MS = 170;
   var setupPieceViewer = () => {
     const dialog = query("[data-piece-viewer]");
     const image = query("[data-piece-viewer-image]", dialog ?? void 0);
@@ -234,19 +236,30 @@
     const closeButton = query("[data-piece-viewer-close]", dialog ?? void 0);
     const openButtons = queryAll("[data-piece-viewer-open]");
     if (!dialog || !image || !status || !closeButton || !openButtons.length) return;
+    const reducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)");
     let activeButton = null;
+    let closeTimer = 0;
+    let openFrame = 0;
+    let imageFrame = 0;
     const setLoadingState = () => {
+      if (imageFrame) window.cancelAnimationFrame(imageFrame);
       dialog.dataset.state = "loading";
       status.textContent = LOADING_MESSAGE;
       status.hidden = false;
       image.hidden = true;
     };
     const setReadyState = () => {
-      dialog.dataset.state = "ready";
-      status.hidden = true;
+      if (!dialog.open || dialog.classList.contains("is-closing")) return;
       image.hidden = false;
+      imageFrame = window.requestAnimationFrame(() => {
+        imageFrame = 0;
+        if (!dialog.open || dialog.classList.contains("is-closing")) return;
+        dialog.dataset.state = "ready";
+        status.hidden = true;
+      });
     };
     const setErrorState = () => {
+      if (!dialog.open || dialog.classList.contains("is-closing")) return;
       dialog.dataset.state = "error";
       status.textContent = ERROR_MESSAGE;
       status.hidden = false;
@@ -260,28 +273,19 @@
       }
       dialog.setAttribute("open", "");
     };
-    const closeDialog = () => {
-      if (!dialog.open) return;
-      if (typeof dialog.close === "function") dialog.close();
-      else dialog.removeAttribute("open");
-    };
-    const openPiece = (button) => {
-      const name = button.dataset.pieceName?.trim();
-      const source = button.dataset.pieceImage?.trim();
-      if (!name || !source) return;
-      activeButton = button;
-      dialog.setAttribute("aria-label", `Imagen de ${name}`);
-      image.alt = name;
-      setLoadingState();
-      document.documentElement.classList.add("has-piece-viewer");
-      openDialog();
-      image.removeAttribute("src");
-      window.requestAnimationFrame(() => {
-        image.src = source;
-      });
+    const clearMotionSchedules = () => {
+      if (closeTimer) window.clearTimeout(closeTimer);
+      if (openFrame) window.cancelAnimationFrame(openFrame);
+      if (imageFrame) window.cancelAnimationFrame(imageFrame);
+      closeTimer = 0;
+      openFrame = 0;
+      imageFrame = 0;
+      dialog.removeEventListener("transitionend", handleCloseTransition);
     };
     const cleanup = () => {
+      clearMotionSchedules();
       document.documentElement.classList.remove("has-piece-viewer");
+      dialog.classList.remove("is-open", "is-closing");
       dialog.setAttribute("aria-label", "Vista de pieza");
       image.removeAttribute("src");
       image.alt = "";
@@ -293,6 +297,50 @@
       activeButton = null;
       button?.focus({ preventScroll: true });
     };
+    const finishClose = () => {
+      clearMotionSchedules();
+      if (!dialog.open) return;
+      if (typeof dialog.close === "function") dialog.close();
+      else {
+        dialog.removeAttribute("open");
+        cleanup();
+      }
+    };
+    function handleCloseTransition(event) {
+      if (event.target !== dialog || event.propertyName !== "opacity") return;
+      finishClose();
+    }
+    const closeDialog = () => {
+      if (!dialog.open || dialog.classList.contains("is-closing")) return;
+      if (openFrame) window.cancelAnimationFrame(openFrame);
+      openFrame = 0;
+      dialog.classList.remove("is-open");
+      dialog.classList.add("is-closing");
+      dialog.addEventListener("transitionend", handleCloseTransition);
+      closeTimer = window.setTimeout(
+        finishClose,
+        reducedMotion2.matches ? REDUCED_CLOSE_FALLBACK_MS : CLOSE_FALLBACK_MS
+      );
+    };
+    const openPiece = (button) => {
+      const name = button.dataset.pieceName?.trim();
+      const source = button.dataset.pieceImage?.trim();
+      if (!name || !source) return;
+      clearMotionSchedules();
+      activeButton = button;
+      dialog.setAttribute("aria-label", `Imagen de ${name}`);
+      image.alt = name;
+      setLoadingState();
+      document.documentElement.classList.add("has-piece-viewer");
+      dialog.classList.remove("is-open", "is-closing");
+      openDialog();
+      image.removeAttribute("src");
+      openFrame = window.requestAnimationFrame(() => {
+        openFrame = 0;
+        dialog.classList.add("is-open");
+        image.src = source;
+      });
+    };
     openButtons.forEach((button) => {
       button.addEventListener("click", () => openPiece(button));
     });
@@ -303,10 +351,9 @@
       if (event.target === dialog) closeDialog();
     });
     dialog.addEventListener("close", cleanup);
-    dialog.addEventListener("cancel", () => {
-      window.requestAnimationFrame(() => {
-        if (!dialog.open) cleanup();
-      });
+    dialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      closeDialog();
     });
   };
 
