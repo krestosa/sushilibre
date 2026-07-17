@@ -1056,7 +1056,7 @@ video {
     right: auto;
     width: min(1600px, 100vw - clamp(48px, 6vw, 160px));
     transform: translateX(-50%);
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
     grid-template-rows: auto;
     column-gap: clamp(18px, 2vw, 44px);
     row-gap: 0;
