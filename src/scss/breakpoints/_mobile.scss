@@ -1,3 +1,7 @@
+.booking-dock__value--mobile {
+  display: none;
+}
+
 @media (max-width: 820px) {
   .booking-dock {
     position: fixed;
@@ -250,6 +254,14 @@
     grid-template-rows: 48px 96px;
     gap: 8px;
     padding: 8px;
+  }
+
+  .booking-dock__value--desktop {
+    display: none;
+  }
+
+  .booking-dock__value--mobile {
+    display: inline;
   }
 
   .booking-dock__meta {
