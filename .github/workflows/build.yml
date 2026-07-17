@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - refactor/sass-typescript
+    paths-ignore:
+      - app.css
+      - app.js
   pull_request:
     branches:
       - design/video-hero-sticky-countdown
@@ -65,5 +68,5 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Publish compiled site assets [skip ci]"
+          git commit -m "Publish compiled site assets"
           git push origin "HEAD:${GITHUB_REF_NAME}"
