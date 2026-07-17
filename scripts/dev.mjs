@@ -102,7 +102,12 @@ function watchPath(path, { label = '', recursive = true } = {}) {
 await buildAll();
 
 watchPath(resolve(root, 'src'));
-watchPath(resolve(root, 'menu.json'), { label: 'menu.json', recursive: false });
+
+const menuWatcher = watch(root, { recursive: false }, (_eventType, filename) => {
+  const normalized = filename ? String(filename).replaceAll('\\', '/') : '';
+  if (normalized === 'menu.json') scheduleRebuild('menu.json');
+});
+watchers.push(menuWatcher);
 
 try {
   const assetWatcher = watch(resolve(dist, 'assets'), { recursive: true }, () => {
@@ -162,7 +167,7 @@ const server = createServer(async (request, response) => {
 
 server.listen(port, host, () => {
   console.log(`Sushi Libre dev server: http://${host}:${port}`);
-  console.log('SCSS updates are injected; TypeScript and static changes reload the page.');
+  console.log('SCSS is injected; TypeScript, menu.json, HTML and assets rebuild and reload the page.');
 });
 
 function shutdown() {
