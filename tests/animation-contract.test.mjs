@@ -103,7 +103,7 @@ test('piece viewer separates loading, ready and error states', async () => {
   assert.match(styles, /prefers-reduced-motion: reduce/);
 });
 
-test('piece viewer locks the background without removing the scrollbar', async () => {
+test('piece viewer locks scrolling without repositioning or hiding the page', async () => {
   const [feature, styles] = await Promise.all([
     readSource('src/ts/features/piece-viewer.ts'),
     readSource('src/scss/components/_piece-viewer.scss')
@@ -111,14 +111,16 @@ test('piece viewer locks the background without removing the scrollbar', async (
 
   assert.match(styles, /scrollbar-gutter: stable/);
   assert.match(styles, /html\.has-piece-viewer[\s\S]*overflow-y: scroll/);
-  assert.match(styles, /\.page[\s\S]*position: fixed/);
+  assert.doesNotMatch(styles, /\.page[\s\S]*position: fixed/);
+  assert.doesNotMatch(styles, /--piece-viewer-scroll-offset|--piece-viewer-document-height/);
   assert.doesNotMatch(styles, /html\.has-piece-viewer\s*\{[^}]*overflow:\s*hidden/);
-  assert.match(feature, /--piece-viewer-scroll-offset/);
-  assert.match(feature, /--piece-viewer-document-height/);
   assert.match(feature, /addEventListener\('wheel',[\s\S]*passive: false/);
   assert.match(feature, /addEventListener\('touchmove',[\s\S]*passive: false/);
+  assert.match(feature, /addEventListener\('scroll', enforceLockedScroll/);
   assert.match(feature, /SCROLL_KEYS/);
   assert.match(feature, /window\.scrollTo\(0, lockedScrollY\)/);
+  assert.doesNotMatch(feature, /--piece-viewer-scroll-offset|--piece-viewer-document-height/);
+  assert.match(styles, /background: rgba\(0, 0, 0, 0\.62\)/);
 });
 
 test('short desktop categories end with their final product divider', async () => {
@@ -147,7 +149,8 @@ test('compiled distribution contains synchronized animation and popup hooks', as
   assert.match(script, /scheduleResizeSettlement/);
   assert.match(script, /is-closing/);
   assert.match(script, /data-piece-viewer-status-text/);
-  assert.match(script, /piece-viewer-scroll-offset/);
+  assert.match(script, /enforceLockedScroll/);
+  assert.doesNotMatch(script, /piece-viewer-scroll-offset|piece-viewer-document-height/);
   assert.doesNotMatch(script, /revealDockContent|booking-dock__meta.*opacity/);
   assert.match(styles, /html\.has-menu-reveal \.menu-reveal/);
   assert.match(styles, /html\.hero-intro-complete/);
