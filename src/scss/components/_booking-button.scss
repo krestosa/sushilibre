@@ -1,0 +1,90 @@
+.booking-dock__cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--orange);
+  color: #090706;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 150ms ease-out, filter 150ms ease-out;
+
+  > span {
+    position: relative;
+    z-index: 2;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+  }
+
+  &:active {
+    transform: scale(0.975);
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: -42%;
+    bottom: -42%;
+    left: -92%;
+    width: 72%;
+    opacity: 0;
+    pointer-events: none;
+    transform: skewX(-18deg);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 12%,
+      rgba(255, 255, 255, 0.14) 26%,
+      rgba(255, 255, 255, 0.36) 42%,
+      rgba(255, 255, 255, 0.58) 50%,
+      rgba(255, 255, 255, 0.36) 58%,
+      rgba(255, 255, 255, 0.14) 74%,
+      rgba(255, 255, 255, 0.04) 88%,
+      transparent 100%
+    );
+    filter: blur(5px);
+    will-change: left, opacity;
+  }
+
+  &.has-runtime-sheen::before {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  > i[aria-hidden="true"] {
+    position: absolute;
+    z-index: 1;
+    top: -42%;
+    bottom: -42%;
+    left: 0;
+    width: 72%;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(-135%, 0, 0) skewX(-18deg);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 12%,
+      rgba(255, 255, 255, 0.14) 26%,
+      rgba(255, 255, 255, 0.36) 42%,
+      rgba(255, 255, 255, 0.58) 50%,
+      rgba(255, 255, 255, 0.36) 58%,
+      rgba(255, 255, 255, 0.14) 74%,
+      rgba(255, 255, 255, 0.04) 88%,
+      transparent 100%
+    );
+    filter: blur(5px);
+    will-change: transform, opacity;
+  }
+}
