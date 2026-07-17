@@ -10,7 +10,7 @@
     "exactOptionalPropertyTypes": true,
     "useDefineForClassFields": true,
     "skipLibCheck": true,
-    "types": []
+    "types": ["node"]
   },
   "include": ["src/ts/**/*.ts", "playwright.config.ts", "tests/**/*.ts"]
 }
