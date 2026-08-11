@@ -205,7 +205,7 @@
   }
 
   .proposal__header h2 {
-    font-size: clamp(68px, 8vw, 96px);
+    font-size: clamp(76px, 9.2vw, 110px);
   }
 }
 
@@ -249,6 +249,10 @@
     grid-row: 3;
     justify-self: end;
   }
+
+  .proposal__header h2 {
+    font-size: clamp(70px, 10.8vw, 98px);
+  }
 }
 
 @media (min-width: 621px) and (max-width: 900px) and (orientation: portrait) {
@@ -271,7 +275,7 @@
 
 @media (max-width: 720px) {
   .proposal__header h2 {
-    font-size: clamp(54px, 12.5vw, 84px);
+    font-size: clamp(58px, 14.2vw, 92px);
   }
 
   .menu-section__intro h2 {
@@ -318,7 +322,7 @@
   }
 
   .proposal__header h2 {
-    font-size: clamp(42px, 11vw, 62px);
+    font-size: clamp(50px, 13.8vw, 74px);
   }
 
   .menu-section__intro h2 {
