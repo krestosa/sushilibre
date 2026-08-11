@@ -52,17 +52,25 @@ test('only the Sushi Libre hero words opt into Gazzetta Black', async () => {
   assert.match(titleStyles, /font-family:\s*["']Gazzetta["'],\s*sans-serif;/);
   assert.match(titleStyles, /font-weight:\s*900;/);
   assert.match(titleStyles, /font-synthesis:\s*none;/);
+  assert.match(titleStyles, /font-size:\s*clamp\(130px,\s*12\.7vw,\s*244px\);/);
+  assert.match(titleStyles, /letter-spacing:\s*0\.018em;/);
+  assert.match(titleStyles, /@media \(max-width: 620px\)[\s\S]*?font-size:\s*27vw;[\s\S]*?letter-spacing:\s*0\.024em;/);
+  assert.doesNotMatch(titleStyles, /letter-spacing:\s*-/);
   assert.doesNotMatch(titleStyles, /title-kicker|hero-copy|masthead|proposal|menu-/);
 
   assert.match(template, /rel=["']preload["'][\s\S]*?href=["']fonts\/Gazzetta Black\.otf["'][\s\S]*?as=["']font["']/);
 });
 
-test('compiled CSS keeps the Gazzetta Black title override after responsive rules', async () => {
+test('compiled CSS keeps Gazzetta Black and expanded title metrics after responsive rules', async () => {
   const css = await readSource('dist/app.css');
-  const titleRule = [...css.matchAll(/\.title-word\s*\{([^}]*)\}/g)].at(-1)?.[1] ?? '';
+  const titleRules = [...css.matchAll(/\.title-word\s*\{([^}]*)\}/g)].map((match) => match[1]);
+  const gazzettaRule = titleRules.find((rule) => /font-family:\s*"Gazzetta"/.test(rule)) ?? '';
 
   assert.match(css, /@font-face/);
   assert.match(css, /fonts\/Gazzetta Black\.otf/);
-  assert.match(titleRule, /font-family:\s*"Gazzetta",\s*sans-serif;/);
-  assert.match(titleRule, /font-weight:\s*900;/);
+  assert.match(gazzettaRule, /font-family:\s*"Gazzetta",\s*sans-serif;/);
+  assert.match(gazzettaRule, /font-weight:\s*900;/);
+  assert.match(gazzettaRule, /font-size:\s*clamp\(130px,\s*12\.7vw,\s*244px\)/);
+  assert.match(gazzettaRule, /letter-spacing:\s*0\.018em/);
+  assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.title-word\s*\{[^}]*font-size:\s*27vw;[^}]*letter-spacing:\s*0\.024em/);
 });
