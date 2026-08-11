@@ -123,20 +123,27 @@
         <div class="hero__video-stack" aria-hidden="true">
           <video
             class="hero__video is-active"
-            data-loop-video
-            data-video-source="assets/hero_bg.webm"
+            data-intro-video
+            data-video-source="assets/bg_inicio.webm"
             autoplay
-            loop
             muted
             playsinline
             preload="metadata"
           >
-            <source src="assets/hero_bg.webm" type="video/webm" />
+            <source src="assets/bg_inicio.webm" type="video/webm" />
           </video>
           <video
             class="hero__video"
             data-loop-video
-            data-video-source="assets/hero_bg.webm"
+            data-video-source="assets/bg_loop.webm"
+            muted
+            playsinline
+            preload="none"
+          ></video>
+          <video
+            class="hero__video"
+            data-loop-video
+            data-video-source="assets/bg_loop.webm"
             muted
             playsinline
             preload="none"
