@@ -563,6 +563,11 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
   animation: none !important;
 }
 
+.hero__black-filter {
+  --stage-overlay-opacity: 0.79;
+  opacity: var(--stage-overlay-opacity);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .booking-dock__cta::before {
     animation: cta-sheen 8.8s ease-in-out 1.5s infinite;
@@ -575,22 +580,22 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
     animation: stage-overlay-in 340ms ease-out 560ms both;
   }
   .title-word--sushi {
-    animation: stage-title-in 520ms var(--ease-out) 800ms both;
+    animation: stage-title-in 520ms var(--ease-out) 1800ms both;
   }
   .title-word--libre {
-    animation: stage-title-in 540ms var(--ease-out) 850ms both;
+    animation: stage-title-in 540ms var(--ease-out) 1850ms both;
   }
   .title-kicker {
-    animation: stage-copy-in 380ms var(--ease-out) 1020ms both;
+    animation: stage-copy-in 380ms var(--ease-out) 2020ms both;
   }
   .hero-copy {
-    animation: stage-copy-centered-in 440ms var(--ease-out) 1150ms both;
+    animation: stage-copy-centered-in 440ms var(--ease-out) 2150ms both;
   }
   .booking-dock {
-    animation: stage-dock-in 460ms var(--ease-out) 1390ms both;
+    animation: stage-dock-in 460ms var(--ease-out) 2390ms both;
   }
   .masthead {
-    animation: stage-masthead-in 400ms var(--ease-out) 1660ms both;
+    animation: stage-masthead-in 400ms var(--ease-out) 2660ms both;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -636,7 +641,7 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
     opacity: 0;
   }
   to {
-    opacity: 1;
+    opacity: var(--stage-overlay-opacity, 1);
   }
 }
 @keyframes stage-title-in {
