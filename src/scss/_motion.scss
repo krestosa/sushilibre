@@ -31,8 +31,20 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
 }
 
 .hero__black-filter {
-  --stage-overlay-opacity: 0.79;
+  --stage-overlay-opacity: 0.66;
   opacity: var(--stage-overlay-opacity);
+}
+
+.hero__gradient {
+  --stage-overlay-opacity: 0.52;
+  opacity: var(--stage-overlay-opacity);
+}
+
+// La intro corta directamente al primer frame del loop. El crossfade sólo existe
+// entre las dos capas de bg_loop.webm una vez que la intro dejó de estar activa.
+.hero__video-stack:has(.hero__video[data-intro-video].is-active)
+  .hero__video[data-loop-video] {
+  transition: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
