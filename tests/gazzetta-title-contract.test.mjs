@@ -71,8 +71,12 @@ test('proposal heading stays large and on one line at every breakpoint', async (
   assert.match(fonts, /@media \(max-width: 620px\)[\s\S]*?\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(42px, 11vw, 62px\)/);
 });
 
-test('hero lockup stays heavy and the experience kicker is geometrically centered', async () => {
-  const fonts = await readSource('src/scss/_fonts.scss');
+test('hero lockup stays heavy, squared and the experience kicker is geometrically centered', async () => {
+  const [fonts, template, distribution] = await Promise.all([
+    readSource('src/scss/_fonts.scss'),
+    readSource('src/static/index.html'),
+    readSource('dist/index.html')
+  ]);
 
   assert.match(fonts, /@media \(min-width: 821px\)[\s\S]*?\.title-lockup\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) auto minmax\(0, 1fr\)/);
   assert.match(fonts, /@media \(min-width: 821px\)[\s\S]*?\.title-kicker\s*\{[\s\S]*?justify-self:\s*center;[\s\S]*?font-size:\s*clamp\(22px, 1\.85vw, 36px\)/);
@@ -81,6 +85,12 @@ test('hero lockup stays heavy and the experience kicker is geometrically centere
   assert.match(fonts, /@media \(max-width: 820px\), \(max-aspect-ratio: 4\/3\)[\s\S]*?\.title-kicker\s*\{[\s\S]*?grid-column:\s*1 \/ -1;[\s\S]*?grid-row:\s*2;[\s\S]*?justify-self:\s*center;/);
   assert.match(fonts, /@media \(max-width: 820px\), \(max-aspect-ratio: 4\/3\)[\s\S]*?\.title-word--libre\s*\{[\s\S]*?grid-row:\s*3;/);
   assert.match(fonts, /@media \(max-width: 620px\)[\s\S]*?\.title-word\s*\{[\s\S]*?font-size:\s*clamp\(118px, 34vw, 176px\)/);
+
+  assert.match(fonts, /\.title-word--libre\s*\{[\s\S]*?position:\s*relative;/);
+  assert.match(fonts, /\.title-word__sup\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?font-size:\s*0\.24em;[\s\S]*?font-weight:\s*900;/);
+  for (const html of [template, distribution]) {
+    assert.match(html, /title-word title-word--libre[\s\S]*?LIBRE[\s\S]*?<sup class="title-word__sup" aria-hidden="true">2<\/sup>[\s\S]*?al cuadrado/);
+  }
 });
 
 test('mobile Gazzetta layout keeps category headings clear of product content', async () => {
@@ -103,4 +113,5 @@ test('compiled CSS keeps Gazzetta weights and neutral tracking for display title
   assert.match(css, /\.menu-section__intro h2[\s\S]*?font-weight:\s*700/);
   assert.match(css, /\.menu-group__title[\s\S]*?font-weight:\s*800/);
   assert.match(css, /grid-template-columns:\s*minmax\(0, 1fr\) auto minmax\(0, 1fr\)/);
+  assert.match(css, /\.title-word__sup\s*\{[\s\S]*?font-size:\s*0\.24em/);
 });
