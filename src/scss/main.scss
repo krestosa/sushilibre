@@ -1,0 +1,16 @@
+@use "settings";
+@use "base";
+@use "components/countdown";
+@use "components/booking-button";
+@use "components/chips";
+@use "components/piece-viewer";
+@use "motion";
+@use "proposal";
+@use "proposal-motion";
+
+// Herencia responsive: desktop define la base, tablet la modifica y mobile cierra la cascada.
+@use "breakpoints/desktop";
+@use "breakpoints/tablet";
+@use "breakpoints/mobile";
+
+@use "environment";

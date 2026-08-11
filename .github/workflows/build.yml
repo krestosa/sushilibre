@@ -1,0 +1,88 @@
+name: Build, validate and publish
+
+on:
+  pull_request:
+    branches:
+      - design/video-hero-sticky-countdown
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sushilibre-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+    steps:
+      - name: Checkout source branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Verify static assets
+        run: test -d dist/assets
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Run local-equivalent verification
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build-diagnostics
+          npm run verify 2>&1 | tee build-diagnostics/verify.log
+
+      - name: Upload build diagnostics
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-diagnostics
+          path: build-diagnostics
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Upload static distribution artifact
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: sushilibre-dist
+          path: dist
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Publish static distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A dist
+          if git diff --cached --quiet; then
+            echo "Static distribution is already current."
+            exit 0
+          fi
+
+          remote_sha="$(git ls-remote origin "refs/heads/${TARGET_BRANCH}" | cut -f1)"
+          if [[ "${remote_sha}" != "${SOURCE_SHA}" ]]; then
+            echo "A newer source commit exists; its workflow will publish the matching distribution."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Publish static distribution"
+          git push origin "HEAD:${TARGET_BRANCH}"
