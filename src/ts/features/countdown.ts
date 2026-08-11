@@ -3,7 +3,7 @@ import { query } from '../shared/dom';
 type CountdownKey = 'days' | 'hours' | 'minutes' | 'seconds';
 
 const keys: CountdownKey[] = ['days', 'hours', 'minutes', 'seconds'];
-const target = new Date('2026-07-30T20:00:00-03:00').getTime();
+const target = new Date('2026-09-03T20:00:00-03:00').getTime();
 
 const replaceCtaLabel = (label: HTMLElement, firstLine: string, secondLine: string): void => {
   label.replaceChildren(
