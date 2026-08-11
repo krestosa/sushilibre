@@ -1,6 +1,9 @@
 name: Build, validate and publish
 
 on:
+  push:
+    branches:
+      - refactor/sass-typescript
   pull_request:
     branches:
       - design/video-hero-sticky-countdown
