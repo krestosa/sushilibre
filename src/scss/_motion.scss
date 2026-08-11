@@ -37,7 +37,7 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
 
 @media (prefers-reduced-motion: no-preference) {
   .booking-dock__cta::before {
-    animation: cta-sheen 8.8s ease-in-out 2.5s infinite;
+    animation: cta-sheen 8.8s ease-in-out 1.5s infinite;
   }
 
   .hero__video-stack {
