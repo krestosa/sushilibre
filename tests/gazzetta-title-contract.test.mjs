@@ -89,7 +89,7 @@ test('hero lockup stays heavy, squared and the experience kicker is geometricall
   assert.match(fonts, /\.title-word--libre\s*\{[\s\S]*?position:\s*relative;/);
   assert.match(fonts, /\.title-word__sup\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?font-size:\s*0\.24em;[\s\S]*?font-weight:\s*900;/);
   for (const html of [template, distribution]) {
-    assert.match(html, /title-word title-word--libre[\s\S]*?LIBRE[\s\S]*?<sup class="title-word__sup" aria-hidden="true">2<\/sup>[\s\S]*?al cuadrado/);
+    assert.match(html, /title-word title-word--libre[\s\S]*?LIBRE[\s\S]*?<sup class="title-word__sup" aria-hidden="true">2<\/sup\s*>[\s\S]*?al cuadrado/);
   }
 });
 
