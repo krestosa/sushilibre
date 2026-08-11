@@ -2110,12 +2110,15 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
 
 .title-word--libre {
   position: relative;
+  width: max-content;
 }
 
 .title-word__sup {
-  position: absolute;
+  position: relative;
   top: -0.15em;
-  right: -0.05em;
+  display: inline-block;
+  margin-left: 0.06em;
+  vertical-align: super;
   font-family: "Gazzetta", sans-serif;
   font-size: 0.24em;
   font-style: normal;
