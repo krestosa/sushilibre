@@ -1,7 +1,7 @@
 import { queryAll } from '../shared/dom';
 
 const HERO_TITLE_ANIMATIONS = new Set(['stage-title-in', 'quiet-fade']);
-const COMPLETION_FALLBACK_MS = 2400;
+const COMPLETION_FALLBACK_MS = 3400;
 
 export const setupHeroIntroMotion = (): void => {
   const root = document.documentElement;
