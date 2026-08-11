@@ -67,8 +67,10 @@ test('proposal heading stays large and on one line at every breakpoint', async (
 
   assert.match(fonts, /\.proposal__header h2\s*\{[\s\S]*?width:\s*max-content;[\s\S]*?max-width:\s*none;[\s\S]*?white-space:\s*nowrap;/);
   assert.doesNotMatch(fonts, /\.proposal__header h2\s*\{[\s\S]*?max-width:\s*[\d.]+ch/);
-  assert.match(fonts, /@media \(max-width: 720px\)[\s\S]*?\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(54px, 12\.5vw, 84px\)/);
-  assert.match(fonts, /@media \(max-width: 620px\)[\s\S]*?\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(42px, 11vw, 62px\)/);
+  assert.match(fonts, /@media \(min-width: 821px\) and \(max-width: 1100px\)[\s\S]*?\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(76px, 9\.2vw, 110px\)/);
+  assert.match(fonts, /@media \(max-width: 820px\), \(max-aspect-ratio: 4\/3\)[\s\S]*?\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(70px, 10\.8vw, 98px\)/);
+  assert.match(fonts, /@media \(max-width: 720px\)[\s\S]*?\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(58px, 14\.2vw, 92px\)/);
+  assert.match(fonts, /@media \(max-width: 620px\)[\s\S]*?\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(50px, 13\.8vw, 74px\)/);
 });
 
 test('hero lockup stays heavy, squared and the experience kicker is geometrically centered', async () => {
