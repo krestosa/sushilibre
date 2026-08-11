@@ -1,7 +1,9 @@
 /*! build-contract: deterministic-local-ci-v1 */
 :root {
   --white: #f7f5f0;
-  --orange: #dd702d;
+  --orange: #001ac5;
+  --orange-rgb: 0, 26, 197;
+  --orange-light: #1234e3;
   --page-x: clamp(24px, 1.55vw, 32px);
   --grid-gap: clamp(12px, 1.05vw, 22px);
   --dock-height: 104px;
@@ -132,7 +134,7 @@ video {
   justify-content: center;
   border-radius: 6px;
   background: var(--orange);
-  color: #090706;
+  color: #fff;
   font-size: 16px;
   font-weight: 700;
   line-height: 0.92;
@@ -220,9 +222,9 @@ video {
 }
 
 .menu-item__badge--diet {
-  border-color: rgba(221, 112, 45, 0.72);
-  background: rgba(221, 112, 45, 0.12);
-  color: #ef8a4b;
+  border-color: rgba(var(--orange-rgb), 0.72);
+  background: rgba(var(--orange-rgb), 0.12);
+  color: var(--orange-light);
 }
 
 .menu-item__badge--pieces {
