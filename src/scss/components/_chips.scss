@@ -29,9 +29,9 @@
 }
 
 .menu-item__badge--diet {
-  border-color: rgba(221, 112, 45, 0.72);
-  background: rgba(221, 112, 45, 0.12);
-  color: #ef8a4b;
+  border-color: rgba(var(--orange-rgb), 0.72);
+  background: rgba(var(--orange-rgb), 0.12);
+  color: var(--orange-light);
 }
 
 .menu-item__badge--pieces {
