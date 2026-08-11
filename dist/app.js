@@ -277,7 +277,7 @@
 
   // src/ts/features/hero-intro-motion.ts
   var HERO_TITLE_ANIMATIONS = /* @__PURE__ */ new Set(["stage-title-in", "quiet-fade"]);
-  var COMPLETION_FALLBACK_MS = 2400;
+  var COMPLETION_FALLBACK_MS = 3400;
   var setupHeroIntroMotion = () => {
     const root = document.documentElement;
     const titleWords = queryAll(".title-word");
