@@ -211,7 +211,7 @@
 
   // src/ts/features/countdown.ts
   var keys = ["days", "hours", "minutes", "seconds"];
-  var target = (/* @__PURE__ */ new Date("2026-07-30T20:00:00-03:00")).getTime();
+  var target = (/* @__PURE__ */ new Date("2026-09-03T20:00:00-03:00")).getTime();
   var replaceCtaLabel = (label, firstLine, secondLine) => {
     label.replaceChildren(
       document.createTextNode(firstLine),
