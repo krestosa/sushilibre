@@ -1,5 +1,4 @@
 @use "settings";
-@use "fonts";
 @use "base";
 @use "components/countdown";
 @use "components/booking-button";
@@ -14,6 +13,6 @@
 @use "breakpoints/tablet";
 @use "breakpoints/mobile";
 
-// La nueva familia se aplica por ahora sólo al título principal del hero.
-@use "gazzetta-title";
+// La familia display se declara y aplica después de los breakpoints para conservar sus métricas.
+@use "fonts";
 @use "environment";
