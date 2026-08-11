@@ -19,12 +19,12 @@ const assertAccessibleMarkup = (html) => {
     assert.equal(attributeValue(tag, 'aria-label'), null, 'strong elements cannot carry aria-label');
   });
 
-  assert.match(compact, /<span\b[^>]*class=["']sr-only["'][^>]*>Puerto Madero — abrir en Google Maps<\/span>/i);
-  assert.match(compact, /<span\b[^>]*class=["']sr-only["'][^>]*>Jueves 30 de julio<\/span>/i);
+  assert.match(compact, /<span\b[^>]*class=["']sr-only["'][^>]*>Recova — abrir en Google Maps<\/span>/i);
+  assert.match(compact, /<span\b[^>]*class=["']sr-only["'][^>]*>Jueves 3 de septiembre<\/span>/i);
 
   const locationLink = findOpeningTag(compact, 'a', (tag) => (
     hasClass(tag, 'booking-dock__meta--location')
-    && attributeValue(tag, 'href') === 'https://maps.app.goo.gl/N6UjNEoETLvo1ucRA'
+    && attributeValue(tag, 'href') === 'https://maps.app.goo.gl/nbh1CpNqBgfToHEe8'
   ));
   assert.ok(locationLink, 'location link must exist');
   assert.equal(attributeValue(locationLink, 'target'), '_blank');
