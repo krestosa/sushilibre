@@ -2108,6 +2108,22 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
   line-height: 0.79;
 }
 
+.title-word--libre {
+  position: relative;
+}
+
+.title-word__sup {
+  position: absolute;
+  top: -0.15em;
+  right: -0.05em;
+  font-family: "Gazzetta", sans-serif;
+  font-size: 0.24em;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: normal;
+}
+
 .proposal__header h2 {
   width: max-content;
   max-width: none;
