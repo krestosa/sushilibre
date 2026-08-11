@@ -3,7 +3,7 @@
   --white: #f7f5f0;
   --orange: #001ac5;
   --orange-rgb: 0, 26, 197;
-  --orange-light: #1234e3;
+  --orange-light: #6b7cff;
   --page-x: clamp(24px, 1.55vw, 32px);
   --grid-gap: clamp(12px, 1.05vw, 22px);
   --dock-height: 104px;
@@ -2270,6 +2270,11 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
 }
 .menu-section {
   --menu-background-image: url("assets/menu_bg.webp");
+}
+
+.menu-item__description,
+.piece-viewer[data-state=error] .piece-viewer__status-text {
+  color: var(--orange-light);
 }
 
 @media (hover: hover) and (pointer: fine) {
