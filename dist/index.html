@@ -40,8 +40,8 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="app.css?v=48f216ac7dc7" />
-    <script src="app.js?v=48f216ac7dc7" defer></script>
+    <link rel="stylesheet" href="app.css?v=d996f14b1586" />
+    <script src="app.js?v=d996f14b1586" defer></script>
   </head>
   <body>
     <main class="page">
@@ -123,20 +123,27 @@
         <div class="hero__video-stack" aria-hidden="true">
           <video
             class="hero__video is-active"
-            data-loop-video
-            data-video-source="assets/hero_bg.webm"
+            data-intro-video
+            data-video-source="assets/bg_inicio.webm"
             autoplay
-            loop
             muted
             playsinline
             preload="metadata"
           >
-            <source src="assets/hero_bg.webm" type="video/webm" />
+            <source src="assets/bg_inicio.webm" type="video/webm" />
           </video>
           <video
             class="hero__video"
             data-loop-video
-            data-video-source="assets/hero_bg.webm"
+            data-video-source="assets/bg_loop.webm"
+            muted
+            playsinline
+            preload="none"
+          ></video>
+          <video
+            class="hero__video"
+            data-loop-video
+            data-video-source="assets/bg_loop.webm"
             muted
             playsinline
             preload="none"
