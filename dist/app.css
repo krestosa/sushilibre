@@ -586,7 +586,7 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
   }
   .hero__black-filter,
   .hero__gradient {
-    animation: stage-overlay-in 340ms ease-out 560ms both;
+    animation: stage-overlay-in 300ms ease-out 1500ms both;
   }
   .title-word--sushi {
     animation: stage-title-in 520ms var(--ease-out) 1800ms both;
