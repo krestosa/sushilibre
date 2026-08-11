@@ -89,7 +89,7 @@ test('hero lockup stays heavy, squared and the experience kicker is geometricall
   assert.match(fonts, /@media \(max-width: 620px\)[\s\S]*?\.title-word\s*\{[\s\S]*?font-size:\s*clamp\(118px, 34vw, 176px\)/);
 
   assert.match(fonts, /\.title-word--libre\s*\{[\s\S]*?position:\s*relative;[\s\S]*?width:\s*max-content;/);
-  assert.match(fonts, /\.title-word__sup\s*\{[\s\S]*?position:\s*relative;[\s\S]*?display:\s*inline-block;[\s\S]*?margin-left:\s*0\.06em;[\s\S]*?vertical-align:\s*super;[\s\S]*?font-size:\s*0\.24em;[\s\S]*?font-weight:\s*900;/);
+  assert.match(fonts, /\.title-word__sup\s*\{[\s\S]*?position:\s*relative;[\s\S]*?top:\s*-0\.44em;[\s\S]*?display:\s*inline-block;[\s\S]*?margin-left:\s*0\.06em;[\s\S]*?vertical-align:\s*top;[\s\S]*?font-size:\s*0\.24em;[\s\S]*?font-weight:\s*900;/);
   assert.doesNotMatch(fonts, /\.title-word__sup\s*\{[\s\S]*?position:\s*absolute;/);
   for (const html of [template, distribution]) {
     assert.match(html, /title-word title-word--libre[\s\S]*?LIBRE[\s\S]*?<sup class="title-word__sup" aria-hidden="true">2<\/sup\s*>[\s\S]*?al cuadrado/);
@@ -117,5 +117,5 @@ test('compiled CSS keeps Gazzetta weights and neutral tracking for display title
   assert.match(css, /\.menu-group__title[\s\S]*?font-weight:\s*800/);
   assert.match(css, /grid-template-columns:\s*minmax\(0, 1fr\) auto minmax\(0, 1fr\)/);
   assert.match(css, /\.title-word--libre\s*\{[\s\S]*?width:\s*max-content/);
-  assert.match(css, /\.title-word__sup\s*\{[\s\S]*?position:\s*relative;[\s\S]*?margin-left:\s*0\.06em;[\s\S]*?font-size:\s*0\.24em/);
+  assert.match(css, /\.title-word__sup\s*\{[\s\S]*?position:\s*relative;[\s\S]*?top:\s*-0\.44em;[\s\S]*?margin-left:\s*0\.06em;[\s\S]*?vertical-align:\s*top;[\s\S]*?font-size:\s*0\.24em/);
 });
