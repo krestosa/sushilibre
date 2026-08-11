@@ -10,7 +10,7 @@ import {
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 const RESERVATION_URL = 'https://www.sushiclub.com.ar/shop_reservas.php';
-const MAPS_URL = 'https://maps.app.goo.gl/N6UjNEoETLvo1ucRA';
+const MAPS_URL = 'https://maps.app.goo.gl/nbh1CpNqBgfToHEe8';
 
 const assertBookingDestinations = (html) => {
   const reservationLink = findOpeningTag(html, 'a', (tag) => (
@@ -38,6 +38,9 @@ test('booking dock exposes reservation and Maps destinations', async () => {
   assertBookingDestinations(template);
   assert.match(template, /data-booking-cta-label/);
   assert.match(template, /booking-dock__external-arrow/);
+  assert.match(template, /RECOVA/);
+  assert.match(template, /JUEVES 03\/09/);
+  assert.match(template, /JUE 03\/09/);
   assert.match(styles, /\.booking-dock__meta--location/);
   assert.match(styles, /\.booking-dock__external-arrow/);
   assert.match(styles, /translate3d\(2px, -2px, 0\)/);
@@ -46,7 +49,7 @@ test('booking dock exposes reservation and Maps destinations', async () => {
 test('countdown converts the CTA into a smooth menu action at zero', async () => {
   const countdown = await readSource('src/ts/features/countdown.ts');
 
-  assert.match(countdown, /2026-07-30T20:00:00-03:00/);
+  assert.match(countdown, /2026-09-03T20:00:00-03:00/);
   assert.match(countdown, /activateMenuMode/);
   assert.match(countdown, /cta\.href = '#menu'/);
   assert.match(countdown, /replaceCtaLabel\(ctaLabel, 'IR A', 'MENÚ'\)/);
@@ -80,6 +83,8 @@ test('compiled distribution keeps booking destinations and action hooks', async 
 
   assertBookingDestinations(html);
   assert.match(html, /booking-dock__external-arrow/);
+  assert.match(html, /RECOVA/);
+  assert.match(html, /03\/09/);
   assert.match(script, /data-booking-cta/);
   assert.match(script, /scrollIntoView/);
   assert.match(script, /replaceChildren/);
