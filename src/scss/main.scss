@@ -14,4 +14,6 @@
 @use "breakpoints/tablet";
 @use "breakpoints/mobile";
 
+// La nueva familia se aplica por ahora sólo al título principal del hero.
+@use "gazzetta-title";
 @use "environment";
