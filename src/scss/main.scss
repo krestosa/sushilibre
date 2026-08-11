@@ -13,6 +13,6 @@
 @use "breakpoints/tablet";
 @use "breakpoints/mobile";
 
-// La familia display se declara y aplica después de los breakpoints para conservar sus métricas.
+// La familia display se declara y aplica después de los breakpoints para conservar sus métricas finales.
 @use "fonts";
 @use "environment";
