@@ -143,10 +143,12 @@
 }
 
 .proposal__header h2 {
-  max-width: 5.8ch;
-  font-size: clamp(68px, 6vw, 112px);
+  width: max-content;
+  max-width: none;
+  font-size: clamp(78px, 7vw, 126px);
   font-weight: 700;
-  line-height: 0.9;
+  line-height: 0.88;
+  white-space: nowrap;
 }
 
 .menu-section__intro h2 {
@@ -187,7 +189,7 @@
   }
 
   .proposal__header h2 {
-    font-size: clamp(60px, 7.2vw, 84px);
+    font-size: clamp(68px, 8vw, 96px);
   }
 }
 
@@ -253,8 +255,7 @@
 
 @media (max-width: 720px) {
   .proposal__header h2 {
-    max-width: 6.5ch;
-    font-size: clamp(58px, 12vw, 78px);
+    font-size: clamp(54px, 12.5vw, 84px);
   }
 
   .menu-section__intro h2 {
@@ -301,7 +302,7 @@
   }
 
   .proposal__header h2 {
-    font-size: clamp(56px, 15vw, 74px);
+    font-size: clamp(42px, 11vw, 62px);
   }
 
   .menu-section__intro h2 {
