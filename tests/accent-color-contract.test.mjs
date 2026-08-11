@@ -21,6 +21,7 @@ test('active accent is the new blue and legacy orange derivatives are gone', asy
   const settings = await readFile(new URL('../src/scss/_settings.scss', import.meta.url), 'utf8');
   const bookingButton = await readFile(new URL('../src/scss/components/_booking-button.scss', import.meta.url), 'utf8');
   const chips = await readFile(new URL('../src/scss/components/_chips.scss', import.meta.url), 'utf8');
+  const environment = await readFile(new URL('../src/scss/_environment.scss', import.meta.url), 'utf8');
   const scssRoot = fileURLToPath(new URL('../src/scss/', import.meta.url));
   const scssFiles = await collectScss(scssRoot);
   const source = (await Promise.all(scssFiles.map((file) => readFile(file, 'utf8')))).join('\n');
@@ -28,10 +29,12 @@ test('active accent is the new blue and legacy orange derivatives are gone', asy
 
   assert.match(settings, /--orange:\s*#001ac5;/i);
   assert.match(settings, /--orange-rgb:\s*0,\s*26,\s*197;/i);
-  assert.match(settings, /--orange-light:\s*#1234e3;/i);
+  assert.match(settings, /--orange-light:\s*#6b7cff;/i);
   assert.match(chips, /rgba\(var\(--orange-rgb\),\s*0\.72\)/);
   assert.match(chips, /rgba\(var\(--orange-rgb\),\s*0\.12\)/);
   assert.match(chips, /color:\s*var\(--orange-light\)/);
+  assert.match(environment, /\.menu-item__description,[\s\S]*?color:\s*var\(--orange-light\);/);
+  assert.match(environment, /\.piece-viewer\[data-state="error"\] \.piece-viewer__status-text[\s\S]*?color:\s*var\(--orange-light\);/);
   assert.match(bookingButton, /\.booking-dock__cta[\s\S]*?background:\s*var\(--orange\);[\s\S]*?color:\s*#fff;/);
 
   for (const css of [source, compiled]) {
