@@ -55,3 +55,14 @@ test('runtime switches permanently from intro to the crossfaded loop pair', asyn
   assert.match(source, /addEventListener\('pageshow'/);
   assert.match(source, /HARD_STALL_THRESHOLD/);
 });
+
+test('intro cuts directly to loop while loop boundaries retain the crossfade', async () => {
+  const motion = await readFile(new URL('../src/scss/_motion.scss', import.meta.url), 'utf8');
+
+  assert.match(
+    motion,
+    /\.hero__video-stack:has\(\.hero__video\[data-intro-video\]\.is-active\)[\s\S]*?\.hero__video\[data-loop-video\][\s\S]*?transition:\s*none/
+  );
+  assert.match(motion, /\.hero__black-filter\s*\{[\s\S]*?--stage-overlay-opacity:\s*0\.66/);
+  assert.match(motion, /\.hero__gradient\s*\{[\s\S]*?--stage-overlay-opacity:\s*0\.52/);
+});
