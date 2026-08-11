@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 const collectScss = async (directory) => {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -20,7 +21,8 @@ test('active accent is the new blue and legacy orange derivatives are gone', asy
   const settings = await readFile(new URL('../src/scss/_settings.scss', import.meta.url), 'utf8');
   const bookingButton = await readFile(new URL('../src/scss/components/_booking-button.scss', import.meta.url), 'utf8');
   const chips = await readFile(new URL('../src/scss/components/_chips.scss', import.meta.url), 'utf8');
-  const scssFiles = await collectScss(new URL('../src/scss', import.meta.url));
+  const scssRoot = fileURLToPath(new URL('../src/scss/', import.meta.url));
+  const scssFiles = await collectScss(scssRoot);
   const source = (await Promise.all(scssFiles.map((file) => readFile(file, 'utf8')))).join('\n');
   const compiled = await readFile(new URL('../dist/app.css', import.meta.url), 'utf8');
 
