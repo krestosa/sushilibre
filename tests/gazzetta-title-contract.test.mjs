@@ -54,12 +54,21 @@ test('Gazzetta display hierarchy lives in the shared fonts stylesheet without tr
   assert.match(fonts, /letter-spacing:\s*normal;/);
   assert.doesNotMatch(fonts, /letter-spacing:\s*[-+]?[\d.]+(?:em|px|rem)/);
 
-  assert.match(fonts, /\.title-word\s*\{[\s\S]*?font-size:\s*clamp\(130px, 12\.7vw, 244px\)/);
-  assert.match(fonts, /\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(58px, 5\.2vw, 96px\)/);
-  assert.match(fonts, /\.menu-section__intro h2\s*\{[\s\S]*?font-size:\s*clamp\(58px, 6\.6vw, 104px\)/);
-  assert.match(fonts, /\.menu-group__title\s*\{[\s\S]*?font-size:\s*clamp\(92px, 10\.2vw, 190px\)/);
+  assert.match(fonts, /\.title-word\s*\{[\s\S]*?font-size:\s*clamp\(148px, 13\.8vw, 268px\)/);
+  assert.match(fonts, /\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(68px, 6vw, 112px\)/);
+  assert.match(fonts, /\.menu-section__intro h2\s*\{[\s\S]*?font-size:\s*clamp\(70px, 7\.4vw, 126px\)/);
+  assert.match(fonts, /\.menu-group__title\s*\{[\s\S]*?font-size:\s*clamp\(108px, 11\.4vw, 220px\)/);
 
   assert.match(template, /rel=["']preload["'][\s\S]*?href=["']fonts\/Gazzetta Black\.otf["'][\s\S]*?as=["']font["']/);
+});
+
+test('mobile Gazzetta layout keeps category headings clear of product content', async () => {
+  const fonts = await readSource('src/scss/_fonts.scss');
+
+  assert.match(fonts, /@media \(max-width: 720px\)[\s\S]*?\.menu-group\s*\{[\s\S]*?padding-top:\s*7vh;[\s\S]*?padding-bottom:\s*9vh;/);
+  assert.match(fonts, /\.menu-group \+ \.menu-group\s*\{[\s\S]*?margin-top:\s*-1vh;/);
+  assert.match(fonts, /\.menu-group__items\s*\{[\s\S]*?padding-top:\s*6\.5vh;/);
+  assert.match(fonts, /@media \(max-width: 620px\)[\s\S]*?\.menu-group__title\s*\{[\s\S]*?font-size:\s*clamp\(78px, 24vw, 108px\)/);
 });
 
 test('compiled CSS keeps Gazzetta weights and neutral tracking for display titles', async () => {
