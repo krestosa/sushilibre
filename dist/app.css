@@ -2087,7 +2087,7 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
 }
 
 .title-word {
-  font-size: clamp(170px, 15.6vw, 302px);
+  font-size: clamp(188px, 17.2vw, 332px);
   font-weight: 900;
   line-height: 0.79;
 }
@@ -2129,7 +2129,7 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
 }
 @media (min-width: 821px) and (max-width: 1100px) {
   .title-word {
-    font-size: clamp(138px, 16.2vw, 184px);
+    font-size: clamp(152px, 18vw, 204px);
   }
   .title-kicker {
     font-size: clamp(20px, 2.25vw, 27px);
@@ -2151,7 +2151,7 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
     grid-template-rows: auto auto auto;
   }
   .title-word {
-    font-size: clamp(120px, 24vw, 196px);
+    font-size: clamp(132px, 26vw, 212px);
   }
   .title-word--sushi {
     grid-column: 1/span 9;
@@ -2175,7 +2175,7 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
 }
 @media (min-width: 621px) and (max-width: 900px) and (orientation: portrait) {
   .title-word {
-    font-size: clamp(128px, 24vw, 184px);
+    font-size: clamp(140px, 26vw, 198px);
   }
   .title-kicker {
     grid-column: 1/-1;
@@ -2214,7 +2214,7 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
 }
 @media (max-width: 620px) {
   .title-word {
-    font-size: clamp(108px, 31vw, 164px);
+    font-size: clamp(118px, 34vw, 176px);
   }
   .title-kicker {
     grid-column: 1/-1;
