@@ -55,11 +55,20 @@ test('Gazzetta display hierarchy lives in the shared fonts stylesheet without tr
   assert.doesNotMatch(fonts, /letter-spacing:\s*[-+]?[\d.]+(?:em|px|rem)/);
 
   assert.match(fonts, /\.title-word\s*\{[\s\S]*?font-size:\s*clamp\(170px, 15\.6vw, 302px\)/);
-  assert.match(fonts, /\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(68px, 6vw, 112px\)/);
+  assert.match(fonts, /\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(78px, 7vw, 126px\)/);
   assert.match(fonts, /\.menu-section__intro h2\s*\{[\s\S]*?font-size:\s*clamp\(70px, 7\.4vw, 126px\)/);
   assert.match(fonts, /\.menu-group__title\s*\{[\s\S]*?font-size:\s*clamp\(108px, 11\.4vw, 220px\)/);
 
   assert.match(template, /rel=["']preload["'][\s\S]*?href=["']fonts\/Gazzetta Black\.otf["'][\s\S]*?as=["']font["']/);
+});
+
+test('proposal heading stays large and on one line at every breakpoint', async () => {
+  const fonts = await readSource('src/scss/_fonts.scss');
+
+  assert.match(fonts, /\.proposal__header h2\s*\{[\s\S]*?width:\s*max-content;[\s\S]*?max-width:\s*none;[\s\S]*?white-space:\s*nowrap;/);
+  assert.doesNotMatch(fonts, /\.proposal__header h2\s*\{[\s\S]*?max-width:\s*[\d.]+ch/);
+  assert.match(fonts, /@media \(max-width: 720px\)[\s\S]*?\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(54px, 12\.5vw, 84px\)/);
+  assert.match(fonts, /@media \(max-width: 620px\)[\s\S]*?\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(42px, 11vw, 62px\)/);
 });
 
 test('hero lockup stays heavy and the experience kicker is geometrically centered', async () => {
@@ -88,6 +97,7 @@ test('compiled CSS keeps Gazzetta weights and neutral tracking for display title
   assert.match(css, /fonts\/Gazzetta Black\.otf/);
   assert.match(css, /\.title-word[\s\S]*?font-family:\s*"Gazzetta",\s*sans-serif;[\s\S]*?letter-spacing:\s*normal/);
   assert.match(css, /\.proposal__header h2[\s\S]*?font-weight:\s*700/);
+  assert.match(css, /\.proposal__header h2[\s\S]*?white-space:\s*nowrap/);
   assert.match(css, /\.menu-section__intro h2[\s\S]*?font-weight:\s*700/);
   assert.match(css, /\.menu-group__title[\s\S]*?font-weight:\s*800/);
   assert.match(css, /grid-template-columns:\s*minmax\(0, 1fr\) auto minmax\(0, 1fr\)/);
