@@ -368,6 +368,7 @@
 
   // src/ts/features/hero-title-layout.ts
   var STACKED_CLASS = "is-stacked";
+  var INLINE_WIDTH = "min(1600px, calc(100vw - 48px))";
   var COLLISION_BUFFER_PX = 8;
   var RETURN_BUFFER_PX = 24;
   var setupHeroTitleLayout = () => {
@@ -380,11 +381,14 @@
     let scheduledFrame = 0;
     const measureInlineFit = () => {
       const wasStacked = lockup.classList.contains(STACKED_CLASS);
+      const previousWidth = lockup.style.width;
       if (wasStacked) lockup.classList.remove(STACKED_CLASS);
+      lockup.style.width = INLINE_WIDTH;
       const style = window.getComputedStyle(lockup);
       const gap = Number.parseFloat(style.columnGap) || 0;
       const available = lockup.clientWidth;
       const required = sushi.getBoundingClientRect().width + kicker.getBoundingClientRect().width + libre.getBoundingClientRect().width + gap * 2;
+      lockup.style.width = previousWidth;
       if (wasStacked) lockup.classList.add(STACKED_CLASS);
       return { available, required };
     };
@@ -394,6 +398,7 @@
       const buffer = wasStacked ? RETURN_BUFFER_PX : COLLISION_BUFFER_PX;
       const shouldStack = required + buffer > available;
       lockup.classList.toggle(STACKED_CLASS, shouldStack);
+      lockup.style.width = shouldStack ? "" : INLINE_WIDTH;
     };
     const scheduleSync = () => {
       if (scheduledFrame) return;
