@@ -19,7 +19,8 @@
     bottom: var(--dock-bottom);
     left: max(12px, env(safe-area-inset-left, 0px));
     width: auto;
-    margin: 0;
+    max-width: 680px;
+    margin: 0 auto;
     grid-template-columns: minmax(0, 1fr) max-content minmax(0, 1fr) 96px;
     grid-template-rows: 48px 96px;
     gap: 8px;
