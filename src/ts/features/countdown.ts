@@ -35,6 +35,7 @@ export const setupCountdown = (): void => {
     if (!cta) return;
     const shouldSuppress = finalMenuCtaVisible && !menuMode;
     cta.classList.toggle('is-suppressed', shouldSuppress);
+    dock?.classList.toggle('is-cta-suppressed', shouldSuppress);
     if (shouldSuppress) cta.setAttribute('tabindex', '-1');
     else cta.removeAttribute('tabindex');
   };
