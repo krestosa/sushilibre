@@ -63,7 +63,7 @@ test('countdown converts the CTA into a smooth menu action at zero', async () =>
   assert.match(countdown, /if \(remaining === 0\) activateMenuMode\(\)/);
 });
 
-test('active countdown hides the reservation CTA only when the final action overlaps the floating dock', async () => {
+test('active countdown hides the reservation CTA after the final action fully passes above the dock', async () => {
   const [countdown, layout, styles, mobileStyles] = await Promise.all([
     readSource('src/ts/features/countdown.ts'),
     readSource('src/ts/features/booking-dock-layout.ts'),
@@ -72,19 +72,17 @@ test('active countdown hides the reservation CTA only when the final action over
   ]);
 
   assert.match(countdown, /query<HTMLElement>\('\.menu-final-cta__action'\)/);
-  assert.match(countdown, /FINAL_CTA_DOCK_OVERLAP_PX = 8/);
+  assert.match(countdown, /FINAL_CTA_DOCK_CLEARANCE_PX = 8/);
   assert.match(countdown, /finalMenuCtaAction\.getBoundingClientRect\(\)/);
   assert.match(countdown, /dock\.getBoundingClientRect\(\)/);
-  assert.match(countdown, /Math\.min\(actionRect\.bottom, dockRect\.bottom\)/);
-  assert.match(countdown, /Math\.max\(actionRect\.top, dockRect\.top\)/);
-  assert.match(countdown, /overlapHeight >= FINAL_CTA_DOCK_OVERLAP_PX/);
-  assert.match(countdown, /finalMenuCtaActionOverlapsDock && !menuMode/);
+  assert.match(countdown, /actionRect\.bottom <= dockRect\.top - FINAL_CTA_DOCK_CLEARANCE_PX/);
+  assert.match(countdown, /finalMenuCtaActionPassedDock && !menuMode/);
   assert.match(countdown, /classList\.toggle\('is-suppressed', shouldSuppress\)/);
   assert.match(countdown, /classList\.toggle\('is-cta-suppressed', shouldSuppress\)/);
   assert.match(countdown, /window\.addEventListener\('scroll'/);
   assert.match(countdown, /window\.addEventListener\('resize'/);
   assert.match(countdown, /window\.addEventListener\('orientationchange'/);
-  assert.doesNotMatch(countdown, /FINAL_CTA_MIN_VISIBLE_RATIO|FINAL_CTA_MIN_VISIBLE_PX/);
+  assert.doesNotMatch(countdown, /overlapHeight|FINAL_CTA_DOCK_OVERLAP_PX/);
   assert.match(layout, /is-cta-suppressed/);
   assert.match(layout, /--dock-cta-track/);
   assert.match(layout, /suppressedWidth: 'min\(923px, calc\(100vw - 165px\)\)'/);
