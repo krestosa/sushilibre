@@ -366,6 +366,52 @@
     fallbackTimer = window.setTimeout(complete, COMPLETION_FALLBACK_MS);
   };
 
+  // src/ts/features/hero-title-layout.ts
+  var STACKED_CLASS = "is-stacked";
+  var COLLISION_BUFFER_PX = 8;
+  var RETURN_BUFFER_PX = 24;
+  var setupHeroTitleLayout = () => {
+    const hero = query(".hero");
+    const lockup = query(".title-lockup");
+    const sushi = query(".title-word--sushi");
+    const kicker = query(".title-kicker");
+    const libre = query(".title-word--libre");
+    if (!hero || !lockup || !sushi || !kicker || !libre) return;
+    let scheduledFrame = 0;
+    const measureInlineFit = () => {
+      const wasStacked = lockup.classList.contains(STACKED_CLASS);
+      if (wasStacked) lockup.classList.remove(STACKED_CLASS);
+      const style = window.getComputedStyle(lockup);
+      const gap = Number.parseFloat(style.columnGap) || 0;
+      const available = lockup.clientWidth;
+      const required = sushi.getBoundingClientRect().width + kicker.getBoundingClientRect().width + libre.getBoundingClientRect().width + gap * 2;
+      if (wasStacked) lockup.classList.add(STACKED_CLASS);
+      return { available, required };
+    };
+    const syncLayout = () => {
+      const wasStacked = lockup.classList.contains(STACKED_CLASS);
+      const { available, required } = measureInlineFit();
+      const buffer = wasStacked ? RETURN_BUFFER_PX : COLLISION_BUFFER_PX;
+      const shouldStack = required + buffer > available;
+      lockup.classList.toggle(STACKED_CLASS, shouldStack);
+    };
+    const scheduleSync = () => {
+      if (scheduledFrame) return;
+      scheduledFrame = window.requestAnimationFrame(() => {
+        scheduledFrame = 0;
+        syncLayout();
+      });
+    };
+    scheduleSync();
+    window.addEventListener("resize", scheduleSync, { passive: true });
+    window.addEventListener("orientationchange", scheduleSync, { passive: true });
+    if ("ResizeObserver" in window) {
+      const observer = new ResizeObserver(scheduleSync);
+      observer.observe(hero);
+    }
+    document.fonts.ready.then(scheduleSync).catch(() => void 0);
+  };
+
   // src/ts/features/piece-viewer.ts
   var LOADING_MESSAGE = "CARGANDO IMAGEN";
   var ERROR_MESSAGE = "IMAGEN NO DISPONIBLE";
@@ -1278,6 +1324,7 @@
   setupCountdown();
   setupBookingDockLayout();
   setupBookingCtaSheen(runtime);
+  setupHeroTitleLayout();
   setupHeroIntroMotion();
   setupPieceViewer();
   setupTapSearchGuard();
