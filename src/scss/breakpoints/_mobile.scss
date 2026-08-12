@@ -21,9 +21,10 @@
     width: auto;
     max-width: 680px;
     margin: 0 auto;
-    grid-template-columns: minmax(0, 1fr) max-content minmax(0, 1fr) 96px;
+    grid-template-columns: max-content max-content max-content minmax(0, 1fr) var(--dock-cta-track, 96px);
     grid-template-rows: 48px 96px;
-    gap: 8px;
+    column-gap: 12px;
+    row-gap: 8px;
     padding: 8px;
   }
 
@@ -43,7 +44,8 @@
     width: max-content;
     max-width: 100%;
     min-width: 0;
-    padding: 0 12px;
+    padding: 0 4px;
+    justify-self: start;
 
     strong {
       display: block;
@@ -54,16 +56,10 @@
     }
   }
 
-  .booking-dock__meta--location {
-    justify-self: start;
-  }
-
-  .booking-dock__meta--location + .booking-dock__meta {
-    justify-self: center;
-  }
-
+  .booking-dock__meta--location,
+  .booking-dock__meta--location + .booking-dock__meta,
   .booking-dock__meta--time {
-    justify-self: end;
+    justify-self: start;
   }
 
   .booking-dock__label {
@@ -72,13 +68,13 @@
   }
 
   .countdown {
-    grid-column: 1 / span 3;
+    grid-column: 1 / span 4;
     grid-row: 2;
     gap: 6px;
   }
 
   .booking-dock__cta {
-    grid-column: 4;
+    grid-column: 5;
     grid-row: 1 / span 2;
     font-size: 14px;
   }
