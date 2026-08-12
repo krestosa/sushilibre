@@ -120,7 +120,7 @@ export const setupBookingDockLayout = (): void => {
     dock.style.gap = '8px';
     dock.style.rowGap = '8px';
 
-    placeMetadata({ row: '1', padding: '0 5px' });
+    placeMetadata({ row: '1', padding: '0 12px' });
     countdown.style.gridColumn = '1 / span 3';
     countdown.style.gridRow = '2';
     cta.style.gridColumn = '4';
