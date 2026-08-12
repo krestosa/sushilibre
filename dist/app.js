@@ -273,14 +273,33 @@
     const cta = query("[data-booking-cta]");
     const ctaLabel = query("[data-booking-cta-label]", cta ?? void 0);
     const menu = query("#menu");
+    const finalMenuCta = query(".menu-final-cta");
     const reducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)");
     let menuMode = false;
+    let finalMenuCtaVisible = false;
     const nodes = {
       days: query('[data-countdown="days"]'),
       hours: query('[data-countdown="hours"]'),
       minutes: query('[data-countdown="minutes"]'),
       seconds: query('[data-countdown="seconds"]')
     };
+    const syncDockCtaVisibility = () => {
+      if (!cta) return;
+      const shouldSuppress = finalMenuCtaVisible && !menuMode;
+      cta.classList.toggle("is-suppressed", shouldSuppress);
+      if (shouldSuppress) cta.setAttribute("tabindex", "-1");
+      else cta.removeAttribute("tabindex");
+    };
+    if (finalMenuCta && "IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        finalMenuCtaVisible = entries.some((entry) => entry.isIntersecting);
+        syncDockCtaVisibility();
+      }, {
+        threshold: 0.08,
+        rootMargin: "0px 0px -8% 0px"
+      });
+      observer.observe(finalMenuCta);
+    }
     const handleMenuClick = (event) => {
       if (!menu) return;
       event.preventDefault();
@@ -302,6 +321,7 @@
       cta.addEventListener("click", handleMenuClick);
       countdown?.setAttribute("aria-label", "El evento comenz\xF3");
       countdown?.setAttribute("data-state", "complete");
+      syncDockCtaVisibility();
     };
     const pad = (value) => String(value).padStart(2, "0");
     const render = () => {
