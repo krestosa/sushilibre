@@ -4,6 +4,7 @@ const LOADING_MESSAGE = 'CARGANDO IMAGEN';
 const ERROR_MESSAGE = 'IMAGEN NO DISPONIBLE';
 const CLOSE_FALLBACK_MS = 320;
 const REDUCED_CLOSE_FALLBACK_MS = 170;
+const PRELOAD_CONCURRENCY = 3;
 const SCROLL_KEYS = new Set([
   'ArrowDown',
   'ArrowLeft',
@@ -22,6 +23,49 @@ const isInteractiveTarget = (target: EventTarget | null): boolean =>
     'a[href], button, input, textarea, select, [contenteditable="true"]'
   ));
 
+const preloadPieceImages = (buttons: readonly HTMLButtonElement[]): void => {
+  const sources = Array.from(new Set(
+    buttons
+      .map((button) => button.dataset.pieceImage?.trim())
+      .filter((source): source is string => Boolean(source))
+  ));
+
+  if (!sources.length) return;
+
+  const pending = new Set<HTMLImageElement>();
+  let cursor = 0;
+  let active = 0;
+
+  const pump = (): void => {
+    while (active < PRELOAD_CONCURRENCY && cursor < sources.length) {
+      const source = sources[cursor++];
+      const preload = new Image();
+      active += 1;
+      pending.add(preload);
+      preload.decoding = 'async';
+      preload.fetchPriority = 'low';
+
+      const settle = (): void => {
+        preload.onload = null;
+        preload.onerror = null;
+        pending.delete(preload);
+        active -= 1;
+        pump();
+      };
+
+      preload.onload = settle;
+      preload.onerror = settle;
+      preload.src = source;
+    }
+  };
+
+  // Start immediately after the first paint so the menu artwork warms the HTTP/image
+  // cache in the background without competing with the initial render at normal priority.
+  window.requestAnimationFrame(() => {
+    window.setTimeout(pump, 0);
+  });
+};
+
 export const setupPieceViewer = (): void => {
   const root = document.documentElement;
   const dialog = query<HTMLDialogElement>('[data-piece-viewer]');
@@ -32,6 +76,8 @@ export const setupPieceViewer = (): void => {
   const openButtons = queryAll<HTMLButtonElement>('[data-piece-viewer-open]');
 
   if (!dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
+
+  preloadPieceImages(openButtons);
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let activeButton: HTMLButtonElement | null = null;
@@ -202,6 +248,7 @@ export const setupPieceViewer = (): void => {
         if (!dialog.open || dialog.classList.contains('is-closing')) return;
 
         dialog.classList.add('is-open');
+        image.fetchPriority = 'high';
         image.src = source;
         enforceLockedScroll();
       });
