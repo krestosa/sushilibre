@@ -22,24 +22,34 @@ export const setupBookingDockLayout = (): void => {
     row: string;
     padding: string;
   }): void => {
-    metadata.forEach((item, index) => {
-      item.style.gridColumn = String(index + 1);
+    const placements = [
+      { item: venueMeta, column: '1', justify: 'start' },
+      { item: dateMeta, column: '2', justify: 'center' },
+      { item: timeMeta, column: '3', justify: 'end' }
+    ];
+
+    placements.forEach(({ item, column, justify }) => {
+      item.style.gridColumn = column;
       item.style.gridRow = row;
-      item.style.padding = padding;
-      item.style.width = '100%';
+      item.style.justifySelf = justify;
+      item.style.width = 'max-content';
+      item.style.maxWidth = '100%';
       item.style.minWidth = '0';
+      item.style.padding = padding;
     });
   };
 
   const applySingleRowLayout = ({
     width,
-    columns
+    countdownWidth,
+    ctaWidth
   }: {
     width: string;
-    columns: string;
+    countdownWidth: string;
+    ctaWidth: string;
   }): void => {
     dock.style.width = width;
-    dock.style.gridTemplateColumns = columns;
+    dock.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) ${countdownWidth} ${ctaWidth}`;
     dock.style.gridTemplateRows = 'minmax(0, 1fr)';
     dock.style.gap = '9px';
     dock.style.rowGap = '9px';
@@ -59,7 +69,7 @@ export const setupBookingDockLayout = (): void => {
     ctaWidth: string;
   }): void => {
     dock.style.width = width;
-    dock.style.gridTemplateColumns = `repeat(3, minmax(0, 1fr)) ${ctaWidth}`;
+    dock.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) ${ctaWidth}`;
     dock.style.gridTemplateRows = 'minmax(0, 1fr)';
     dock.style.gap = '9px';
     dock.style.rowGap = '9px';
@@ -82,7 +92,8 @@ export const setupBookingDockLayout = (): void => {
 
     applySingleRowLayout({
       width: 'min(1040px, calc(100vw - 48px))',
-      columns: 'repeat(3, minmax(0, 1fr)) minmax(0, 2.55fr) 108px'
+      countdownWidth: 'minmax(0, 2.55fr)',
+      ctaWidth: '108px'
     });
   };
 
@@ -97,13 +108,14 @@ export const setupBookingDockLayout = (): void => {
 
     applySingleRowLayout({
       width: 'min(920px, calc(100vw - 32px))',
-      columns: 'repeat(3, minmax(0, 1fr)) minmax(0, 2.3fr) 104px'
+      countdownWidth: 'minmax(0, 2.3fr)',
+      ctaWidth: '104px'
     });
   };
 
   const applyMobileLayout = (eventLive: boolean): void => {
     dock.style.width = '';
-    dock.style.gridTemplateColumns = 'repeat(3, minmax(0, 1fr)) 96px';
+    dock.style.gridTemplateColumns = 'minmax(0, 1fr) max-content minmax(0, 1fr) 96px';
     dock.style.gridTemplateRows = eventLive ? '48px' : '48px 96px';
     dock.style.gap = '8px';
     dock.style.rowGap = '8px';
