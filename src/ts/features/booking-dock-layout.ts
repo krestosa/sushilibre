@@ -107,14 +107,14 @@ export const setupBookingDockLayout = (): void => {
     }
 
     applySingleRowLayout({
-      width: 'min(920px, calc(100vw - 32px))',
+      width: 'min(780px, calc(100vw - 32px))',
       countdownWidth: 'minmax(0, 2.3fr)',
       ctaWidth: '104px'
     });
   };
 
   const applyMobileLayout = (eventLive: boolean): void => {
-    dock.style.width = '';
+    dock.style.width = 'min(680px, calc(100vw - 24px))';
     dock.style.gridTemplateColumns = 'minmax(0, 1fr) max-content minmax(0, 1fr) 96px';
     dock.style.gridTemplateRows = eventLive ? '48px' : '48px 96px';
     dock.style.gap = '8px';
