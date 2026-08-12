@@ -130,6 +130,7 @@
     if (!dock2 || !venueMeta || !dateMeta || !timeMeta || !countdown || !cta) return;
     let activeMode = null;
     let activeLiveState = null;
+    let activeSuppressedState = null;
     let scheduledFrame = 0;
     const placeMetadata = ({
       row,
@@ -152,11 +153,14 @@
     };
     const applySingleRowLayout = ({
       width,
+      suppressedWidth,
       countdownWidth,
-      ctaWidth
+      ctaWidth,
+      ctaSuppressed
     }) => {
-      dock2.style.width = width;
-      dock2.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) ${countdownWidth} ${ctaWidth}`;
+      dock2.style.width = ctaSuppressed ? suppressedWidth : width;
+      dock2.style.setProperty("--dock-cta-track", ctaSuppressed ? "0px" : ctaWidth);
+      dock2.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) ${countdownWidth} var(--dock-cta-track)`;
       dock2.style.gridTemplateRows = "minmax(0, 1fr)";
       dock2.style.gap = "9px";
       dock2.style.rowGap = "9px";
@@ -171,7 +175,8 @@
       ctaWidth
     }) => {
       dock2.style.width = width;
-      dock2.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) ${ctaWidth}`;
+      dock2.style.setProperty("--dock-cta-track", ctaWidth);
+      dock2.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) var(--dock-cta-track)`;
       dock2.style.gridTemplateRows = "minmax(0, 1fr)";
       dock2.style.gap = "9px";
       dock2.style.rowGap = "9px";
@@ -181,7 +186,7 @@
       cta.style.gridColumn = "4";
       cta.style.gridRow = "1";
     };
-    const applyDesktopLayout = (eventLive) => {
+    const applyDesktopLayout = (eventLive, ctaSuppressed) => {
       if (eventLive) {
         applyEventLiveSingleRowLayout({
           width: "min(760px, calc(100vw - 48px))",
@@ -191,11 +196,13 @@
       }
       applySingleRowLayout({
         width: "min(1040px, calc(100vw - 48px))",
+        suppressedWidth: "min(923px, calc(100vw - 165px))",
         countdownWidth: "minmax(0, 2.55fr)",
-        ctaWidth: "108px"
+        ctaWidth: "108px",
+        ctaSuppressed
       });
     };
-    const applyCompactLayout = (eventLive) => {
+    const applyCompactLayout = (eventLive, ctaSuppressed) => {
       if (eventLive) {
         applyEventLiveSingleRowLayout({
           width: "min(700px, calc(100vw - 32px))",
@@ -205,13 +212,17 @@
       }
       applySingleRowLayout({
         width: "min(780px, calc(100vw - 32px))",
+        suppressedWidth: "min(667px, calc(100vw - 145px))",
         countdownWidth: "minmax(0, 2.3fr)",
-        ctaWidth: "104px"
+        ctaWidth: "104px",
+        ctaSuppressed
       });
     };
-    const applyMobileLayout = (eventLive) => {
-      dock2.style.width = "min(680px, calc(100vw - 24px))";
-      dock2.style.gridTemplateColumns = "minmax(0, 1fr) max-content minmax(0, 1fr) 96px";
+    const applyMobileLayout = (eventLive, ctaSuppressed) => {
+      const suppressReservation = ctaSuppressed && !eventLive;
+      dock2.style.width = suppressReservation ? "min(576px, calc(100vw - 128px))" : "min(680px, calc(100vw - 24px))";
+      dock2.style.setProperty("--dock-cta-track", suppressReservation ? "0px" : "96px");
+      dock2.style.gridTemplateColumns = "minmax(0, 1fr) max-content minmax(0, 1fr) var(--dock-cta-track)";
       dock2.style.gridTemplateRows = eventLive ? "48px" : "48px 96px";
       dock2.style.gap = "8px";
       dock2.style.rowGap = "8px";
@@ -229,12 +240,14 @@
     const syncLayout = () => {
       const nextMode = resolveMode();
       const nextLiveState = dock2.classList.contains("is-event-live");
-      if (nextMode === activeMode && nextLiveState === activeLiveState) return;
+      const nextSuppressedState = dock2.classList.contains("is-cta-suppressed") && !nextLiveState;
+      if (nextMode === activeMode && nextLiveState === activeLiveState && nextSuppressedState === activeSuppressedState) return;
       activeMode = nextMode;
       activeLiveState = nextLiveState;
-      if (nextMode === "mobile") applyMobileLayout(nextLiveState);
-      else if (nextMode === "compact") applyCompactLayout(nextLiveState);
-      else applyDesktopLayout(nextLiveState);
+      activeSuppressedState = nextSuppressedState;
+      if (nextMode === "mobile") applyMobileLayout(nextLiveState, nextSuppressedState);
+      else if (nextMode === "compact") applyCompactLayout(nextLiveState, nextSuppressedState);
+      else applyDesktopLayout(nextLiveState, nextSuppressedState);
     };
     const scheduleSync = () => {
       if (scheduledFrame) return;
