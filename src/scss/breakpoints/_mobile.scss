@@ -20,7 +20,7 @@
     left: max(12px, env(safe-area-inset-left, 0px));
     width: auto;
     margin: 0;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) 96px;
+    grid-template-columns: minmax(0, 1fr) max-content minmax(0, 1fr) 96px;
     grid-template-rows: 48px 96px;
     gap: 8px;
     padding: 8px;
@@ -39,7 +39,8 @@
   }
 
   .booking-dock__meta {
-    width: 100%;
+    width: max-content;
+    max-width: 100%;
     min-width: 0;
     padding: 0 5px;
 
@@ -50,6 +51,18 @@
       font-size: 12px;
       text-overflow: ellipsis;
     }
+  }
+
+  .booking-dock__meta--location {
+    justify-self: start;
+  }
+
+  .booking-dock__meta--location + .booking-dock__meta {
+    justify-self: center;
+  }
+
+  .booking-dock__meta--time {
+    justify-self: end;
   }
 
   .booking-dock__label {
