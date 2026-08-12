@@ -422,6 +422,7 @@
   var ERROR_MESSAGE = "IMAGEN NO DISPONIBLE";
   var CLOSE_FALLBACK_MS = 320;
   var REDUCED_CLOSE_FALLBACK_MS = 170;
+  var PRELOAD_CONCURRENCY = 3;
   var SCROLL_KEYS = /* @__PURE__ */ new Set([
     "ArrowDown",
     "ArrowLeft",
@@ -437,6 +438,40 @@
   var isInteractiveTarget = (target2) => target2 instanceof Element && Boolean(target2.closest(
     'a[href], button, input, textarea, select, [contenteditable="true"]'
   ));
+  var preloadPieceImages = (buttons) => {
+    const sources = Array.from(new Set(
+      buttons.map((button) => button.dataset.pieceImage?.trim()).filter((source) => Boolean(source))
+    ));
+    if (!sources.length) return;
+    const pending = /* @__PURE__ */ new Set();
+    let cursor = 0;
+    let active = 0;
+    const pump = () => {
+      while (active < PRELOAD_CONCURRENCY && cursor < sources.length) {
+        const source = sources[cursor];
+        cursor += 1;
+        if (!source) continue;
+        const preload = new Image();
+        active += 1;
+        pending.add(preload);
+        preload.decoding = "async";
+        preload.fetchPriority = "low";
+        const settle = () => {
+          preload.onload = null;
+          preload.onerror = null;
+          pending.delete(preload);
+          active -= 1;
+          pump();
+        };
+        preload.onload = settle;
+        preload.onerror = settle;
+        preload.src = source;
+      }
+    };
+    window.requestAnimationFrame(() => {
+      window.setTimeout(pump, 0);
+    });
+  };
   var setupPieceViewer = () => {
     const root = document.documentElement;
     const dialog = query("[data-piece-viewer]");
@@ -446,6 +481,7 @@
     const closeButton = query("[data-piece-viewer-close]", dialog ?? void 0);
     const openButtons = queryAll("[data-piece-viewer-open]");
     if (!dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
+    preloadPieceImages(openButtons);
     const reducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)");
     let activeButton = null;
     let closeTimer = 0;
@@ -585,6 +621,7 @@
           openFrame = 0;
           if (!dialog.open || dialog.classList.contains("is-closing")) return;
           dialog.classList.add("is-open");
+          image.fetchPriority = "high";
           image.src = source;
           enforceLockedScroll();
         });
