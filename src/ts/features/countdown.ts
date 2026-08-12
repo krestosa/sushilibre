@@ -19,8 +19,10 @@ export const setupCountdown = (): void => {
   const cta = query<HTMLAnchorElement>('[data-booking-cta]');
   const ctaLabel = query<HTMLElement>('[data-booking-cta-label]', cta ?? undefined);
   const menu = query<HTMLElement>('#menu');
+  const finalMenuCta = query<HTMLElement>('.menu-final-cta');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let menuMode = false;
+  let finalMenuCtaVisible = false;
 
   const nodes: Record<CountdownKey, HTMLElement | null> = {
     days: query<HTMLElement>('[data-countdown="days"]'),
@@ -28,6 +30,25 @@ export const setupCountdown = (): void => {
     minutes: query<HTMLElement>('[data-countdown="minutes"]'),
     seconds: query<HTMLElement>('[data-countdown="seconds"]')
   };
+
+  const syncDockCtaVisibility = (): void => {
+    if (!cta) return;
+    const shouldSuppress = finalMenuCtaVisible && !menuMode;
+    cta.classList.toggle('is-suppressed', shouldSuppress);
+    if (shouldSuppress) cta.setAttribute('tabindex', '-1');
+    else cta.removeAttribute('tabindex');
+  };
+
+  if (finalMenuCta && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      finalMenuCtaVisible = entries.some((entry) => entry.isIntersecting);
+      syncDockCtaVisibility();
+    }, {
+      threshold: 0.08,
+      rootMargin: '0px 0px -8% 0px'
+    });
+    observer.observe(finalMenuCta);
+  }
 
   const handleMenuClick = (event: MouseEvent): void => {
     if (!menu) return;
@@ -51,6 +72,7 @@ export const setupCountdown = (): void => {
     cta.addEventListener('click', handleMenuClick);
     countdown?.setAttribute('aria-label', 'El evento comenzó');
     countdown?.setAttribute('data-state', 'complete');
+    syncDockCtaVisibility();
   };
 
   const pad = (value: number): string => String(value).padStart(2, '0');
