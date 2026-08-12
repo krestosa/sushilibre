@@ -276,7 +276,7 @@
   // src/ts/features/countdown.ts
   var keys = ["days", "hours", "minutes", "seconds"];
   var target = (/* @__PURE__ */ new Date("2026-09-03T20:00:00-03:00")).getTime();
-  var FINAL_CTA_DOCK_OVERLAP_PX = 8;
+  var FINAL_CTA_DOCK_CLEARANCE_PX = 8;
   var replaceCtaLabel = (label, firstLine, secondLine) => {
     label.replaceChildren(
       document.createTextNode(firstLine),
@@ -293,7 +293,7 @@
     const finalMenuCtaAction = query(".menu-final-cta__action");
     const reducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)");
     let menuMode = false;
-    let finalMenuCtaActionOverlapsDock = false;
+    let finalMenuCtaActionPassedDock = false;
     let visibilityFrame = 0;
     const nodes = {
       days: query('[data-countdown="days"]'),
@@ -303,46 +303,42 @@
     };
     const syncDockCtaVisibility = () => {
       if (!cta) return;
-      const shouldSuppress = finalMenuCtaActionOverlapsDock && !menuMode;
+      const shouldSuppress = finalMenuCtaActionPassedDock && !menuMode;
       cta.classList.toggle("is-suppressed", shouldSuppress);
       dock2?.classList.toggle("is-cta-suppressed", shouldSuppress);
       if (shouldSuppress) cta.setAttribute("tabindex", "-1");
       else cta.removeAttribute("tabindex");
     };
-    const doesFinalMenuCtaActionOverlapDock = () => {
+    const hasFinalMenuCtaActionPassedDock = () => {
       if (!finalMenuCtaAction || !dock2) return false;
       const actionRect = finalMenuCtaAction.getBoundingClientRect();
       const dockRect = dock2.getBoundingClientRect();
-      const overlapHeight = Math.max(
-        0,
-        Math.min(actionRect.bottom, dockRect.bottom) - Math.max(actionRect.top, dockRect.top)
-      );
-      return overlapHeight >= FINAL_CTA_DOCK_OVERLAP_PX;
+      return actionRect.bottom <= dockRect.top - FINAL_CTA_DOCK_CLEARANCE_PX;
     };
-    const syncFinalMenuCtaActionOverlap = () => {
-      const nextOverlap = doesFinalMenuCtaActionOverlapDock();
-      if (nextOverlap === finalMenuCtaActionOverlapsDock) return;
-      finalMenuCtaActionOverlapsDock = nextOverlap;
+    const syncFinalMenuCtaActionPosition = () => {
+      const nextPassedState = hasFinalMenuCtaActionPassedDock();
+      if (nextPassedState === finalMenuCtaActionPassedDock) return;
+      finalMenuCtaActionPassedDock = nextPassedState;
       syncDockCtaVisibility();
     };
-    const scheduleFinalMenuCtaActionOverlapSync = () => {
+    const scheduleFinalMenuCtaActionPositionSync = () => {
       if (visibilityFrame) return;
       visibilityFrame = window.requestAnimationFrame(() => {
         visibilityFrame = 0;
-        syncFinalMenuCtaActionOverlap();
+        syncFinalMenuCtaActionPosition();
       });
     };
     if (finalMenuCtaAction && dock2) {
-      syncFinalMenuCtaActionOverlap();
+      syncFinalMenuCtaActionPosition();
       if ("IntersectionObserver" in window) {
-        const observer = new IntersectionObserver(scheduleFinalMenuCtaActionOverlapSync, {
+        const observer = new IntersectionObserver(scheduleFinalMenuCtaActionPositionSync, {
           threshold: [0, 0.25, 0.5, 0.75, 1]
         });
         observer.observe(finalMenuCtaAction);
       }
-      window.addEventListener("scroll", scheduleFinalMenuCtaActionOverlapSync, { passive: true });
-      window.addEventListener("resize", scheduleFinalMenuCtaActionOverlapSync, { passive: true });
-      window.addEventListener("orientationchange", scheduleFinalMenuCtaActionOverlapSync, { passive: true });
+      window.addEventListener("scroll", scheduleFinalMenuCtaActionPositionSync, { passive: true });
+      window.addEventListener("resize", scheduleFinalMenuCtaActionPositionSync, { passive: true });
+      window.addEventListener("orientationchange", scheduleFinalMenuCtaActionPositionSync, { passive: true });
     }
     const handleMenuClick = (event) => {
       if (!menu) return;
