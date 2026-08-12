@@ -59,7 +59,8 @@ const assertStaticMenuMarkup = (html) => {
   assert.match(html, /<h4 class="menu-item__name">\+ CAFÉ NESPRESSO X PERSONA<\/h4>/);
   assert.match(html, /<h3 class="menu-final-cta__title" id="menu-final-cta-title">¿ESTÁS LISTO\?<\/h3>/);
   assert.match(html, /RESERVÁ TU LUGAR Y VIVÍ SUSHI LIBRE/);
-  assert.match(html, /<a class="menu-final-cta__action" href="https:\/\/www\.sushiclub\.com\.ar\/shop_reservas\.php">RESERVÁ<br>AHORA<\/a>/);
+  assert.match(html, /<a class="menu-final-cta__action" href="https:\/\/www\.sushiclub\.com\.ar\/shop_reservas\.php">RESERVÁ AHORA<\/a>/);
+  assert.doesNotMatch(html, /menu-final-cta__action[^>]*>RESERVÁ<br>AHORA/);
 };
 
 test('menu values, categories and piece image paths remain unchanged', async () => {
