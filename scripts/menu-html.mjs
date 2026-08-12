@@ -2,6 +2,7 @@ const MENU_MARKER = '<!-- MENU_SECTION -->';
 const PIECE_IMAGE_PATTERN = /^assets\/piezas\/[a-z0-9_\/-]+\.webp$/;
 const ITEM_REVEAL_STAGGER_MS = 45;
 const MAX_ITEM_REVEAL_STAGGER_MS = 90;
+const BOOKING_URL = 'https://www.sushiclub.com.ar/shop_reservas.php';
 
 const isRecord = (value) => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 
@@ -122,7 +123,7 @@ const renderBadge = (label, modifier) =>
   `<span class="menu-item__badge menu-item__badge--${modifier}">${escapeText(label)}</span>`;
 
 const renderViewButton = (item) => item.image
-  ? `<button class="menu-item__badge menu-item__view" type="button" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="${escapeAttribute(item.name)}" data-piece-image="${escapeAttribute(item.image)}">VER PIEZA</button>`
+  ? `<button class="menu-item__view" type="button" aria-label="Ver imagen de ${escapeAttribute(item.name)}" aria-haspopup="dialog" aria-controls="piece-viewer" data-piece-viewer-open data-piece-name="${escapeAttribute(item.name)}" data-piece-image="${escapeAttribute(item.image)}"><img class="menu-item__view-icon" src="assets/visibility.svg" alt="" aria-hidden="true" width="24" height="24"></button>`
   : '';
 
 const renderMenuItem = (item, sectionPieces, itemIndex) => {
@@ -181,6 +182,17 @@ const renderMenuGroup = (section) => {
   ].join('\n');
 };
 
+const renderMenuCta = () => [
+  '        <section class="menu-final-cta menu-reveal menu-reveal--item" data-menu-reveal aria-labelledby="menu-final-cta-title">',
+  '          <div class="menu-final-cta__copy">',
+  '            <p class="menu-final-cta__eyebrow">UNA NOCHE. PIEZAS ILIMITADAS. SIN APURO.</p>',
+  '            <h3 class="menu-final-cta__title" id="menu-final-cta-title">¿ESTÁS LISTO?</h3>',
+  '            <p class="menu-final-cta__text">RESERVÁ TU LUGAR Y VIVÍ SUSHI LIBRE: UNA EXPERIENCIA PARA RECORRER LOS SABORES MÁS REPRESENTATIVOS DE SUSHICLUB.</p>',
+  '          </div>',
+  `          <a class="menu-final-cta__action" href="${BOOKING_URL}">RESERVÁ<br>AHORA</a>`,
+  '        </section>'
+].join('\n');
+
 const renderPieceViewer = () => [
   '    <dialog class="piece-viewer" id="piece-viewer" data-piece-viewer aria-label="Vista de pieza">',
   '      <div class="piece-viewer__content">',
@@ -207,6 +219,7 @@ export const renderMenuSection = (menu) => {
     '        <div class="menu-section__groups" data-menu-groups>',
     groups,
     '        </div>',
+    renderMenuCta(),
     '      </div>',
     '    </section>',
     renderPieceViewer()
