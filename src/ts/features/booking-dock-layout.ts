@@ -13,6 +13,7 @@ export const setupBookingDockLayout = (): void => {
 
   let activeMode: DockLayoutMode | null = null;
   let activeLiveState: boolean | null = null;
+  let activeSuppressedState: boolean | null = null;
   let scheduledFrame = 0;
 
   const placeMetadata = ({
@@ -41,15 +42,20 @@ export const setupBookingDockLayout = (): void => {
 
   const applySingleRowLayout = ({
     width,
+    suppressedWidth,
     countdownWidth,
-    ctaWidth
+    ctaWidth,
+    ctaSuppressed
   }: {
     width: string;
+    suppressedWidth: string;
     countdownWidth: string;
     ctaWidth: string;
+    ctaSuppressed: boolean;
   }): void => {
-    dock.style.width = width;
-    dock.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) ${countdownWidth} ${ctaWidth}`;
+    dock.style.width = ctaSuppressed ? suppressedWidth : width;
+    dock.style.setProperty('--dock-cta-track', ctaSuppressed ? '0px' : ctaWidth);
+    dock.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) ${countdownWidth} var(--dock-cta-track)`;
     dock.style.gridTemplateRows = 'minmax(0, 1fr)';
     dock.style.gap = '9px';
     dock.style.rowGap = '9px';
@@ -69,7 +75,8 @@ export const setupBookingDockLayout = (): void => {
     ctaWidth: string;
   }): void => {
     dock.style.width = width;
-    dock.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) ${ctaWidth}`;
+    dock.style.setProperty('--dock-cta-track', ctaWidth);
+    dock.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) var(--dock-cta-track)`;
     dock.style.gridTemplateRows = 'minmax(0, 1fr)';
     dock.style.gap = '9px';
     dock.style.rowGap = '9px';
@@ -81,7 +88,7 @@ export const setupBookingDockLayout = (): void => {
     cta.style.gridRow = '1';
   };
 
-  const applyDesktopLayout = (eventLive: boolean): void => {
+  const applyDesktopLayout = (eventLive: boolean, ctaSuppressed: boolean): void => {
     if (eventLive) {
       applyEventLiveSingleRowLayout({
         width: 'min(760px, calc(100vw - 48px))',
@@ -92,12 +99,14 @@ export const setupBookingDockLayout = (): void => {
 
     applySingleRowLayout({
       width: 'min(1040px, calc(100vw - 48px))',
+      suppressedWidth: 'min(923px, calc(100vw - 165px))',
       countdownWidth: 'minmax(0, 2.55fr)',
-      ctaWidth: '108px'
+      ctaWidth: '108px',
+      ctaSuppressed
     });
   };
 
-  const applyCompactLayout = (eventLive: boolean): void => {
+  const applyCompactLayout = (eventLive: boolean, ctaSuppressed: boolean): void => {
     if (eventLive) {
       applyEventLiveSingleRowLayout({
         width: 'min(700px, calc(100vw - 32px))',
@@ -108,14 +117,20 @@ export const setupBookingDockLayout = (): void => {
 
     applySingleRowLayout({
       width: 'min(780px, calc(100vw - 32px))',
+      suppressedWidth: 'min(667px, calc(100vw - 145px))',
       countdownWidth: 'minmax(0, 2.3fr)',
-      ctaWidth: '104px'
+      ctaWidth: '104px',
+      ctaSuppressed
     });
   };
 
-  const applyMobileLayout = (eventLive: boolean): void => {
-    dock.style.width = 'min(680px, calc(100vw - 24px))';
-    dock.style.gridTemplateColumns = 'minmax(0, 1fr) max-content minmax(0, 1fr) 96px';
+  const applyMobileLayout = (eventLive: boolean, ctaSuppressed: boolean): void => {
+    const suppressReservation = ctaSuppressed && !eventLive;
+    dock.style.width = suppressReservation
+      ? 'min(576px, calc(100vw - 128px))'
+      : 'min(680px, calc(100vw - 24px))';
+    dock.style.setProperty('--dock-cta-track', suppressReservation ? '0px' : '96px');
+    dock.style.gridTemplateColumns = 'minmax(0, 1fr) max-content minmax(0, 1fr) var(--dock-cta-track)';
     dock.style.gridTemplateRows = eventLive ? '48px' : '48px 96px';
     dock.style.gap = '8px';
     dock.style.rowGap = '8px';
@@ -136,13 +151,19 @@ export const setupBookingDockLayout = (): void => {
   const syncLayout = (): void => {
     const nextMode = resolveMode();
     const nextLiveState = dock.classList.contains('is-event-live');
-    if (nextMode === activeMode && nextLiveState === activeLiveState) return;
+    const nextSuppressedState = dock.classList.contains('is-cta-suppressed') && !nextLiveState;
+    if (
+      nextMode === activeMode
+      && nextLiveState === activeLiveState
+      && nextSuppressedState === activeSuppressedState
+    ) return;
 
     activeMode = nextMode;
     activeLiveState = nextLiveState;
-    if (nextMode === 'mobile') applyMobileLayout(nextLiveState);
-    else if (nextMode === 'compact') applyCompactLayout(nextLiveState);
-    else applyDesktopLayout(nextLiveState);
+    activeSuppressedState = nextSuppressedState;
+    if (nextMode === 'mobile') applyMobileLayout(nextLiveState, nextSuppressedState);
+    else if (nextMode === 'compact') applyCompactLayout(nextLiveState, nextSuppressedState);
+    else applyDesktopLayout(nextLiveState, nextSuppressedState);
   };
 
   const scheduleSync = (): void => {
