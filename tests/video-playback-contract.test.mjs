@@ -17,10 +17,11 @@ const assertSequencedVideoMarkup = (html) => {
 
   assert.match(
     stack,
-    /<video\b[^>]*\bdata-intro-video\b[^>]*data-video-source="assets\/bg_inicio\.webm"[^>]*\bautoplay\b[^>]*\bmuted\b[^>]*\bplaysinline\b/
+    /<video\b[^>]*\bdata-intro-video\b[^>]*data-video-source="assets\/bg_inicio\.mp4"[^>]*\bautoplay\b[^>]*\bmuted\b[^>]*\bplaysinline\b/
   );
-  assert.match(stack, /<source\b[^>]*src="assets\/bg_inicio\.webm"[^>]*type="video\/webm"/);
-  assert.equal(countMatches(stack, /data-video-source="assets\/bg_loop\.webm"/g), 2);
+  assert.match(stack, /<source\b[^>]*src="assets\/bg_inicio\.mp4"[^>]*type="video\/mp4"/);
+  assert.equal(countMatches(stack, /data-video-source="assets\/bg_loop\.mp4"/g), 2);
+  assert.doesNotMatch(stack, /\.webm/);
   assert.doesNotMatch(stack, /<video\b[^>]*\bdata-intro-video\b[^>]*\bloop\b/);
 };
 
@@ -34,8 +35,8 @@ test('the hero loads the intro once and keeps two deferred loop layers', async (
   assertSequencedVideoMarkup(distribution);
 
   await Promise.all([
-    access(new URL('../dist/assets/bg_inicio.webm', import.meta.url)),
-    access(new URL('../dist/assets/bg_loop.webm', import.meta.url))
+    access(new URL('../dist/assets/bg_inicio.mp4', import.meta.url)),
+    access(new URL('../dist/assets/bg_loop.mp4', import.meta.url))
   ]);
 });
 
