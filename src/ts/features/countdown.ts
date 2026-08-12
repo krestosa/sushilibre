@@ -46,8 +46,8 @@ export const setupCountdown = (): void => {
     dock?.classList.add('is-event-live');
     cta.href = '#menu';
     cta.dataset.destination = 'menu';
-    cta.setAttribute('aria-label', 'Ver menú');
-    replaceCtaLabel(ctaLabel, 'VER', 'MENÚ');
+    cta.setAttribute('aria-label', 'Ir al menú');
+    replaceCtaLabel(ctaLabel, 'IR A', 'MENÚ');
     cta.addEventListener('click', handleMenuClick);
     countdown?.setAttribute('aria-label', 'El evento comenzó');
     countdown?.setAttribute('data-state', 'complete');
