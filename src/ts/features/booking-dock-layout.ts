@@ -126,19 +126,20 @@ export const setupBookingDockLayout = (): void => {
 
   const applyMobileLayout = (eventLive: boolean, ctaSuppressed: boolean): void => {
     const suppressReservation = ctaSuppressed && !eventLive;
-    dock.style.width = suppressReservation
-      ? 'min(576px, calc(100vw - 128px))'
-      : 'min(680px, calc(100vw - 24px))';
+    dock.style.width = 'min(680px, calc(100vw - 24px))';
     dock.style.setProperty('--dock-cta-track', suppressReservation ? '0px' : '96px');
-    dock.style.gridTemplateColumns = 'minmax(0, 1fr) max-content minmax(0, 1fr) var(--dock-cta-track)';
+    dock.style.gridTemplateColumns = 'max-content max-content max-content minmax(0, 1fr) var(--dock-cta-track)';
     dock.style.gridTemplateRows = eventLive ? '48px' : '48px 96px';
-    dock.style.gap = '8px';
+    dock.style.columnGap = '12px';
     dock.style.rowGap = '8px';
 
-    placeMetadata({ row: '1', padding: '0 12px' });
-    countdown.style.gridColumn = '1 / span 3';
+    placeMetadata({ row: '1', padding: '0 4px' });
+    venueMeta.style.justifySelf = 'start';
+    dateMeta.style.justifySelf = 'start';
+    timeMeta.style.justifySelf = 'start';
+    countdown.style.gridColumn = '1 / span 4';
     countdown.style.gridRow = '2';
-    cta.style.gridColumn = '4';
+    cta.style.gridColumn = '5';
     cta.style.gridRow = eventLive ? '1' : '1 / span 2';
   };
 
