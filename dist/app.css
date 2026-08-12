@@ -1780,7 +1780,7 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
     width: max-content;
     max-width: 100%;
     min-width: 0;
-    padding: 0 5px;
+    padding: 0 12px;
   }
   .booking-dock__meta strong {
     display: block;
