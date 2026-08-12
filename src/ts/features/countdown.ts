@@ -15,6 +15,7 @@ const replaceCtaLabel = (label: HTMLElement, firstLine: string, secondLine: stri
 
 export const setupCountdown = (): void => {
   const countdown = query<HTMLElement>('.countdown');
+  const dock = query<HTMLElement>('.booking-dock');
   const cta = query<HTMLAnchorElement>('[data-booking-cta]');
   const ctaLabel = query<HTMLElement>('[data-booking-cta-label]', cta ?? undefined);
   const menu = query<HTMLElement>('#menu');
@@ -41,10 +42,12 @@ export const setupCountdown = (): void => {
   const activateMenuMode = (): void => {
     if (menuMode || !cta || !ctaLabel) return;
     menuMode = true;
+    document.documentElement.classList.add('event-live');
+    dock?.classList.add('is-event-live');
     cta.href = '#menu';
     cta.dataset.destination = 'menu';
-    cta.setAttribute('aria-label', 'Ir al menú');
-    replaceCtaLabel(ctaLabel, 'IR A', 'MENÚ');
+    cta.setAttribute('aria-label', 'Ver menú');
+    replaceCtaLabel(ctaLabel, 'VER', 'MENÚ');
     cta.addEventListener('click', handleMenuClick);
     countdown?.setAttribute('aria-label', 'El evento comenzó');
     countdown?.setAttribute('data-state', 'complete');
