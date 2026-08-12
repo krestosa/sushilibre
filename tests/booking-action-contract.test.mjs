@@ -63,7 +63,7 @@ test('countdown converts the CTA into a smooth menu action at zero', async () =>
   assert.match(countdown, /if \(remaining === 0\) activateMenuMode\(\)/);
 });
 
-test('active countdown hides the reservation CTA and smoothly contracts the floating dock', async () => {
+test('active countdown waits for the final reservation button itself to be visible before suppressing the dock CTA', async () => {
   const [countdown, layout, styles, mobileStyles] = await Promise.all([
     readSource('src/ts/features/countdown.ts'),
     readSource('src/ts/features/booking-dock-layout.ts'),
@@ -71,12 +71,21 @@ test('active countdown hides the reservation CTA and smoothly contracts the floa
     readSource('src/scss/breakpoints/_mobile.scss')
   ]);
 
-  assert.match(countdown, /query<HTMLElement>\('\.menu-final-cta'\)/);
+  assert.match(countdown, /query<HTMLElement>\('\.menu-final-cta__action'\)/);
+  assert.doesNotMatch(countdown, /query<HTMLElement>\('\.menu-final-cta'\)/);
+  assert.match(countdown, /FINAL_CTA_MIN_VISIBLE_RATIO = 0\.16/);
+  assert.match(countdown, /FINAL_CTA_MIN_VISIBLE_PX = 14/);
+  assert.match(countdown, /getBoundingClientRect\(\)/);
+  assert.match(countdown, /visibleHeight >= requiredVisibleHeight/);
+  assert.match(countdown, /visibleWidth >= requiredVisibleWidth/);
   assert.match(countdown, /IntersectionObserver/);
-  assert.match(countdown, /finalMenuCtaVisible && !menuMode/);
+  assert.match(countdown, /observer\.observe\(finalMenuCtaAction\)/);
+  assert.match(countdown, /window\.addEventListener\('scroll', scheduleFinalMenuCtaActionVisibilitySync/);
+  assert.match(countdown, /window\.addEventListener\('resize', scheduleFinalMenuCtaActionVisibilitySync/);
+  assert.match(countdown, /window\.addEventListener\('orientationchange', scheduleFinalMenuCtaActionVisibilitySync/);
+  assert.match(countdown, /finalMenuCtaActionVisible && !menuMode/);
   assert.match(countdown, /classList\.toggle\('is-suppressed', shouldSuppress\)/);
   assert.match(countdown, /classList\.toggle\('is-cta-suppressed', shouldSuppress\)/);
-  assert.match(countdown, /syncDockCtaVisibility\(\);/);
   assert.match(layout, /is-cta-suppressed/);
   assert.match(layout, /--dock-cta-track/);
   assert.match(layout, /suppressedWidth: 'min\(923px, calc\(100vw - 165px\)\)'/);
@@ -131,6 +140,8 @@ test('compiled distribution keeps booking destinations and action hooks', async 
   assert.match(script, /replaceChildren/);
   assert.match(script, /is-suppressed/);
   assert.match(script, /is-cta-suppressed/);
+  assert.match(script, /menu-final-cta__action/);
+  assert.match(script, /getBoundingClientRect/);
   assert.match(script, /--dock-cta-track/);
   assert.match(script, /#menu/);
 });
