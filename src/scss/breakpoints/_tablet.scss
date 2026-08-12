@@ -1,3 +1,31 @@
+.title-lockup.is-stacked {
+  top: 25.5%;
+  width: calc(100% - 48px);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto auto auto;
+  row-gap: clamp(8px, 1.4vh, 14px);
+}
+
+.title-lockup.is-stacked .title-word--sushi {
+  grid-column: 1 / span 9;
+  grid-row: 1;
+  justify-self: start;
+}
+
+.title-lockup.is-stacked .title-kicker {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  align-self: center;
+  justify-self: center;
+  margin: 0;
+}
+
+.title-lockup.is-stacked .title-word--libre {
+  grid-column: 4 / span 9;
+  grid-row: 3;
+  justify-self: end;
+}
+
 @media (max-width: 1100px) {
   :root {
     --dock-height: 102px;
@@ -68,38 +96,6 @@
     object-position: 52% center;
   }
 
-  .title-lockup {
-    top: 25.5%;
-    width: calc(100% - 48px);
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    grid-template-rows: auto auto;
-    row-gap: clamp(8px, 1.4vh, 14px);
-  }
-
-  .title-word {
-    font-size: clamp(82px, 18vw, 150px);
-  }
-
-  .title-word--sushi {
-    grid-column: 1 / span 8;
-    grid-row: 1;
-  }
-
-  .title-kicker {
-    grid-column: 8 / span 5;
-    grid-row: 1;
-    align-self: end;
-    justify-self: end;
-    margin-bottom: 0.3em;
-    font-size: clamp(15px, 2.8vw, 24px);
-  }
-
-  .title-word--libre {
-    grid-column: 3 / span 10;
-    grid-row: 2;
-    justify-self: end;
-  }
-
   .hero-copy {
     top: auto;
     bottom: calc(var(--dock-height) + var(--dock-bottom) + 28px);
@@ -111,43 +107,6 @@
   .hero {
     height: 100svh;
     min-height: 680px;
-  }
-
-  .title-lockup {
-    top: 24.5%;
-    left: 50%;
-    right: auto;
-    width: calc(100% - clamp(44px, 7vw, 72px));
-    transform: translateX(-50%);
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    grid-template-rows: auto auto auto;
-    column-gap: var(--grid-gap);
-    row-gap: clamp(7px, 1.1vh, 12px);
-  }
-
-  .title-word {
-    font-size: clamp(94px, 18.5vw, 142px);
-  }
-
-  .title-word--sushi {
-    grid-column: 1 / span 9;
-    grid-row: 1;
-    justify-self: start;
-  }
-
-  .title-kicker {
-    grid-column: 4 / span 9;
-    grid-row: 2;
-    align-self: auto;
-    justify-self: end;
-    margin: 0;
-    font-size: clamp(17px, 3.25vw, 25px);
-  }
-
-  .title-word--libre {
-    grid-column: 3 / span 10;
-    grid-row: 3;
-    justify-self: end;
   }
 
   .hero-copy {
