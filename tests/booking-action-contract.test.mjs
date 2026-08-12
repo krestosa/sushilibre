@@ -41,6 +41,10 @@ test('booking dock exposes reservation and Maps destinations', async () => {
   assert.match(template, /RECOVA/);
   assert.match(template, /JUEVES 03\/09/);
   assert.match(template, /JUE 03\/09/);
+  assert.match(template, /data-video-source="assets\/bg_inicio\.mp4"/);
+  assert.match(template, /<source src="assets\/bg_inicio\.mp4" type="video\/mp4"/);
+  assert.equal((template.match(/data-video-source="assets\/bg_loop\.mp4"/g) ?? []).length, 2);
+  assert.doesNotMatch(template, /\.webm/);
   assert.match(styles, /\.booking-dock__meta--location/);
   assert.match(styles, /\.booking-dock__external-arrow/);
   assert.match(styles, /translate3d\(2px, -2px, 0\)/);
@@ -57,6 +61,22 @@ test('countdown converts the CTA into a smooth menu action at zero', async () =>
   assert.match(countdown, /behavior: reducedMotion\.matches \? 'auto' : 'smooth'/);
   assert.match(countdown, /window\.history\.replaceState\(null, '', '#menu'\)/);
   assert.match(countdown, /if \(remaining === 0\) activateMenuMode\(\)/);
+});
+
+test('active countdown hides only the reservation button when the final CTA enters view', async () => {
+  const [countdown, styles] = await Promise.all([
+    readSource('src/ts/features/countdown.ts'),
+    readSource('src/scss/components/_booking-button.scss')
+  ]);
+
+  assert.match(countdown, /query<HTMLElement>\('\.menu-final-cta'\)/);
+  assert.match(countdown, /IntersectionObserver/);
+  assert.match(countdown, /finalMenuCtaVisible && !menuMode/);
+  assert.match(countdown, /classList\.toggle\('is-suppressed', shouldSuppress\)/);
+  assert.match(countdown, /syncDockCtaVisibility\(\);/);
+  assert.match(styles, /&\.is-suppressed/);
+  assert.match(styles, /visibility: hidden/);
+  assert.match(styles, /pointer-events: none/);
 });
 
 test('reservation CTA motion is slower, brighter and deliberately spaced', async () => {
@@ -85,8 +105,12 @@ test('compiled distribution keeps booking destinations and action hooks', async 
   assert.match(html, /booking-dock__external-arrow/);
   assert.match(html, /RECOVA/);
   assert.match(html, /03\/09/);
+  assert.match(html, /assets\/bg_inicio\.mp4/);
+  assert.match(html, /assets\/bg_loop\.mp4/);
+  assert.doesNotMatch(html, /\.webm/);
   assert.match(script, /data-booking-cta/);
   assert.match(script, /scrollIntoView/);
   assert.match(script, /replaceChildren/);
+  assert.match(script, /is-suppressed/);
   assert.match(script, /#menu/);
 });
