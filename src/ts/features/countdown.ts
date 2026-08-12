@@ -4,6 +4,7 @@ type CountdownKey = 'days' | 'hours' | 'minutes' | 'seconds';
 
 const keys: CountdownKey[] = ['days', 'hours', 'minutes', 'seconds'];
 const target = new Date('2026-09-03T20:00:00-03:00').getTime();
+const FINAL_CTA_DOCK_OVERLAP_PX = 8;
 
 const replaceCtaLabel = (label: HTMLElement, firstLine: string, secondLine: string): void => {
   label.replaceChildren(
@@ -15,11 +16,15 @@ const replaceCtaLabel = (label: HTMLElement, firstLine: string, secondLine: stri
 
 export const setupCountdown = (): void => {
   const countdown = query<HTMLElement>('.countdown');
+  const dock = query<HTMLElement>('.booking-dock');
   const cta = query<HTMLAnchorElement>('[data-booking-cta]');
   const ctaLabel = query<HTMLElement>('[data-booking-cta-label]', cta ?? undefined);
   const menu = query<HTMLElement>('#menu');
+  const finalMenuCtaAction = query<HTMLElement>('.menu-final-cta__action');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let menuMode = false;
+  let finalMenuCtaActionOverlapsDock = false;
+  let visibilityFrame = 0;
 
   const nodes: Record<CountdownKey, HTMLElement | null> = {
     days: query<HTMLElement>('[data-countdown="days"]'),
@@ -27,6 +32,58 @@ export const setupCountdown = (): void => {
     minutes: query<HTMLElement>('[data-countdown="minutes"]'),
     seconds: query<HTMLElement>('[data-countdown="seconds"]')
   };
+
+  const syncDockCtaVisibility = (): void => {
+    if (!cta) return;
+    const shouldSuppress = finalMenuCtaActionOverlapsDock && !menuMode;
+    cta.classList.toggle('is-suppressed', shouldSuppress);
+    dock?.classList.toggle('is-cta-suppressed', shouldSuppress);
+    if (shouldSuppress) cta.setAttribute('tabindex', '-1');
+    else cta.removeAttribute('tabindex');
+  };
+
+  const doesFinalMenuCtaActionOverlapDock = (): boolean => {
+    if (!finalMenuCtaAction || !dock) return false;
+
+    const actionRect = finalMenuCtaAction.getBoundingClientRect();
+    const dockRect = dock.getBoundingClientRect();
+    const overlapHeight = Math.max(
+      0,
+      Math.min(actionRect.bottom, dockRect.bottom) - Math.max(actionRect.top, dockRect.top)
+    );
+
+    return overlapHeight >= FINAL_CTA_DOCK_OVERLAP_PX;
+  };
+
+  const syncFinalMenuCtaActionOverlap = (): void => {
+    const nextOverlap = doesFinalMenuCtaActionOverlapDock();
+    if (nextOverlap === finalMenuCtaActionOverlapsDock) return;
+    finalMenuCtaActionOverlapsDock = nextOverlap;
+    syncDockCtaVisibility();
+  };
+
+  const scheduleFinalMenuCtaActionOverlapSync = (): void => {
+    if (visibilityFrame) return;
+    visibilityFrame = window.requestAnimationFrame(() => {
+      visibilityFrame = 0;
+      syncFinalMenuCtaActionOverlap();
+    });
+  };
+
+  if (finalMenuCtaAction && dock) {
+    syncFinalMenuCtaActionOverlap();
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(scheduleFinalMenuCtaActionOverlapSync, {
+        threshold: [0, 0.25, 0.5, 0.75, 1]
+      });
+      observer.observe(finalMenuCtaAction);
+    }
+
+    window.addEventListener('scroll', scheduleFinalMenuCtaActionOverlapSync, { passive: true });
+    window.addEventListener('resize', scheduleFinalMenuCtaActionOverlapSync, { passive: true });
+    window.addEventListener('orientationchange', scheduleFinalMenuCtaActionOverlapSync, { passive: true });
+  }
 
   const handleMenuClick = (event: MouseEvent): void => {
     if (!menu) return;
@@ -41,6 +98,8 @@ export const setupCountdown = (): void => {
   const activateMenuMode = (): void => {
     if (menuMode || !cta || !ctaLabel) return;
     menuMode = true;
+    document.documentElement.classList.add('event-live');
+    dock?.classList.add('is-event-live');
     cta.href = '#menu';
     cta.dataset.destination = 'menu';
     cta.setAttribute('aria-label', 'Ir al menú');
@@ -48,6 +107,7 @@ export const setupCountdown = (): void => {
     cta.addEventListener('click', handleMenuClick);
     countdown?.setAttribute('aria-label', 'El evento comenzó');
     countdown?.setAttribute('data-state', 'complete');
+    syncDockCtaVisibility();
   };
 
   const pad = (value: number): string => String(value).padStart(2, '0');

@@ -31,15 +31,19 @@ const assertStaticMenuMarkup = (html) => {
   assert.equal(countMatches(html, /<article class="menu-item(?:\s|\")/g), 36);
   assert.equal(countMatches(html, /class="menu-item__description"/g), 33);
   assert.equal(countMatches(html, /class="menu-group__exit-sentinel"/g), 5);
-  assert.equal(countMatches(html, /data-menu-reveal(?:\s|>)/g), 42);
+  assert.equal(countMatches(html, /data-menu-reveal(?:\s|>)/g), 43);
   assert.equal(countMatches(html, /data-piece-viewer-open/g), 33);
-  assert.equal(countMatches(html, /class="menu-item__badge menu-item__view"/g), 33);
+  assert.equal(countMatches(html, /class="menu-item__view"/g), 33);
+  assert.equal(countMatches(html, /class="menu-item__view-icon"/g), 33);
   assert.equal(countMatches(html, /<dialog class="piece-viewer"/g), 1);
   assert.equal(countMatches(html, /data-piece-viewer-image/g), 1);
   assert.equal(countMatches(html, /class="piece-viewer__loader"/g), 1);
   assert.equal(countMatches(html, /data-piece-viewer-status-text/g), 1);
   assert.equal(countMatches(html, /class="piece-viewer__disclaimer"/g), 1);
-  assert.match(html, /<div class="menu-item__badges">[^<]*(?:<[^>]+>[^<]*<\/[^>]+>)*<button class="menu-item__badge menu-item__view"/);
+  assert.equal(countMatches(html, /class="menu-final-cta /g), 1);
+  assert.match(html, /<div class="menu-item__badges">[\s\S]*?<button class="menu-item__view"[^>]*>[\s\S]*?<img class="menu-item__view-icon" src="assets\/visibility\.svg"/);
+  assert.match(html, /aria-label="Ver imagen de BUENOS AIRES"/);
+  assert.doesNotMatch(html, />VER PIEZA<\/button>/);
   assert.match(html, /<button class="piece-viewer__close"[^>]*><span class="piece-viewer__close-icon" aria-hidden="true"><\/span><\/button>/);
   assert.match(html, /Imagen ilustrativa\. Cantidad de piezas según menú\./);
   assert.doesNotMatch(html, /piece-viewer__caption|data-piece-viewer-title/);
@@ -53,6 +57,10 @@ const assertStaticMenuMarkup = (html) => {
   assert.match(html, /FINAS FETAS DE SALMÓN SOBRE BOCADITOS DE ARROZ\./);
   assert.match(html, /<h4 class="menu-item__name">PALTA THAI<\/h4>/);
   assert.match(html, /<h4 class="menu-item__name">\+ CAFÉ NESPRESSO X PERSONA<\/h4>/);
+  assert.match(html, /<h3 class="menu-final-cta__title" id="menu-final-cta-title">¿ESTÁS LISTO\?<\/h3>/);
+  assert.match(html, /RESERVÁ TU LUGAR Y VIVÍ SUSHI LIBRE/);
+  assert.match(html, /<a class="menu-final-cta__action" href="https:\/\/www\.sushiclub\.com\.ar\/shop_reservas\.php">RESERVÁ AHORA<\/a>/);
+  assert.doesNotMatch(html, /menu-final-cta__action[^>]*>RESERVÁ<br>AHORA/);
 };
 
 test('menu values, categories and piece image paths remain unchanged', async () => {
@@ -113,12 +121,14 @@ test('build converts menu.json into normal HTML elements and one reusable viewer
 });
 
 test('compiled distribution is standalone and contains no runtime menu source', async () => {
-  const [html, script] = await Promise.all([
+  const [html, script, visibilityIcon] = await Promise.all([
     readFile(new URL('../dist/index.html', import.meta.url), 'utf8'),
-    readFile(new URL('../dist/app.js', import.meta.url), 'utf8')
+    readFile(new URL('../dist/app.js', import.meta.url), 'utf8'),
+    readFile(new URL('../dist/assets/visibility.svg', import.meta.url), 'utf8')
   ]);
 
   assertStaticMenuMarkup(html);
+  assert.match(visibilityIcon, /<svg[^>]*viewBox="0 -960 960 960"/);
   await assert.rejects(
     readFile(new URL('../dist/menu.json', import.meta.url), 'utf8'),
     (error) => error?.code === 'ENOENT'

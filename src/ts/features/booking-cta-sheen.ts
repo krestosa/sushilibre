@@ -72,10 +72,10 @@ export const setupBookingCtaSheen = ({
     });
 
     const glow = cta.animate([
-      { boxShadow: '0 0 0 rgba(231,112,43,0)', filter: 'brightness(1)' },
-      { boxShadow: '0 0 0 rgba(231,112,43,0)', filter: 'brightness(1)', offset: 0.18 },
-      { boxShadow: '0 0 28px rgba(231,112,43,.34)', filter: 'brightness(1.08)', offset: 0.55 },
-      { boxShadow: '0 0 0 rgba(231,112,43,0)', filter: 'brightness(1)' }
+      { boxShadow: '0 0 0 rgba(0,26,197,0)', filter: 'brightness(1)' },
+      { boxShadow: '0 0 0 rgba(0,26,197,0)', filter: 'brightness(1)', offset: 0.18 },
+      { boxShadow: '0 0 28px rgba(0,26,197,.34)', filter: 'brightness(1.08)', offset: 0.55 },
+      { boxShadow: '0 0 0 rgba(0,26,197,0)', filter: 'brightness(1)' }
     ], {
       duration,
       easing: 'ease-in-out',

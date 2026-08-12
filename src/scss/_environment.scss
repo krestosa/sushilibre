@@ -2,6 +2,11 @@
   --menu-background-image: url("assets/menu_bg.webp");
 }
 
+.menu-item__description,
+.piece-viewer[data-state="error"] .piece-viewer__status-text {
+  color: var(--orange-light);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .booking-dock__cta:hover {
     filter: brightness(1.06);

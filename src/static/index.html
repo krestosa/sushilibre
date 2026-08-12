@@ -27,6 +27,13 @@
         }, 1800);
       })();
     </script>
+    <link
+      rel="preload"
+      href="fonts/Gazzetta Black.otf"
+      as="font"
+      type="font/otf"
+      crossorigin
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -116,20 +123,27 @@
         <div class="hero__video-stack" aria-hidden="true">
           <video
             class="hero__video is-active"
-            data-loop-video
-            data-video-source="assets/hero_bg.webm"
+            data-intro-video
+            data-video-source="assets/bg_inicio.mp4"
             autoplay
-            loop
             muted
             playsinline
             preload="metadata"
           >
-            <source src="assets/hero_bg.webm" type="video/webm" />
+            <source src="assets/bg_inicio.mp4" type="video/mp4" />
           </video>
           <video
             class="hero__video"
             data-loop-video
-            data-video-source="assets/hero_bg.webm"
+            data-video-source="assets/bg_loop.mp4"
+            muted
+            playsinline
+            preload="none"
+          ></video>
+          <video
+            class="hero__video"
+            data-loop-video
+            data-video-source="assets/bg_loop.mp4"
             muted
             playsinline
             preload="none"
@@ -187,7 +201,10 @@
         <div class="title-lockup" id="hero-title">
           <h1 class="title-word title-word--sushi">SUSHI</h1>
           <p class="title-kicker">EXCLUSIVE EXPERIENCE</p>
-          <p class="title-word title-word--libre">LIBRE</p>
+          <p class="title-word title-word--libre">
+            LIBRE<sup class="title-word__sup" aria-hidden="true">2</sup
+            ><span class="sr-only"> al cuadrado</span>
+          </p>
         </div>
 
         <div class="hero-copy">

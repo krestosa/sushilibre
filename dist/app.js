@@ -71,10 +71,10 @@
         fill: "none"
       });
       const glow = cta.animate([
-        { boxShadow: "0 0 0 rgba(231,112,43,0)", filter: "brightness(1)" },
-        { boxShadow: "0 0 0 rgba(231,112,43,0)", filter: "brightness(1)", offset: 0.18 },
-        { boxShadow: "0 0 28px rgba(231,112,43,.34)", filter: "brightness(1.08)", offset: 0.55 },
-        { boxShadow: "0 0 0 rgba(231,112,43,0)", filter: "brightness(1)" }
+        { boxShadow: "0 0 0 rgba(0,26,197,0)", filter: "brightness(1)" },
+        { boxShadow: "0 0 0 rgba(0,26,197,0)", filter: "brightness(1)", offset: 0.18 },
+        { boxShadow: "0 0 28px rgba(0,26,197,.34)", filter: "brightness(1.08)", offset: 0.55 },
+        { boxShadow: "0 0 0 rgba(0,26,197,0)", filter: "brightness(1)" }
       ], {
         duration,
         easing: "ease-in-out",
@@ -129,23 +129,38 @@
     const [venueMeta, dateMeta, timeMeta] = metadata;
     if (!dock2 || !venueMeta || !dateMeta || !timeMeta || !countdown || !cta) return;
     let activeMode = null;
+    let activeLiveState = null;
+    let activeSuppressedState = null;
     let scheduledFrame = 0;
     const placeMetadata = ({
       row,
       padding
     }) => {
-      metadata.forEach((item, index) => {
-        item.style.gridColumn = String(index + 1);
+      const placements = [
+        { item: venueMeta, column: "1", justify: "start" },
+        { item: dateMeta, column: "2", justify: "center" },
+        { item: timeMeta, column: "3", justify: "end" }
+      ];
+      placements.forEach(({ item, column, justify }) => {
+        item.style.gridColumn = column;
         item.style.gridRow = row;
+        item.style.justifySelf = justify;
+        item.style.width = "max-content";
+        item.style.maxWidth = "100%";
+        item.style.minWidth = "0";
         item.style.padding = padding;
       });
     };
     const applySingleRowLayout = ({
       width,
-      columns
+      suppressedWidth,
+      countdownWidth,
+      ctaWidth,
+      ctaSuppressed
     }) => {
-      dock2.style.width = width;
-      dock2.style.gridTemplateColumns = columns;
+      dock2.style.width = ctaSuppressed ? suppressedWidth : width;
+      dock2.style.setProperty("--dock-cta-track", ctaSuppressed ? "0px" : ctaWidth);
+      dock2.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) ${countdownWidth} var(--dock-cta-track)`;
       dock2.style.gridTemplateRows = "minmax(0, 1fr)";
       dock2.style.gap = "9px";
       dock2.style.rowGap = "9px";
@@ -155,29 +170,70 @@
       cta.style.gridColumn = "5";
       cta.style.gridRow = "1";
     };
-    const applyDesktopLayout = () => {
+    const applyEventLiveSingleRowLayout = ({
+      width,
+      ctaWidth
+    }) => {
+      dock2.style.width = width;
+      dock2.style.setProperty("--dock-cta-track", ctaWidth);
+      dock2.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) var(--dock-cta-track)`;
+      dock2.style.gridTemplateRows = "minmax(0, 1fr)";
+      dock2.style.gap = "9px";
+      dock2.style.rowGap = "9px";
+      placeMetadata({ row: "1", padding: "0 8px" });
+      countdown.style.gridColumn = "";
+      countdown.style.gridRow = "";
+      cta.style.gridColumn = "4";
+      cta.style.gridRow = "1";
+    };
+    const applyDesktopLayout = (eventLive, ctaSuppressed) => {
+      if (eventLive) {
+        applyEventLiveSingleRowLayout({
+          width: "min(760px, calc(100vw - 48px))",
+          ctaWidth: "108px"
+        });
+        return;
+      }
       applySingleRowLayout({
         width: "min(1040px, calc(100vw - 48px))",
-        columns: "minmax(158px, 1.16fr) minmax(150px, 1.08fr) minmax(86px, 0.68fr) minmax(0, 2.55fr) 108px"
+        suppressedWidth: "min(923px, calc(100vw - 165px))",
+        countdownWidth: "minmax(0, 2.55fr)",
+        ctaWidth: "108px",
+        ctaSuppressed
       });
     };
-    const applyCompactLayout = () => {
+    const applyCompactLayout = (eventLive, ctaSuppressed) => {
+      if (eventLive) {
+        applyEventLiveSingleRowLayout({
+          width: "min(700px, calc(100vw - 32px))",
+          ctaWidth: "104px"
+        });
+        return;
+      }
       applySingleRowLayout({
-        width: "min(920px, calc(100vw - 32px))",
-        columns: "minmax(142px, 1.1fr) minmax(132px, 1fr) minmax(78px, 0.62fr) minmax(0, 2.3fr) 104px"
+        width: "min(780px, calc(100vw - 32px))",
+        suppressedWidth: "min(667px, calc(100vw - 145px))",
+        countdownWidth: "minmax(0, 2.3fr)",
+        ctaWidth: "104px",
+        ctaSuppressed
       });
     };
-    const applyMobileLayout = () => {
-      dock2.style.width = "";
-      dock2.style.gridTemplateColumns = "minmax(0, 1.28fr) minmax(0, 1.05fr) minmax(0, 0.72fr) 96px";
-      dock2.style.gridTemplateRows = "48px 96px";
-      dock2.style.gap = "8px";
+    const applyMobileLayout = (eventLive, ctaSuppressed) => {
+      const suppressReservation = ctaSuppressed && !eventLive;
+      dock2.style.width = "min(680px, calc(100vw - 24px))";
+      dock2.style.setProperty("--dock-cta-track", suppressReservation ? "0px" : "96px");
+      dock2.style.gridTemplateColumns = "max-content max-content max-content minmax(0, 1fr) var(--dock-cta-track)";
+      dock2.style.gridTemplateRows = eventLive ? "48px" : "48px 96px";
+      dock2.style.columnGap = "12px";
       dock2.style.rowGap = "8px";
-      placeMetadata({ row: "1", padding: "0 5px" });
-      countdown.style.gridColumn = "1 / span 3";
+      placeMetadata({ row: "1", padding: "0 4px" });
+      venueMeta.style.justifySelf = "start";
+      dateMeta.style.justifySelf = "start";
+      timeMeta.style.justifySelf = "start";
+      countdown.style.gridColumn = "1 / span 4";
       countdown.style.gridRow = "2";
-      cta.style.gridColumn = "4";
-      cta.style.gridRow = "1 / span 2";
+      cta.style.gridColumn = "5";
+      cta.style.gridRow = eventLive ? "1" : "1 / span 2";
     };
     const resolveMode = () => {
       if (window.matchMedia("(max-width: 840px)").matches) return "mobile";
@@ -186,11 +242,15 @@
     };
     const syncLayout = () => {
       const nextMode = resolveMode();
-      if (nextMode === activeMode) return;
+      const nextLiveState = dock2.classList.contains("is-event-live");
+      const nextSuppressedState = dock2.classList.contains("is-cta-suppressed") && !nextLiveState;
+      if (nextMode === activeMode && nextLiveState === activeLiveState && nextSuppressedState === activeSuppressedState) return;
       activeMode = nextMode;
-      if (nextMode === "mobile") applyMobileLayout();
-      else if (nextMode === "compact") applyCompactLayout();
-      else applyDesktopLayout();
+      activeLiveState = nextLiveState;
+      activeSuppressedState = nextSuppressedState;
+      if (nextMode === "mobile") applyMobileLayout(nextLiveState, nextSuppressedState);
+      else if (nextMode === "compact") applyCompactLayout(nextLiveState, nextSuppressedState);
+      else applyDesktopLayout(nextLiveState, nextSuppressedState);
     };
     const scheduleSync = () => {
       if (scheduledFrame) return;
@@ -206,12 +266,17 @@
       const observer = new ResizeObserver(scheduleSync);
       observer.observe(dock2);
     }
+    if ("MutationObserver" in window) {
+      const observer = new MutationObserver(scheduleSync);
+      observer.observe(dock2, { attributes: true, attributeFilter: ["class"] });
+    }
     document.fonts.ready.then(scheduleSync).catch(() => void 0);
   };
 
   // src/ts/features/countdown.ts
   var keys = ["days", "hours", "minutes", "seconds"];
   var target = (/* @__PURE__ */ new Date("2026-09-03T20:00:00-03:00")).getTime();
+  var FINAL_CTA_DOCK_OVERLAP_PX = 8;
   var replaceCtaLabel = (label, firstLine, secondLine) => {
     label.replaceChildren(
       document.createTextNode(firstLine),
@@ -221,17 +286,64 @@
   };
   var setupCountdown = () => {
     const countdown = query(".countdown");
+    const dock2 = query(".booking-dock");
     const cta = query("[data-booking-cta]");
     const ctaLabel = query("[data-booking-cta-label]", cta ?? void 0);
     const menu = query("#menu");
+    const finalMenuCtaAction = query(".menu-final-cta__action");
     const reducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)");
     let menuMode = false;
+    let finalMenuCtaActionOverlapsDock = false;
+    let visibilityFrame = 0;
     const nodes = {
       days: query('[data-countdown="days"]'),
       hours: query('[data-countdown="hours"]'),
       minutes: query('[data-countdown="minutes"]'),
       seconds: query('[data-countdown="seconds"]')
     };
+    const syncDockCtaVisibility = () => {
+      if (!cta) return;
+      const shouldSuppress = finalMenuCtaActionOverlapsDock && !menuMode;
+      cta.classList.toggle("is-suppressed", shouldSuppress);
+      dock2?.classList.toggle("is-cta-suppressed", shouldSuppress);
+      if (shouldSuppress) cta.setAttribute("tabindex", "-1");
+      else cta.removeAttribute("tabindex");
+    };
+    const doesFinalMenuCtaActionOverlapDock = () => {
+      if (!finalMenuCtaAction || !dock2) return false;
+      const actionRect = finalMenuCtaAction.getBoundingClientRect();
+      const dockRect = dock2.getBoundingClientRect();
+      const overlapHeight = Math.max(
+        0,
+        Math.min(actionRect.bottom, dockRect.bottom) - Math.max(actionRect.top, dockRect.top)
+      );
+      return overlapHeight >= FINAL_CTA_DOCK_OVERLAP_PX;
+    };
+    const syncFinalMenuCtaActionOverlap = () => {
+      const nextOverlap = doesFinalMenuCtaActionOverlapDock();
+      if (nextOverlap === finalMenuCtaActionOverlapsDock) return;
+      finalMenuCtaActionOverlapsDock = nextOverlap;
+      syncDockCtaVisibility();
+    };
+    const scheduleFinalMenuCtaActionOverlapSync = () => {
+      if (visibilityFrame) return;
+      visibilityFrame = window.requestAnimationFrame(() => {
+        visibilityFrame = 0;
+        syncFinalMenuCtaActionOverlap();
+      });
+    };
+    if (finalMenuCtaAction && dock2) {
+      syncFinalMenuCtaActionOverlap();
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(scheduleFinalMenuCtaActionOverlapSync, {
+          threshold: [0, 0.25, 0.5, 0.75, 1]
+        });
+        observer.observe(finalMenuCtaAction);
+      }
+      window.addEventListener("scroll", scheduleFinalMenuCtaActionOverlapSync, { passive: true });
+      window.addEventListener("resize", scheduleFinalMenuCtaActionOverlapSync, { passive: true });
+      window.addEventListener("orientationchange", scheduleFinalMenuCtaActionOverlapSync, { passive: true });
+    }
     const handleMenuClick = (event) => {
       if (!menu) return;
       event.preventDefault();
@@ -244,6 +356,8 @@
     const activateMenuMode = () => {
       if (menuMode || !cta || !ctaLabel) return;
       menuMode = true;
+      document.documentElement.classList.add("event-live");
+      dock2?.classList.add("is-event-live");
       cta.href = "#menu";
       cta.dataset.destination = "menu";
       cta.setAttribute("aria-label", "Ir al men\xFA");
@@ -251,6 +365,7 @@
       cta.addEventListener("click", handleMenuClick);
       countdown?.setAttribute("aria-label", "El evento comenz\xF3");
       countdown?.setAttribute("data-state", "complete");
+      syncDockCtaVisibility();
     };
     const pad = (value) => String(value).padStart(2, "0");
     const render = () => {
@@ -277,7 +392,7 @@
 
   // src/ts/features/hero-intro-motion.ts
   var HERO_TITLE_ANIMATIONS = /* @__PURE__ */ new Set(["stage-title-in", "quiet-fade"]);
-  var COMPLETION_FALLBACK_MS = 2400;
+  var COMPLETION_FALLBACK_MS = 3400;
   var setupHeroIntroMotion = () => {
     const root = document.documentElement;
     const titleWords = queryAll(".title-word");
@@ -315,11 +430,63 @@
     fallbackTimer = window.setTimeout(complete, COMPLETION_FALLBACK_MS);
   };
 
+  // src/ts/features/hero-title-layout.ts
+  var STACKED_CLASS = "is-stacked";
+  var INLINE_WIDTH = "min(1600px, calc(100vw - 48px))";
+  var COLLISION_BUFFER_PX = 8;
+  var RETURN_BUFFER_PX = 24;
+  var setupHeroTitleLayout = () => {
+    const hero = query(".hero");
+    const lockup = query(".title-lockup");
+    const sushi = query(".title-word--sushi");
+    const kicker = query(".title-kicker");
+    const libre = query(".title-word--libre");
+    if (!hero || !lockup || !sushi || !kicker || !libre) return;
+    let scheduledFrame = 0;
+    const measureInlineFit = () => {
+      const wasStacked = lockup.classList.contains(STACKED_CLASS);
+      const previousWidth = lockup.style.width;
+      if (wasStacked) lockup.classList.remove(STACKED_CLASS);
+      lockup.style.width = INLINE_WIDTH;
+      const style = window.getComputedStyle(lockup);
+      const gap = Number.parseFloat(style.columnGap) || 0;
+      const available = lockup.clientWidth;
+      const required = sushi.getBoundingClientRect().width + kicker.getBoundingClientRect().width + libre.getBoundingClientRect().width + gap * 2;
+      lockup.style.width = previousWidth;
+      if (wasStacked) lockup.classList.add(STACKED_CLASS);
+      return { available, required };
+    };
+    const syncLayout = () => {
+      const wasStacked = lockup.classList.contains(STACKED_CLASS);
+      const { available, required } = measureInlineFit();
+      const buffer = wasStacked ? RETURN_BUFFER_PX : COLLISION_BUFFER_PX;
+      const shouldStack = required + buffer > available;
+      lockup.classList.toggle(STACKED_CLASS, shouldStack);
+      lockup.style.width = shouldStack ? "" : INLINE_WIDTH;
+    };
+    const scheduleSync = () => {
+      if (scheduledFrame) return;
+      scheduledFrame = window.requestAnimationFrame(() => {
+        scheduledFrame = 0;
+        syncLayout();
+      });
+    };
+    scheduleSync();
+    window.addEventListener("resize", scheduleSync, { passive: true });
+    window.addEventListener("orientationchange", scheduleSync, { passive: true });
+    if ("ResizeObserver" in window) {
+      const observer = new ResizeObserver(scheduleSync);
+      observer.observe(hero);
+    }
+    document.fonts.ready.then(scheduleSync).catch(() => void 0);
+  };
+
   // src/ts/features/piece-viewer.ts
   var LOADING_MESSAGE = "CARGANDO IMAGEN";
   var ERROR_MESSAGE = "IMAGEN NO DISPONIBLE";
   var CLOSE_FALLBACK_MS = 320;
   var REDUCED_CLOSE_FALLBACK_MS = 170;
+  var PRELOAD_CONCURRENCY = 3;
   var SCROLL_KEYS = /* @__PURE__ */ new Set([
     "ArrowDown",
     "ArrowLeft",
@@ -335,6 +502,40 @@
   var isInteractiveTarget = (target2) => target2 instanceof Element && Boolean(target2.closest(
     'a[href], button, input, textarea, select, [contenteditable="true"]'
   ));
+  var preloadPieceImages = (buttons) => {
+    const sources = Array.from(new Set(
+      buttons.map((button) => button.dataset.pieceImage?.trim()).filter((source) => Boolean(source))
+    ));
+    if (!sources.length) return;
+    const pending = /* @__PURE__ */ new Set();
+    let cursor = 0;
+    let active = 0;
+    const pump = () => {
+      while (active < PRELOAD_CONCURRENCY && cursor < sources.length) {
+        const source = sources[cursor];
+        cursor += 1;
+        if (!source) continue;
+        const preload = new Image();
+        active += 1;
+        pending.add(preload);
+        preload.decoding = "async";
+        preload.fetchPriority = "low";
+        const settle = () => {
+          preload.onload = null;
+          preload.onerror = null;
+          pending.delete(preload);
+          active -= 1;
+          pump();
+        };
+        preload.onload = settle;
+        preload.onerror = settle;
+        preload.src = source;
+      }
+    };
+    window.requestAnimationFrame(() => {
+      window.setTimeout(pump, 0);
+    });
+  };
   var setupPieceViewer = () => {
     const root = document.documentElement;
     const dialog = query("[data-piece-viewer]");
@@ -344,6 +545,7 @@
     const closeButton = query("[data-piece-viewer-close]", dialog ?? void 0);
     const openButtons = queryAll("[data-piece-viewer-open]");
     if (!dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
+    preloadPieceImages(openButtons);
     const reducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)");
     let activeButton = null;
     let closeTimer = 0;
@@ -483,6 +685,7 @@
           openFrame = 0;
           if (!dialog.open || dialog.classList.contains("is-closing")) return;
           dialog.classList.add("is-open");
+          image.fetchPriority = "high";
           image.src = source;
           enforceLockedScroll();
         });
@@ -799,7 +1002,6 @@
   var HARD_STALL_THRESHOLD = 6500;
   var WATCHDOG_INTERVAL = 2e3;
   var PLAY_START_TIMEOUT = 4500;
-  var MAX_SOFT_RELOADS = 2;
   var ensureVideoSource = (video) => {
     if (video.currentSrc || video.hasAttribute("src") || Boolean(video.querySelector("source[src]"))) {
       return true;
@@ -809,12 +1011,6 @@
     video.src = source;
     video.load();
     return true;
-  };
-  var releaseVideoSource = (video) => {
-    video.pause();
-    video.removeAttribute("src");
-    queryAll("source", video).forEach((source) => source.removeAttribute("src"));
-    video.load();
   };
   var setCurrentTimeSafely = (video, requestedTime) => {
     const applyTime = () => {
@@ -845,172 +1041,38 @@
       if (timeoutId) window.clearTimeout(timeoutId);
     }
   };
-  var setupSingleVideoLoop = (video, unusedVideos, hero) => {
-    unusedVideos.forEach((unusedVideo) => {
-      unusedVideo.hidden = true;
-      unusedVideo.classList.remove("is-active", "is-mixing-in");
-      releaseVideoSource(unusedVideo);
-    });
-    video.hidden = false;
-    video.loop = true;
-    video.muted = true;
-    video.playsInline = true;
-    video.preload = "metadata";
-    video.classList.add("is-active");
-    video.classList.remove("is-mixing-in");
-    ensureVideoSource(video);
-    let heroVisible = true;
-    let suspendedTime = 0;
-    let recoveryTimer = 0;
-    let recoveryInProgress = false;
-    let reloadAttempts = 0;
-    let lastMediaTime = Number.isFinite(video.currentTime) ? video.currentTime : 0;
-    let lastProgressAt = performance.now();
-    const canPlay = () => !document.hidden && heroVisible && navigator.onLine !== false;
-    const clearRecoveryTimer = () => {
-      if (!recoveryTimer) return;
-      window.clearTimeout(recoveryTimer);
-      recoveryTimer = 0;
-    };
-    const noteProgress = () => {
-      const currentTime = Number.isFinite(video.currentTime) ? video.currentTime : lastMediaTime;
-      const advanced = Math.abs(currentTime - lastMediaTime) >= 0.04;
-      if (advanced || currentTime < lastMediaTime) {
-        lastMediaTime = currentTime;
-        lastProgressAt = performance.now();
-        reloadAttempts = 0;
-      }
-    };
-    const rebuildBuffer = () => {
-      const duration = video.duration;
-      const nearBoundary = Number.isFinite(duration) && duration > 0 ? duration - video.currentTime < 0.45 : false;
-      const resumeTime = reloadAttempts >= MAX_SOFT_RELOADS || nearBoundary ? 0 : Number.isFinite(video.currentTime) ? video.currentTime : suspendedTime;
-      reloadAttempts += 1;
-      video.load();
-      setCurrentTimeSafely(video, resumeTime);
-    };
-    const recoverPlayback = async (forceReload = false) => {
-      clearRecoveryTimer();
-      if (!canPlay() || recoveryInProgress) return;
-      recoveryInProgress = true;
-      try {
-        ensureVideoSource(video);
-        const duration = video.duration;
-        const reachedBoundary = video.ended || Number.isFinite(duration) && duration > 0 && duration - video.currentTime < 0.12;
-        if (reachedBoundary) setCurrentTimeSafely(video, 0);
-        if (forceReload || video.error || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
-          rebuildBuffer();
-        }
-        await playWithTimeout(video);
-        lastProgressAt = performance.now();
-      } catch {
-        if (canPlay()) {
-          recoveryTimer = window.setTimeout(() => {
-            recoveryTimer = 0;
-            void recoverPlayback(true);
-          }, STALL_RECOVERY_DELAY);
-        }
-      } finally {
-        recoveryInProgress = false;
-      }
-    };
-    const scheduleRecovery = (forceReload = false) => {
-      if (!canPlay() || recoveryTimer || recoveryInProgress) return;
-      recoveryTimer = window.setTimeout(() => {
-        recoveryTimer = 0;
-        void recoverPlayback(forceReload);
-      }, STALL_RECOVERY_DELAY);
-    };
-    const suspendPlayback = () => {
-      clearRecoveryTimer();
-      suspendedTime = Number.isFinite(video.currentTime) ? video.currentTime : suspendedTime;
-      video.pause();
-    };
-    const resumePlayback = () => {
-      if (!canPlay()) return;
-      if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
-        setCurrentTimeSafely(video, suspendedTime);
-      }
-      void recoverPlayback(false);
-    };
-    video.addEventListener("timeupdate", noteProgress, { passive: true });
-    video.addEventListener("playing", () => {
-      clearRecoveryTimer();
-      lastProgressAt = performance.now();
-      noteProgress();
-    }, { passive: true });
-    video.addEventListener("canplay", () => {
-      clearRecoveryTimer();
-      if (canPlay() && video.paused) void recoverPlayback(false);
-    }, { passive: true });
-    video.addEventListener("waiting", () => scheduleRecovery(false), { passive: true });
-    video.addEventListener("stalled", () => scheduleRecovery(true), { passive: true });
-    video.addEventListener("suspend", () => {
-      if (!video.paused && video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) {
-        scheduleRecovery(false);
-      }
-    }, { passive: true });
-    video.addEventListener("ended", () => {
-      setCurrentTimeSafely(video, 0);
-      void recoverPlayback(false);
-    }, { passive: true });
-    video.addEventListener("error", () => scheduleRecovery(true), { passive: true });
-    if (hero && "IntersectionObserver" in window) {
-      const observer = new IntersectionObserver((entries) => {
-        const entry = entries[0];
-        if (!entry) return;
-        heroVisible = entry.isIntersecting;
-        if (heroVisible && !document.hidden) resumePlayback();
-        else suspendPlayback();
-      }, { rootMargin: "80px 0px", threshold: 0 });
-      observer.observe(hero);
-    }
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) suspendPlayback();
-      else resumePlayback();
-    });
-    window.addEventListener("pagehide", suspendPlayback, { passive: true });
-    window.addEventListener("pageshow", resumePlayback, { passive: true });
-    window.addEventListener("online", resumePlayback, { passive: true });
-    window.setInterval(() => {
-      if (!canPlay()) return;
-      noteProgress();
-      const stalledFor = performance.now() - lastProgressAt;
-      const unexpectedlyPaused = video.paused && !video.ended;
-      const bufferStarved = video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA;
-      if (unexpectedlyPaused || stalledFor >= HARD_STALL_THRESHOLD) {
-        scheduleRecovery(bufferStarved || stalledFor >= HARD_STALL_THRESHOLD);
-      }
-    }, WATCHDOG_INTERVAL);
-    void recoverPlayback(false);
-  };
   var setupVideoLoop = ({
     root,
     compactViewport,
     coarsePointer
   }) => {
     const hero = query(".hero");
-    const videos = queryAll("[data-loop-video]");
-    const firstVideo = videos[0];
-    if (!firstVideo) return;
+    const introVideo = query("[data-intro-video]");
+    const loopVideos = queryAll("[data-loop-video]");
+    if (!introVideo || loopVideos.length === 0) return;
+    const allVideos = [introVideo, ...loopVideos];
     const compactPlayback = compactViewport.matches || coarsePointer.matches;
     const mixDuration = compactPlayback ? 650 : 900;
     const mixLead = mixDuration / 1e3 + 0.24;
     root.style.setProperty("--video-mix-duration", `${mixDuration}ms`);
-    if (compactPlayback || videos.length < 2) {
-      setupSingleVideoLoop(firstVideo, videos.slice(1), hero);
-      return;
-    }
-    videos.forEach((video, index) => {
+    introVideo.hidden = false;
+    introVideo.loop = false;
+    introVideo.muted = true;
+    introVideo.playsInline = true;
+    introVideo.preload = "metadata";
+    introVideo.classList.add("is-active");
+    introVideo.classList.remove("is-mixing-in");
+    loopVideos.forEach((video) => {
       video.hidden = false;
       video.loop = false;
       video.muted = true;
       video.playsInline = true;
-      video.preload = index === 0 ? "metadata" : "none";
-      video.classList.toggle("is-active", index === 0);
-      video.classList.remove("is-mixing-in");
+      video.preload = "none";
+      video.classList.remove("is-active", "is-mixing-in");
     });
-    let activeIndex = 0;
+    let phase = "intro";
+    let introCompleted = false;
+    let activeLoopIndex = 0;
     let transitionInProgress = false;
     let boundaryTimerId = 0;
     let mixTimerId = 0;
@@ -1018,10 +1080,13 @@
     let mixGeneration = 0;
     let suspendedState = null;
     let heroVisible = true;
+    let lastProgressVideo = introVideo;
     let lastMediaTime = 0;
     let lastProgressAt = performance.now();
     const canPlay = () => !document.hidden && heroVisible && navigator.onLine !== false;
-    const getVideo = (index) => videos[index] ?? null;
+    const getLoopVideo = (index) => loopVideos[index] ?? null;
+    const currentVideo = () => phase === "intro" ? introVideo : getLoopVideo(activeLoopIndex) ?? introVideo;
+    const nextLoopIndex = (index) => loopVideos.length > 1 ? (index + 1) % loopVideos.length : index;
     const clearBoundaryTimer = () => {
       if (!boundaryTimerId) return;
       window.clearTimeout(boundaryTimerId);
@@ -1037,27 +1102,56 @@
       window.clearTimeout(recoveryTimerId);
       recoveryTimerId = 0;
     };
-    const activateSingleVideo = (index, time) => {
+    const resetVisualState = (activeVideo) => {
+      allVideos.forEach((video) => {
+        if (video !== activeVideo) video.pause();
+        video.classList.remove("is-active", "is-mixing-in");
+      });
+      activeVideo.classList.add("is-active");
+    };
+    const activateIntro = (time) => {
       clearBoundaryTimer();
       clearMixTimer();
       mixGeneration += 1;
       transitionInProgress = false;
-      videos.forEach((video) => {
-        video.pause();
-        video.classList.remove("is-active", "is-mixing-in");
-      });
-      const activeVideo = getVideo(index);
-      if (!activeVideo) return null;
-      ensureVideoSource(activeVideo);
-      activeIndex = index;
-      activeVideo.classList.add("is-active");
-      setCurrentTimeSafely(activeVideo, time);
-      return activeVideo;
+      phase = "intro";
+      resetVisualState(introVideo);
+      ensureVideoSource(introVideo);
+      setCurrentTimeSafely(introVideo, time);
+      return introVideo;
+    };
+    const activateLoop = (index, time) => {
+      const video = getLoopVideo(index);
+      if (!video || !ensureVideoSource(video)) return null;
+      clearBoundaryTimer();
+      clearMixTimer();
+      mixGeneration += 1;
+      transitionInProgress = false;
+      phase = "loop";
+      activeLoopIndex = index;
+      resetVisualState(video);
+      setCurrentTimeSafely(video, time);
+      return video;
+    };
+    const primeLoop = (index) => {
+      const video = getLoopVideo(index);
+      if (!video) return null;
+      video.preload = "auto";
+      return ensureVideoSource(video) ? video : null;
+    };
+    const noteProgress = (video) => {
+      if (video !== currentVideo()) return;
+      const currentTime = Number.isFinite(video.currentTime) ? video.currentTime : lastMediaTime;
+      if (video !== lastProgressVideo || Math.abs(currentTime - lastMediaTime) >= 0.04 || currentTime < lastMediaTime) {
+        lastProgressVideo = video;
+        lastMediaTime = currentTime;
+        lastProgressAt = performance.now();
+      }
     };
     const scheduleBoundary = () => {
       clearBoundaryTimer();
-      if (!canPlay() || transitionInProgress) return;
-      const activeVideo = getVideo(activeIndex);
+      if (!canPlay() || transitionInProgress || phase !== "loop") return;
+      const activeVideo = getLoopVideo(activeLoopIndex);
       if (!activeVideo) return;
       const duration = activeVideo.duration;
       if (!Number.isFinite(duration) || duration <= 0) {
@@ -1067,52 +1161,79 @@
       const playbackRate = Math.max(0.1, Math.abs(activeVideo.playbackRate || 1));
       const remaining = duration - activeVideo.currentTime;
       const delay = Math.max(0, (remaining - mixLead) / playbackRate * 1e3);
+      const scheduledIndex = activeLoopIndex;
       boundaryTimerId = window.setTimeout(() => {
         boundaryTimerId = 0;
+        if (phase !== "loop" || activeLoopIndex !== scheduledIndex || transitionInProgress) return;
         const currentRemaining = activeVideo.duration - activeVideo.currentTime;
-        if (currentRemaining <= mixLead + 0.16) void mixLoopBoundary();
-        else scheduleBoundary();
+        if (currentRemaining <= mixLead + 0.16) {
+          void transitionToLoop(nextLoopIndex(activeLoopIndex));
+        } else {
+          scheduleBoundary();
+        }
       }, delay);
     };
-    const recoverActiveVideo = async (forceReload = false) => {
+    const recoverCurrentVideo = async (forceReload = false) => {
       clearRecoveryTimer();
       if (!canPlay()) return;
-      const currentVideo = getVideo(activeIndex);
-      if (!currentVideo) return;
-      const duration = currentVideo.duration;
-      const nearBoundary = Number.isFinite(duration) && duration > 0 ? duration - currentVideo.currentTime < 0.35 : false;
-      const resumeTime = nearBoundary ? 0 : Number.isFinite(currentVideo.currentTime) ? currentVideo.currentTime : 0;
-      const activeVideo = activateSingleVideo(activeIndex, resumeTime);
-      if (!activeVideo) return;
-      if (forceReload || activeVideo.error) {
-        activeVideo.load();
-        setCurrentTimeSafely(activeVideo, resumeTime);
+      if (phase === "intro" && introCompleted) {
+        void transitionToLoop(0);
+        return;
+      }
+      const video = currentVideo();
+      if (!ensureVideoSource(video)) return;
+      if (phase === "loop") {
+        const duration = video.duration;
+        const reachedBoundary = video.ended || Number.isFinite(duration) && duration > 0 && duration - video.currentTime < 0.12;
+        if (reachedBoundary) setCurrentTimeSafely(video, 0);
+      }
+      if (forceReload || video.error || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+        const resumeTime = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+        video.load();
+        setCurrentTimeSafely(video, resumeTime);
       }
       try {
-        await playWithTimeout(activeVideo);
-        lastMediaTime = activeVideo.currentTime;
+        await playWithTimeout(video);
+        lastProgressVideo = video;
+        lastMediaTime = video.currentTime;
         lastProgressAt = performance.now();
-        scheduleBoundary();
+        if (phase === "loop") scheduleBoundary();
       } catch {
-        recoveryTimerId = window.setTimeout(() => {
-          recoveryTimerId = 0;
-          void recoverActiveVideo(true);
-        }, STALL_RECOVERY_DELAY);
+        if (canPlay()) {
+          recoveryTimerId = window.setTimeout(() => {
+            recoveryTimerId = 0;
+            void recoverCurrentVideo(true);
+          }, STALL_RECOVERY_DELAY);
+        }
       }
     };
     const scheduleRecovery = (forceReload = false) => {
       if (!canPlay() || recoveryTimerId) return;
       recoveryTimerId = window.setTimeout(() => {
         recoveryTimerId = 0;
-        void recoverActiveVideo(forceReload);
+        void recoverCurrentVideo(forceReload);
       }, STALL_RECOVERY_DELAY);
     };
-    async function mixLoopBoundary() {
+    async function transitionToLoop(index) {
       if (transitionInProgress || !canPlay()) return;
-      const outgoing = getVideo(activeIndex);
-      const nextIndex = (activeIndex + 1) % videos.length;
-      const incoming = getVideo(nextIndex);
-      if (!outgoing || !incoming || !ensureVideoSource(incoming)) return;
+      const outgoing = currentVideo();
+      const incoming = primeLoop(index);
+      if (!incoming) {
+        scheduleRecovery(true);
+        return;
+      }
+      if (outgoing === incoming) {
+        setCurrentTimeSafely(incoming, 0);
+        try {
+          await playWithTimeout(incoming);
+          phase = "loop";
+          activeLoopIndex = index;
+          scheduleBoundary();
+        } catch {
+          scheduleRecovery(true);
+        }
+        return;
+      }
       transitionInProgress = true;
       clearBoundaryTimer();
       clearRecoveryTimer();
@@ -1125,7 +1246,7 @@
         await playWithTimeout(incoming);
         if (generation !== mixGeneration || !canPlay()) {
           incoming.pause();
-          incoming.classList.remove("is-mixing-in");
+          incoming.classList.remove("is-active", "is-mixing-in");
           return;
         }
         window.requestAnimationFrame(() => {
@@ -1135,13 +1256,16 @@
           if (generation !== mixGeneration || !canPlay()) return;
           outgoing.classList.remove("is-active");
           outgoing.pause();
-          setCurrentTimeSafely(outgoing, 0);
+          if (outgoing !== introVideo) setCurrentTimeSafely(outgoing, 0);
           incoming.classList.remove("is-mixing-in");
-          activeIndex = nextIndex;
+          phase = "loop";
+          activeLoopIndex = index;
           transitionInProgress = false;
           mixTimerId = 0;
+          lastProgressVideo = incoming;
           lastMediaTime = incoming.currentTime;
           lastProgressAt = performance.now();
+          primeLoop(nextLoopIndex(index));
           scheduleBoundary();
         }, mixDuration + 50);
       } catch {
@@ -1149,72 +1273,101 @@
         incoming.classList.remove("is-active", "is-mixing-in");
         if (generation !== mixGeneration) return;
         transitionInProgress = false;
-        setCurrentTimeSafely(outgoing, 0);
         outgoing.classList.add("is-active");
-        void recoverActiveVideo(false);
+        scheduleRecovery(true);
       }
     }
     const suspendPlayback = () => {
-      if (suspendedState) return;
-      const incomingIndex = videos.findIndex(
+      clearBoundaryTimer();
+      clearMixTimer();
+      clearRecoveryTimer();
+      const mixingLoopIndex = loopVideos.findIndex(
         (video) => video.classList.contains("is-active") && video.classList.contains("is-mixing-in")
       );
-      const visibleIndex = incomingIndex >= 0 ? incomingIndex : activeIndex;
-      const visibleVideo = getVideo(visibleIndex);
+      const visibleVideo = mixingLoopIndex >= 0 ? getLoopVideo(mixingLoopIndex) : currentVideo();
       if (!visibleVideo) return;
       suspendedState = {
-        index: visibleIndex,
+        phase: visibleVideo === introVideo ? "intro" : "loop",
+        index: mixingLoopIndex >= 0 ? mixingLoopIndex : activeLoopIndex,
         time: Number.isFinite(visibleVideo.currentTime) ? visibleVideo.currentTime : 0
       };
-      activateSingleVideo(suspendedState.index, suspendedState.time);
+      mixGeneration += 1;
+      transitionInProgress = false;
+      allVideos.forEach((video) => video.pause());
+      resetVisualState(visibleVideo);
+      if (suspendedState.phase === "loop") {
+        phase = "loop";
+        activeLoopIndex = suspendedState.index;
+      } else {
+        phase = "intro";
+      }
     };
     const resumePlayback = () => {
       if (!canPlay()) return;
-      const currentVideo = getVideo(activeIndex);
-      const state = suspendedState ?? {
-        index: activeIndex,
-        time: currentVideo && Number.isFinite(currentVideo.currentTime) ? currentVideo.currentTime : 0
-      };
+      const state = suspendedState;
       suspendedState = null;
-      const activeVideo = activateSingleVideo(state.index, state.time);
-      if (activeVideo) void playWithTimeout(activeVideo).then(scheduleBoundary).catch(() => scheduleRecovery(true));
-    };
-    videos.forEach((video, index) => {
-      video.addEventListener("timeupdate", () => {
-        if (index !== activeIndex) return;
-        const currentTime = video.currentTime;
-        if (Math.abs(currentTime - lastMediaTime) >= 0.04 || currentTime < lastMediaTime) {
-          lastMediaTime = currentTime;
-          lastProgressAt = performance.now();
+      if (state?.phase === "loop") {
+        const activeVideo2 = activateLoop(state.index, state.time);
+        if (activeVideo2) {
+          void playWithTimeout(activeVideo2).then(scheduleBoundary).catch(() => scheduleRecovery(true));
         }
-      }, { passive: true });
+        return;
+      }
+      if (introCompleted) {
+        void transitionToLoop(0);
+        return;
+      }
+      const introTime = state?.phase === "intro" ? state.time : Number.isFinite(introVideo.currentTime) ? introVideo.currentTime : 0;
+      const activeVideo = activateIntro(introTime);
+      void playWithTimeout(activeVideo).catch(() => scheduleRecovery(true));
+    };
+    introVideo.addEventListener("timeupdate", () => noteProgress(introVideo), { passive: true });
+    introVideo.addEventListener("playing", () => {
+      clearRecoveryTimer();
+      lastProgressVideo = introVideo;
+      lastProgressAt = performance.now();
+    }, { passive: true });
+    introVideo.addEventListener("canplay", () => {
+      primeLoop(0);
+    }, { once: true, passive: true });
+    introVideo.addEventListener("ended", () => {
+      introCompleted = true;
+      if (phase === "intro") void transitionToLoop(0);
+    }, { passive: true });
+    introVideo.addEventListener("waiting", () => scheduleRecovery(false), { passive: true });
+    introVideo.addEventListener("stalled", () => scheduleRecovery(true), { passive: true });
+    introVideo.addEventListener("error", () => scheduleRecovery(true), { passive: true });
+    loopVideos.forEach((video, index) => {
+      video.addEventListener("timeupdate", () => noteProgress(video), { passive: true });
       video.addEventListener("playing", () => {
         clearRecoveryTimer();
         lastProgressAt = performance.now();
-        scheduleBoundary();
+        if (phase === "loop" && index === activeLoopIndex) scheduleBoundary();
       }, { passive: true });
-      video.addEventListener("seeked", scheduleBoundary, { passive: true });
-      video.addEventListener("ratechange", scheduleBoundary, { passive: true });
+      video.addEventListener("seeked", () => {
+        if (phase === "loop" && index === activeLoopIndex) scheduleBoundary();
+      }, { passive: true });
+      video.addEventListener("ratechange", () => {
+        if (phase === "loop" && index === activeLoopIndex) scheduleBoundary();
+      }, { passive: true });
       video.addEventListener("waiting", () => {
-        clearBoundaryTimer();
-        if (index === activeIndex) scheduleRecovery(false);
+        if (phase === "loop" && index === activeLoopIndex) {
+          clearBoundaryTimer();
+          scheduleRecovery(false);
+        }
       }, { passive: true });
       video.addEventListener("stalled", () => {
-        if (index === activeIndex) scheduleRecovery(true);
+        if (phase === "loop" && index === activeLoopIndex) scheduleRecovery(true);
       }, { passive: true });
       video.addEventListener("error", () => {
-        if (index === activeIndex) scheduleRecovery(true);
+        if (phase === "loop" && index === activeLoopIndex) scheduleRecovery(true);
       }, { passive: true });
       video.addEventListener("ended", () => {
-        if (index === activeIndex) void mixLoopBoundary();
+        if (phase === "loop" && index === activeLoopIndex && !transitionInProgress) {
+          void transitionToLoop(nextLoopIndex(index));
+        }
       }, { passive: true });
     });
-    firstVideo.addEventListener("canplay", () => {
-      const secondaryVideo = getVideo(1);
-      if (!secondaryVideo) return;
-      secondaryVideo.preload = "metadata";
-      ensureVideoSource(secondaryVideo);
-    }, { once: true, passive: true });
     if (hero && "IntersectionObserver" in window) {
       const heroObserver = new IntersectionObserver((entries) => {
         const entry = entries[0];
@@ -1227,18 +1380,6 @@
       }, { rootMargin: "80px 0px", threshold: 0 });
       heroObserver.observe(hero);
     }
-    window.setInterval(() => {
-      if (!canPlay()) return;
-      const activeVideo = getVideo(activeIndex);
-      if (!activeVideo) return;
-      const stalledFor = performance.now() - lastProgressAt;
-      const unexpectedlyPaused = activeVideo.paused && !activeVideo.ended;
-      if (unexpectedlyPaused || stalledFor >= HARD_STALL_THRESHOLD) {
-        scheduleRecovery(activeVideo.readyState < HTMLMediaElement.HAVE_CURRENT_DATA);
-      }
-    }, WATCHDOG_INTERVAL);
-    ensureVideoSource(firstVideo);
-    void playWithTimeout(firstVideo).then(scheduleBoundary).catch(() => scheduleRecovery(true));
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) suspendPlayback();
       else resumePlayback();
@@ -1246,6 +1387,20 @@
     window.addEventListener("pagehide", suspendPlayback, { passive: true });
     window.addEventListener("pageshow", resumePlayback, { passive: true });
     window.addEventListener("online", resumePlayback, { passive: true });
+    window.setInterval(() => {
+      if (!canPlay()) return;
+      const activeVideo = currentVideo();
+      noteProgress(activeVideo);
+      const stalledFor = performance.now() - lastProgressAt;
+      const unexpectedlyPaused = activeVideo.paused && !activeVideo.ended;
+      const bufferStarved = activeVideo.readyState < HTMLMediaElement.HAVE_CURRENT_DATA;
+      if (unexpectedlyPaused || stalledFor >= HARD_STALL_THRESHOLD) {
+        scheduleRecovery(bufferStarved || stalledFor >= HARD_STALL_THRESHOLD);
+      }
+    }, WATCHDOG_INTERVAL);
+    ensureVideoSource(introVideo);
+    primeLoop(0);
+    void playWithTimeout(introVideo).catch(() => scheduleRecovery(true));
   };
 
   // src/ts/shared/runtime.ts
@@ -1275,6 +1430,7 @@
   setupCountdown();
   setupBookingDockLayout();
   setupBookingCtaSheen(runtime);
+  setupHeroTitleLayout();
   setupHeroIntroMotion();
   setupPieceViewer();
   setupTapSearchGuard();

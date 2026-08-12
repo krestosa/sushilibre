@@ -10,7 +10,8 @@ test('phone hero uses a stable viewport and keeps copy above the fixed dock', as
     readSource('src/scss/breakpoints/_mobile.scss')
   ]);
 
-  assert.match(tablet, /@media \(max-width: 820px\), \(max-aspect-ratio: 4\/3\)[\s\S]*?\.hero\s*\{[\s\S]*?height: 100svh;[\s\S]*?min-height: 680px;/);
+  assert.match(tablet, /@media \(max-width: 820px\)[\s\S]*?\.hero\s*\{[\s\S]*?height: 100svh;[\s\S]*?min-height: 680px;/);
+  assert.doesNotMatch(tablet, /@media \(max-width: 820px\), \(max-aspect-ratio: 4\/3\)/);
   assert.match(tablet, /\.hero-copy\s*\{[\s\S]*?top: auto;[\s\S]*?bottom: calc\(var\(--dock-height\) \+ var\(--dock-bottom\) \+ 28px\);/);
 
   assert.match(mobile, /@media \(max-width: 620px\)[\s\S]*?\.hero\s*\{[\s\S]*?height: 100svh;[\s\S]*?min-height: 640px;/);

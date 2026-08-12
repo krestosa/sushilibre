@@ -34,13 +34,13 @@
 }
 
 .proposal__intro {
-  max-width: 28ch;
+  max-width: 30ch;
   margin: 0;
   color: #fff;
-  font-size: clamp(27px, 2.22vw, 42px);
+  font-size: clamp(25px, 2vw, 38px);
   font-weight: 400;
-  line-height: 1.02;
-  letter-spacing: -0.058em;
+  line-height: 1.04;
+  letter-spacing: -0.052em;
   text-transform: uppercase;
 }
 
@@ -48,7 +48,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px 18px;
-  margin: clamp(16px, 4vh, 24px) 0 0;
+  margin: clamp(18px, 3.4vh, 26px) 0 0;
   padding: 0;
   list-style: none;
 
@@ -61,10 +61,10 @@
     border: 1px solid rgba(255, 255, 255, 0.84);
     border-radius: 999px;
     color: #fff;
-    font-size: clamp(10px, 0.78vw, 14px);
+    font-size: clamp(10px, 0.72vw, 13px);
     font-weight: 500;
     line-height: 1;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
     text-transform: uppercase;
     white-space: nowrap;
   }
@@ -86,10 +86,10 @@
 .proposal__condition h3 {
   margin: 0;
   color: #fff;
-  font-size: clamp(10px, 0.72vw, 13px);
+  font-size: clamp(11px, 0.76vw, 14px);
   font-weight: 600;
   line-height: 1.1;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
 }
 
@@ -99,15 +99,26 @@
   gap: 7px;
   margin: 10px 0 0;
   color: #fff;
-  font-size: clamp(44px, 3.7vw, 68px);
+  font-size: clamp(46px, 3.7vw, 68px);
   font-weight: 500;
   line-height: 0.9;
-  letter-spacing: -0.075em;
+  letter-spacing: -0.072em;
   white-space: nowrap;
 
   span {
     font-size: 0.52em;
     letter-spacing: -0.04em;
+  }
+}
+
+.proposal__price--benefit {
+  .proposal__eyebrow {
+    font-size: clamp(12px, 0.82vw, 15px);
+    font-weight: 700;
+  }
+
+  .proposal__amount {
+    font-size: clamp(52px, 4.1vw, 76px);
   }
 }
 
@@ -135,13 +146,13 @@
   }
 
   p {
-    max-width: 27ch;
-    margin: 19px 0 0;
+    max-width: 29ch;
+    margin: 16px 0 0;
     color: #fff;
-    font-size: clamp(12px, 0.95vw, 17px);
+    font-size: clamp(13px, 0.9vw, 16px);
     font-weight: 400;
-    line-height: 1.12;
-    letter-spacing: -0.035em;
+    line-height: 1.16;
+    letter-spacing: -0.03em;
     text-transform: uppercase;
   }
 
@@ -175,8 +186,8 @@
   }
 
   .proposal__intro {
-    max-width: 25ch;
-    font-size: clamp(25px, 3.15vw, 35px);
+    max-width: 27ch;
+    font-size: clamp(24px, 2.9vw, 33px);
   }
 
   .proposal__prices {
@@ -197,7 +208,7 @@
   }
 
   .proposal__payment-logo {
-    width: 270px;
+    width: 280px;
   }
 }
 
@@ -216,24 +227,24 @@
   }
 
   .proposal__content {
-    margin-top: clamp(46px, 7vh, 66px);
+    margin-top: clamp(42px, 6vh, 58px);
   }
 
   .proposal__intro {
-    max-width: 28ch;
-    font-size: clamp(25px, 4.6vw, 38px);
+    max-width: 30ch;
+    font-size: clamp(23px, 4.2vw, 32px);
   }
 
   .proposal__chips {
-    margin-top: 30px;
+    margin-top: 28px;
   }
 
   .proposal__prices {
-    margin-top: 50px;
+    margin-top: 48px;
   }
 
   .proposal__conditions {
-    margin-top: 68px;
+    margin-top: 64px;
   }
 
   .proposal + .menu-section .menu-section__shell {
@@ -256,23 +267,24 @@
   }
 
   .proposal__content {
-    margin-top: 38px;
+    margin-top: 34px;
   }
 
   .proposal__intro {
     max-width: none;
-    font-size: clamp(23px, 6.2vw, 31px);
-    line-height: 1.04;
+    font-size: clamp(22px, 5.5vw, 28px);
+    line-height: 1.06;
+    letter-spacing: -0.045em;
   }
 
   .proposal__chips {
     gap: 8px;
-    margin-top: 26px;
+    margin-top: 24px;
 
     li {
       min-height: 26px;
       padding: 5px 10px 4px;
-      font-size: 12px;
+      font-size: 11px;
     }
   }
 
@@ -282,35 +294,50 @@
   }
 
   .proposal__prices {
-    gap: 40px;
-    margin-top: 44px;
+    gap: 42px;
+    margin-top: 42px;
+  }
+
+  .proposal__eyebrow,
+  .proposal__condition h3 {
+    font-size: 11px;
   }
 
   .proposal__amount {
     margin-top: 9px;
-    font-size: clamp(48px, 15vw, 64px);
+    font-size: clamp(52px, 13.2vw, 62px);
+  }
+
+  .proposal__price--benefit {
+    .proposal__eyebrow {
+      font-size: 12px;
+    }
+
+    .proposal__amount {
+      font-size: clamp(58px, 15vw, 70px);
+    }
   }
 
   .proposal__payment-logo {
-    width: 290px;
+    width: 305px;
     margin-top: 16px;
   }
 
   .proposal__conditions {
-    gap: 38px;
-    margin-top: 62px;
+    gap: 36px;
+    margin-top: 58px;
   }
 
   .proposal__condition p {
-    max-width: 32ch;
-    margin-top: 14px;
-    font-size: 18px;
-    line-height: 1.18;
+    max-width: 34ch;
+    margin-top: 13px;
+    font-size: 16px;
+    line-height: 1.2;
   }
 
   .proposal__legal {
     max-width: none;
-    margin-top: 42px;
+    margin-top: 40px;
     font-size: 9px;
     line-height: 1.4;
   }

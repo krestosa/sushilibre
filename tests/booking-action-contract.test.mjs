@@ -41,6 +41,10 @@ test('booking dock exposes reservation and Maps destinations', async () => {
   assert.match(template, /RECOVA/);
   assert.match(template, /JUEVES 03\/09/);
   assert.match(template, /JUE 03\/09/);
+  assert.match(template, /data-video-source="assets\/bg_inicio\.mp4"/);
+  assert.match(template, /<source src="assets\/bg_inicio\.mp4" type="video\/mp4"/);
+  assert.equal((template.match(/data-video-source="assets\/bg_loop\.mp4"/g) ?? []).length, 2);
+  assert.doesNotMatch(template, /\.webm/);
   assert.match(styles, /\.booking-dock__meta--location/);
   assert.match(styles, /\.booking-dock__external-arrow/);
   assert.match(styles, /translate3d\(2px, -2px, 0\)/);
@@ -57,6 +61,48 @@ test('countdown converts the CTA into a smooth menu action at zero', async () =>
   assert.match(countdown, /behavior: reducedMotion\.matches \? 'auto' : 'smooth'/);
   assert.match(countdown, /window\.history\.replaceState\(null, '', '#menu'\)/);
   assert.match(countdown, /if \(remaining === 0\) activateMenuMode\(\)/);
+});
+
+test('active countdown hides the reservation CTA only when the final action overlaps the floating dock', async () => {
+  const [countdown, layout, styles, mobileStyles] = await Promise.all([
+    readSource('src/ts/features/countdown.ts'),
+    readSource('src/ts/features/booking-dock-layout.ts'),
+    readSource('src/scss/components/_booking-button.scss'),
+    readSource('src/scss/breakpoints/_mobile.scss')
+  ]);
+
+  assert.match(countdown, /query<HTMLElement>\('\.menu-final-cta__action'\)/);
+  assert.match(countdown, /FINAL_CTA_DOCK_OVERLAP_PX = 8/);
+  assert.match(countdown, /finalMenuCtaAction\.getBoundingClientRect\(\)/);
+  assert.match(countdown, /dock\.getBoundingClientRect\(\)/);
+  assert.match(countdown, /Math\.min\(actionRect\.bottom, dockRect\.bottom\)/);
+  assert.match(countdown, /Math\.max\(actionRect\.top, dockRect\.top\)/);
+  assert.match(countdown, /overlapHeight >= FINAL_CTA_DOCK_OVERLAP_PX/);
+  assert.match(countdown, /finalMenuCtaActionOverlapsDock && !menuMode/);
+  assert.match(countdown, /classList\.toggle\('is-suppressed', shouldSuppress\)/);
+  assert.match(countdown, /classList\.toggle\('is-cta-suppressed', shouldSuppress\)/);
+  assert.match(countdown, /window\.addEventListener\('scroll'/);
+  assert.match(countdown, /window\.addEventListener\('resize'/);
+  assert.match(countdown, /window\.addEventListener\('orientationchange'/);
+  assert.doesNotMatch(countdown, /FINAL_CTA_MIN_VISIBLE_RATIO|FINAL_CTA_MIN_VISIBLE_PX/);
+  assert.match(layout, /is-cta-suppressed/);
+  assert.match(layout, /--dock-cta-track/);
+  assert.match(layout, /suppressedWidth: 'min\(923px, calc\(100vw - 165px\)\)'/);
+  assert.match(layout, /suppressedWidth: 'min\(667px, calc\(100vw - 145px\)\)'/);
+  assert.match(layout, /dock\.style\.width = 'min\(680px, calc\(100vw - 24px\)\)'/);
+  assert.match(layout, /max-content max-content max-content minmax\(0, 1fr\) var\(--dock-cta-track\)/);
+  assert.match(layout, /countdown\.style\.gridColumn = '1 \/ span 4'/);
+  assert.match(layout, /dateMeta\.style\.justifySelf = 'start'/);
+  assert.match(layout, /timeMeta\.style\.justifySelf = 'start'/);
+  assert.match(mobileStyles, /grid-template-columns:\s*max-content max-content max-content minmax\(0, 1fr\) var\(--dock-cta-track, 96px\)/);
+  assert.match(mobileStyles, /column-gap:\s*12px/);
+  assert.match(mobileStyles, /\.countdown\s*\{[\s\S]*?grid-column:\s*1 \/ span 4/);
+  assert.match(styles, /@property --dock-cta-track/);
+  assert.match(styles, /width 220ms cubic-bezier/);
+  assert.match(styles, /--dock-cta-track 190ms cubic-bezier/);
+  assert.match(styles, /&\.is-suppressed/);
+  assert.match(styles, /visibility: hidden/);
+  assert.match(styles, /pointer-events: none/);
 });
 
 test('reservation CTA motion is slower, brighter and deliberately spaced', async () => {
@@ -85,8 +131,15 @@ test('compiled distribution keeps booking destinations and action hooks', async 
   assert.match(html, /booking-dock__external-arrow/);
   assert.match(html, /RECOVA/);
   assert.match(html, /03\/09/);
+  assert.match(html, /assets\/bg_inicio\.mp4/);
+  assert.match(html, /assets\/bg_loop\.mp4/);
+  assert.doesNotMatch(html, /\.webm/);
   assert.match(script, /data-booking-cta/);
   assert.match(script, /scrollIntoView/);
   assert.match(script, /replaceChildren/);
+  assert.match(script, /is-suppressed/);
+  assert.match(script, /is-cta-suppressed/);
+  assert.match(script, /--dock-cta-track/);
+  assert.match(script, /getBoundingClientRect/);
   assert.match(script, /#menu/);
 });
