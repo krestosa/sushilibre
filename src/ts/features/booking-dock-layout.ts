@@ -12,6 +12,7 @@ export const setupBookingDockLayout = (): void => {
   if (!dock || !venueMeta || !dateMeta || !timeMeta || !countdown || !cta) return;
 
   let activeMode: DockLayoutMode | null = null;
+  let activeLiveState: boolean | null = null;
   let scheduledFrame = 0;
 
   const placeMetadata = ({
@@ -25,6 +26,8 @@ export const setupBookingDockLayout = (): void => {
       item.style.gridColumn = String(index + 1);
       item.style.gridRow = row;
       item.style.padding = padding;
+      item.style.width = '100%';
+      item.style.minWidth = '0';
     });
   };
 
@@ -48,24 +51,60 @@ export const setupBookingDockLayout = (): void => {
     cta.style.gridRow = '1';
   };
 
-  const applyDesktopLayout = (): void => {
+  const applyEventLiveSingleRowLayout = ({
+    width,
+    ctaWidth
+  }: {
+    width: string;
+    ctaWidth: string;
+  }): void => {
+    dock.style.width = width;
+    dock.style.gridTemplateColumns = `repeat(3, minmax(0, 1fr)) ${ctaWidth}`;
+    dock.style.gridTemplateRows = 'minmax(0, 1fr)';
+    dock.style.gap = '9px';
+    dock.style.rowGap = '9px';
+
+    placeMetadata({ row: '1', padding: '0 8px' });
+    countdown.style.gridColumn = '';
+    countdown.style.gridRow = '';
+    cta.style.gridColumn = '4';
+    cta.style.gridRow = '1';
+  };
+
+  const applyDesktopLayout = (eventLive: boolean): void => {
+    if (eventLive) {
+      applyEventLiveSingleRowLayout({
+        width: 'min(760px, calc(100vw - 48px))',
+        ctaWidth: '108px'
+      });
+      return;
+    }
+
     applySingleRowLayout({
       width: 'min(1040px, calc(100vw - 48px))',
-      columns: 'minmax(158px, 1.16fr) minmax(150px, 1.08fr) minmax(86px, 0.68fr) minmax(0, 2.55fr) 108px'
+      columns: 'repeat(3, minmax(0, 1fr)) minmax(0, 2.55fr) 108px'
     });
   };
 
-  const applyCompactLayout = (): void => {
+  const applyCompactLayout = (eventLive: boolean): void => {
+    if (eventLive) {
+      applyEventLiveSingleRowLayout({
+        width: 'min(700px, calc(100vw - 32px))',
+        ctaWidth: '104px'
+      });
+      return;
+    }
+
     applySingleRowLayout({
       width: 'min(920px, calc(100vw - 32px))',
-      columns: 'minmax(142px, 1.1fr) minmax(132px, 1fr) minmax(78px, 0.62fr) minmax(0, 2.3fr) 104px'
+      columns: 'repeat(3, minmax(0, 1fr)) minmax(0, 2.3fr) 104px'
     });
   };
 
-  const applyMobileLayout = (): void => {
+  const applyMobileLayout = (eventLive: boolean): void => {
     dock.style.width = '';
-    dock.style.gridTemplateColumns = 'minmax(0, 1.28fr) minmax(0, 1.05fr) minmax(0, 0.72fr) 96px';
-    dock.style.gridTemplateRows = '48px 96px';
+    dock.style.gridTemplateColumns = 'repeat(3, minmax(0, 1fr)) 96px';
+    dock.style.gridTemplateRows = eventLive ? '48px' : '48px 96px';
     dock.style.gap = '8px';
     dock.style.rowGap = '8px';
 
@@ -73,7 +112,7 @@ export const setupBookingDockLayout = (): void => {
     countdown.style.gridColumn = '1 / span 3';
     countdown.style.gridRow = '2';
     cta.style.gridColumn = '4';
-    cta.style.gridRow = '1 / span 2';
+    cta.style.gridRow = eventLive ? '1' : '1 / span 2';
   };
 
   const resolveMode = (): DockLayoutMode => {
@@ -84,12 +123,14 @@ export const setupBookingDockLayout = (): void => {
 
   const syncLayout = (): void => {
     const nextMode = resolveMode();
-    if (nextMode === activeMode) return;
+    const nextLiveState = dock.classList.contains('is-event-live');
+    if (nextMode === activeMode && nextLiveState === activeLiveState) return;
 
     activeMode = nextMode;
-    if (nextMode === 'mobile') applyMobileLayout();
-    else if (nextMode === 'compact') applyCompactLayout();
-    else applyDesktopLayout();
+    activeLiveState = nextLiveState;
+    if (nextMode === 'mobile') applyMobileLayout(nextLiveState);
+    else if (nextMode === 'compact') applyCompactLayout(nextLiveState);
+    else applyDesktopLayout(nextLiveState);
   };
 
   const scheduleSync = (): void => {
@@ -108,6 +149,11 @@ export const setupBookingDockLayout = (): void => {
   if ('ResizeObserver' in window) {
     const observer = new ResizeObserver(scheduleSync);
     observer.observe(dock);
+  }
+
+  if ('MutationObserver' in window) {
+    const observer = new MutationObserver(scheduleSync);
+    observer.observe(dock, { attributes: true, attributeFilter: ['class'] });
   }
 
   document.fonts.ready.then(scheduleSync).catch(() => undefined);
