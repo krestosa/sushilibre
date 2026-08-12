@@ -71,10 +71,10 @@
         fill: "none"
       });
       const glow = cta.animate([
-        { boxShadow: "0 0 0 rgba(231,112,43,0)", filter: "brightness(1)" },
-        { boxShadow: "0 0 0 rgba(231,112,43,0)", filter: "brightness(1)", offset: 0.18 },
-        { boxShadow: "0 0 28px rgba(231,112,43,.34)", filter: "brightness(1.08)", offset: 0.55 },
-        { boxShadow: "0 0 0 rgba(231,112,43,0)", filter: "brightness(1)" }
+        { boxShadow: "0 0 0 rgba(0,26,197,0)", filter: "brightness(1)" },
+        { boxShadow: "0 0 0 rgba(0,26,197,0)", filter: "brightness(1)", offset: 0.18 },
+        { boxShadow: "0 0 28px rgba(0,26,197,.34)", filter: "brightness(1.08)", offset: 0.55 },
+        { boxShadow: "0 0 0 rgba(0,26,197,0)", filter: "brightness(1)" }
       ], {
         duration,
         easing: "ease-in-out",
@@ -221,6 +221,7 @@
   };
   var setupCountdown = () => {
     const countdown = query(".countdown");
+    const dock2 = query(".booking-dock");
     const cta = query("[data-booking-cta]");
     const ctaLabel = query("[data-booking-cta-label]", cta ?? void 0);
     const menu = query("#menu");
@@ -244,6 +245,8 @@
     const activateMenuMode = () => {
       if (menuMode || !cta || !ctaLabel) return;
       menuMode = true;
+      document.documentElement.classList.add("event-live");
+      dock2?.classList.add("is-event-live");
       cta.href = "#menu";
       cta.dataset.destination = "menu";
       cta.setAttribute("aria-label", "Ir al men\xFA");

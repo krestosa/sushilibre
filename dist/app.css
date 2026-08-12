@@ -58,6 +58,9 @@ video {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
+.countdown[data-state=complete] {
+  display: none;
+}
 
 .countdown__unit {
   display: flex;
@@ -1747,6 +1750,9 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
     --dock-height: 174px;
     --dock-bottom: max(14px, env(safe-area-inset-bottom, 0px));
   }
+  html.event-live {
+    --dock-height: 64px;
+  }
   .booking-dock {
     position: fixed;
     top: auto;
@@ -1755,10 +1761,13 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
     left: max(12px, env(safe-area-inset-left, 0px));
     width: auto;
     margin: 0;
-    grid-template-columns: minmax(0, 1.28fr) minmax(0, 1.05fr) minmax(0, 0.72fr) 96px;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) 96px;
     grid-template-rows: 48px 96px;
     gap: 8px;
     padding: 8px;
+  }
+  .booking-dock.is-event-live {
+    grid-template-rows: 48px;
   }
   .booking-dock__value--desktop {
     display: none;
@@ -1767,10 +1776,16 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
     display: inline;
   }
   .booking-dock__meta {
+    width: 100%;
+    min-width: 0;
     padding: 0 5px;
   }
   .booking-dock__meta strong {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
     font-size: 12px;
+    text-overflow: ellipsis;
   }
   .booking-dock__label {
     margin-bottom: 4px;
@@ -1785,6 +1800,9 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
     grid-column: 4;
     grid-row: 1/span 2;
     font-size: 14px;
+  }
+  .booking-dock.is-event-live .booking-dock__cta {
+    grid-row: 1;
   }
   .countdown__unit strong {
     font-size: 27px;
