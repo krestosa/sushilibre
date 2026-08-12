@@ -64,10 +64,11 @@ test('countdown converts the CTA into a smooth menu action at zero', async () =>
 });
 
 test('active countdown hides the reservation CTA and smoothly contracts the floating dock', async () => {
-  const [countdown, layout, styles] = await Promise.all([
+  const [countdown, layout, styles, mobileStyles] = await Promise.all([
     readSource('src/ts/features/countdown.ts'),
     readSource('src/ts/features/booking-dock-layout.ts'),
-    readSource('src/scss/components/_booking-button.scss')
+    readSource('src/scss/components/_booking-button.scss'),
+    readSource('src/scss/breakpoints/_mobile.scss')
   ]);
 
   assert.match(countdown, /query<HTMLElement>\('\.menu-final-cta'\)/);
@@ -80,7 +81,14 @@ test('active countdown hides the reservation CTA and smoothly contracts the floa
   assert.match(layout, /--dock-cta-track/);
   assert.match(layout, /suppressedWidth: 'min\(923px, calc\(100vw - 165px\)\)'/);
   assert.match(layout, /suppressedWidth: 'min\(667px, calc\(100vw - 145px\)\)'/);
-  assert.match(layout, /'min\(576px, calc\(100vw - 128px\)\)'/);
+  assert.match(layout, /dock\.style\.width = 'min\(680px, calc\(100vw - 24px\)\)'/);
+  assert.match(layout, /max-content max-content max-content minmax\(0, 1fr\) var\(--dock-cta-track\)/);
+  assert.match(layout, /countdown\.style\.gridColumn = '1 \/ span 4'/);
+  assert.match(layout, /dateMeta\.style\.justifySelf = 'start'/);
+  assert.match(layout, /timeMeta\.style\.justifySelf = 'start'/);
+  assert.match(mobileStyles, /grid-template-columns:\s*max-content max-content max-content minmax\(0, 1fr\) var\(--dock-cta-track, 96px\)/);
+  assert.match(mobileStyles, /column-gap:\s*12px/);
+  assert.match(mobileStyles, /\.countdown\s*\{[\s\S]*?grid-column:\s*1 \/ span 4/);
   assert.match(styles, /@property --dock-cta-track/);
   assert.match(styles, /width 220ms cubic-bezier/);
   assert.match(styles, /--dock-cta-track 190ms cubic-bezier/);
