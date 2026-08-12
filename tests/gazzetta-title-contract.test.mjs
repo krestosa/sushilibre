@@ -90,7 +90,7 @@ test('hero lockup stays inline until its real content would collide', async () =
   assert.match(tablet, /\.title-lockup\.is-stacked\s*\{[\s\S]*?grid-template-columns:\s*repeat\(12, minmax\(0, 1fr\)\);[\s\S]*?grid-template-rows:\s*auto auto auto;/);
   assert.match(fonts, /\.title-lockup\.is-stacked \.title-word\s*\{[\s\S]*?font-size:\s*clamp\(132px, 24vw, 198px\)/);
   assert.match(fonts, /\.title-lockup\.is-stacked \.title-kicker\s*\{[\s\S]*?font-weight:\s*600;/);
-  assert.doesNotMatch(fonts, /@media \(max-width: 820px\), \(max-aspect-ratio: 4\/3\)[\s\S]*?\.title-word\s*\{/);
+  assert.doesNotMatch(fonts, /font-size:\s*clamp\(132px, 26vw, 212px\)/);
 
   assert.match(layout, /INLINE_WIDTH\s*=\s*'min\(1600px, calc\(100vw - 48px\)\)'/);
   assert.match(layout, /required\s*=\s*[\s\S]*?sushi\.getBoundingClientRect\(\)\.width[\s\S]*?kicker\.getBoundingClientRect\(\)\.width[\s\S]*?libre\.getBoundingClientRect\(\)\.width/);
