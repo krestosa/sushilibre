@@ -63,9 +63,10 @@ test('countdown converts the CTA into a smooth menu action at zero', async () =>
   assert.match(countdown, /if \(remaining === 0\) activateMenuMode\(\)/);
 });
 
-test('active countdown hides only the reservation button when the final CTA enters view', async () => {
-  const [countdown, styles] = await Promise.all([
+test('active countdown hides the reservation CTA and smoothly contracts the floating dock', async () => {
+  const [countdown, layout, styles] = await Promise.all([
     readSource('src/ts/features/countdown.ts'),
+    readSource('src/ts/features/booking-dock-layout.ts'),
     readSource('src/scss/components/_booking-button.scss')
   ]);
 
@@ -73,7 +74,16 @@ test('active countdown hides only the reservation button when the final CTA ente
   assert.match(countdown, /IntersectionObserver/);
   assert.match(countdown, /finalMenuCtaVisible && !menuMode/);
   assert.match(countdown, /classList\.toggle\('is-suppressed', shouldSuppress\)/);
+  assert.match(countdown, /classList\.toggle\('is-cta-suppressed', shouldSuppress\)/);
   assert.match(countdown, /syncDockCtaVisibility\(\);/);
+  assert.match(layout, /is-cta-suppressed/);
+  assert.match(layout, /--dock-cta-track/);
+  assert.match(layout, /suppressedWidth: 'min\(923px, calc\(100vw - 165px\)\)'/);
+  assert.match(layout, /suppressedWidth: 'min\(667px, calc\(100vw - 145px\)\)'/);
+  assert.match(layout, /'min\(576px, calc\(100vw - 128px\)\)'/);
+  assert.match(styles, /@property --dock-cta-track/);
+  assert.match(styles, /width 220ms cubic-bezier/);
+  assert.match(styles, /--dock-cta-track 190ms cubic-bezier/);
   assert.match(styles, /&\.is-suppressed/);
   assert.match(styles, /visibility: hidden/);
   assert.match(styles, /pointer-events: none/);
@@ -112,5 +122,7 @@ test('compiled distribution keeps booking destinations and action hooks', async 
   assert.match(script, /scrollIntoView/);
   assert.match(script, /replaceChildren/);
   assert.match(script, /is-suppressed/);
+  assert.match(script, /is-cta-suppressed/);
+  assert.match(script, /--dock-cta-track/);
   assert.match(script, /#menu/);
 });
