@@ -31,6 +31,9 @@ export const setupBookingCtaSheen = ({
   });
   cta.prepend(sheen);
 
+  const glowRgb = getComputedStyle(document.documentElement)
+    .getPropertyValue('--orange-rgb')
+    .trim() || '0, 26, 197';
   const initialDelay = 1_500;
   const regularDelay = 7_400;
   const duration = compactViewport.matches || coarsePointer.matches ? 1_450 : 1_800;
@@ -72,10 +75,10 @@ export const setupBookingCtaSheen = ({
     });
 
     const glow = cta.animate([
-      { boxShadow: '0 0 0 rgba(231,112,43,0)', filter: 'brightness(1)' },
-      { boxShadow: '0 0 0 rgba(231,112,43,0)', filter: 'brightness(1)', offset: 0.18 },
-      { boxShadow: '0 0 28px rgba(231,112,43,.34)', filter: 'brightness(1.08)', offset: 0.55 },
-      { boxShadow: '0 0 0 rgba(231,112,43,0)', filter: 'brightness(1)' }
+      { boxShadow: `0 0 0 rgba(${glowRgb},0)`, filter: 'brightness(1)' },
+      { boxShadow: `0 0 0 rgba(${glowRgb},0)`, filter: 'brightness(1)', offset: 0.18 },
+      { boxShadow: `0 0 28px rgba(${glowRgb},.34)`, filter: 'brightness(1.08)', offset: 0.55 },
+      { boxShadow: `0 0 0 rgba(${glowRgb},0)`, filter: 'brightness(1)' }
     ], {
       duration,
       easing: 'ease-in-out',
