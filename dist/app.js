@@ -215,7 +215,7 @@
       dock2.style.gridTemplateRows = eventLive ? "48px" : "48px 96px";
       dock2.style.gap = "8px";
       dock2.style.rowGap = "8px";
-      placeMetadata({ row: "1", padding: "0 5px" });
+      placeMetadata({ row: "1", padding: "0 12px" });
       countdown.style.gridColumn = "1 / span 3";
       countdown.style.gridRow = "2";
       cta.style.gridColumn = "4";
