@@ -189,7 +189,7 @@ const renderMenuCta = () => [
   '            <h3 class="menu-final-cta__title" id="menu-final-cta-title">¿ESTÁS LISTO?</h3>',
   '            <p class="menu-final-cta__text">RESERVÁ TU LUGAR Y VIVÍ SUSHI LIBRE: UNA EXPERIENCIA PARA RECORRER LOS SABORES MÁS REPRESENTATIVOS DE SUSHICLUB.</p>',
   '          </div>',
-  `          <a class="menu-final-cta__action" href="${BOOKING_URL}">RESERVÁ<br>AHORA</a>`,
+  `          <a class="menu-final-cta__action" href="${BOOKING_URL}">RESERVÁ AHORA</a>`,
   '        </section>'
 ].join('\n');
 
