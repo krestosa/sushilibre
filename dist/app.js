@@ -204,13 +204,13 @@
         return;
       }
       applySingleRowLayout({
-        width: "min(920px, calc(100vw - 32px))",
+        width: "min(780px, calc(100vw - 32px))",
         countdownWidth: "minmax(0, 2.3fr)",
         ctaWidth: "104px"
       });
     };
     const applyMobileLayout = (eventLive) => {
-      dock2.style.width = "";
+      dock2.style.width = "min(680px, calc(100vw - 24px))";
       dock2.style.gridTemplateColumns = "minmax(0, 1fr) max-content minmax(0, 1fr) 96px";
       dock2.style.gridTemplateRows = eventLive ? "48px" : "48px 96px";
       dock2.style.gap = "8px";
