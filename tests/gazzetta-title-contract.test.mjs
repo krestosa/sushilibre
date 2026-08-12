@@ -73,9 +73,12 @@ test('proposal heading stays large and on one line at every breakpoint', async (
   assert.match(fonts, /@media \(max-width: 620px\)[\s\S]*?\.proposal__header h2\s*\{[\s\S]*?font-size:\s*clamp\(50px, 13\.8vw, 74px\)/);
 });
 
-test('hero lockup stays heavy, squared and the experience kicker is geometrically centered', async () => {
-  const [fonts, template, distribution] = await Promise.all([
+test('hero lockup stays inline until its real content would collide', async () => {
+  const [fonts, tablet, layout, application, template, distribution] = await Promise.all([
     readSource('src/scss/_fonts.scss'),
+    readSource('src/scss/breakpoints/_tablet.scss'),
+    readSource('src/ts/features/hero-title-layout.ts'),
+    readSource('src/ts/application.ts'),
     readSource('src/static/index.html'),
     readSource('dist/index.html')
   ]);
@@ -83,10 +86,17 @@ test('hero lockup stays heavy, squared and the experience kicker is geometricall
   assert.match(fonts, /@media \(min-width: 821px\)[\s\S]*?\.title-lockup\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) auto minmax\(0, 1fr\)/);
   assert.match(fonts, /@media \(min-width: 821px\)[\s\S]*?\.title-kicker\s*\{[\s\S]*?justify-self:\s*center;[\s\S]*?font-size:\s*clamp\(22px, 1\.85vw, 36px\)/);
   assert.match(fonts, /@media \(min-width: 821px\) and \(max-width: 1100px\)[\s\S]*?\.title-word\s*\{[\s\S]*?font-size:\s*clamp\(152px, 18vw, 204px\)/);
-  assert.match(fonts, /@media \(max-width: 820px\), \(max-aspect-ratio: 4\/3\)[\s\S]*?\.title-word\s*\{[\s\S]*?font-size:\s*clamp\(132px, 26vw, 212px\)/);
-  assert.match(fonts, /@media \(max-width: 820px\), \(max-aspect-ratio: 4\/3\)[\s\S]*?\.title-kicker\s*\{[\s\S]*?grid-column:\s*1 \/ -1;[\s\S]*?grid-row:\s*2;[\s\S]*?justify-self:\s*center;/);
-  assert.match(fonts, /@media \(max-width: 820px\), \(max-aspect-ratio: 4\/3\)[\s\S]*?\.title-word--libre\s*\{[\s\S]*?grid-row:\s*3;/);
-  assert.match(fonts, /@media \(max-width: 620px\)[\s\S]*?\.title-word\s*\{[\s\S]*?font-size:\s*clamp\(118px, 34vw, 176px\)/);
+
+  assert.match(tablet, /\.title-lockup\.is-stacked\s*\{[\s\S]*?grid-template-columns:\s*repeat\(12, minmax\(0, 1fr\)\);[\s\S]*?grid-template-rows:\s*auto auto auto;/);
+  assert.match(fonts, /\.title-lockup\.is-stacked \.title-word\s*\{[\s\S]*?font-size:\s*clamp\(132px, 24vw, 198px\)/);
+  assert.match(fonts, /\.title-lockup\.is-stacked \.title-kicker\s*\{[\s\S]*?font-weight:\s*600;/);
+  assert.doesNotMatch(fonts, /@media \(max-width: 820px\), \(max-aspect-ratio: 4\/3\)[\s\S]*?\.title-word\s*\{/);
+
+  assert.match(layout, /INLINE_WIDTH\s*=\s*'min\(1600px, calc\(100vw - 48px\)\)'/);
+  assert.match(layout, /required\s*=\s*[\s\S]*?sushi\.getBoundingClientRect\(\)\.width[\s\S]*?kicker\.getBoundingClientRect\(\)\.width[\s\S]*?libre\.getBoundingClientRect\(\)\.width/);
+  assert.match(layout, /lockup\.classList\.toggle\(STACKED_CLASS, shouldStack\)/);
+  assert.match(layout, /document\.fonts\.ready\.then\(scheduleSync\)/);
+  assert.match(application, /setupHeroTitleLayout\(\);/);
 
   assert.match(fonts, /\.title-word--libre\s*\{[\s\S]*?position:\s*relative;[\s\S]*?width:\s*max-content;/);
   assert.match(fonts, /\.title-word__sup\s*\{[\s\S]*?position:\s*relative;[\s\S]*?top:\s*-0\.44em;[\s\S]*?display:\s*inline-block;[\s\S]*?margin-left:\s*0\.06em;[\s\S]*?vertical-align:\s*top;[\s\S]*?font-size:\s*0\.24em;[\s\S]*?font-weight:\s*900;/);
@@ -116,6 +126,7 @@ test('compiled CSS keeps Gazzetta weights and neutral tracking for display title
   assert.match(css, /\.menu-section__intro h2[\s\S]*?font-weight:\s*700/);
   assert.match(css, /\.menu-group__title[\s\S]*?font-weight:\s*800/);
   assert.match(css, /grid-template-columns:\s*minmax\(0, 1fr\) auto minmax\(0, 1fr\)/);
+  assert.match(css, /\.title-lockup\.is-stacked/);
   assert.match(css, /\.title-word--libre\s*\{[\s\S]*?width:\s*max-content/);
   assert.match(css, /\.title-word__sup\s*\{[\s\S]*?position:\s*relative;[\s\S]*?top:\s*-0\.44em;[\s\S]*?margin-left:\s*0\.06em;[\s\S]*?vertical-align:\s*top;[\s\S]*?font-size:\s*0\.24em/);
 });
