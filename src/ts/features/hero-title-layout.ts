@@ -1,6 +1,7 @@
 import { query } from '../shared/dom';
 
 const STACKED_CLASS = 'is-stacked';
+const INLINE_WIDTH = 'min(1600px, calc(100vw - 48px))';
 const COLLISION_BUFFER_PX = 8;
 const RETURN_BUFFER_PX = 24;
 
@@ -17,10 +18,12 @@ export const setupHeroTitleLayout = (): void => {
 
   const measureInlineFit = (): { available: number; required: number } => {
     const wasStacked = lockup.classList.contains(STACKED_CLASS);
+    const previousWidth = lockup.style.width;
 
-    // Measure the natural one-line composition even while the stacked layout is active.
-    // The class is restored before the browser paints the frame.
+    // Always measure the real single-line composition. The temporary changes are
+    // restored within the same animation frame, before the browser paints.
     if (wasStacked) lockup.classList.remove(STACKED_CLASS);
+    lockup.style.width = INLINE_WIDTH;
 
     const style = window.getComputedStyle(lockup);
     const gap = Number.parseFloat(style.columnGap) || 0;
@@ -31,6 +34,7 @@ export const setupHeroTitleLayout = (): void => {
       libre.getBoundingClientRect().width +
       gap * 2;
 
+    lockup.style.width = previousWidth;
     if (wasStacked) lockup.classList.add(STACKED_CLASS);
 
     return { available, required };
@@ -43,6 +47,7 @@ export const setupHeroTitleLayout = (): void => {
     const shouldStack = required + buffer > available;
 
     lockup.classList.toggle(STACKED_CLASS, shouldStack);
+    lockup.style.width = shouldStack ? '' : INLINE_WIDTH;
   };
 
   const scheduleSync = (): void => {
