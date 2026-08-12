@@ -38,7 +38,10 @@ const preloadPieceImages = (buttons: readonly HTMLButtonElement[]): void => {
 
   const pump = (): void => {
     while (active < PRELOAD_CONCURRENCY && cursor < sources.length) {
-      const source = sources[cursor++];
+      const source = sources[cursor];
+      cursor += 1;
+      if (!source) continue;
+
       const preload = new Image();
       active += 1;
       pending.add(preload);
