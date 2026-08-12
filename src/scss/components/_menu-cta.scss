@@ -1,4 +1,6 @@
 .menu-item__view {
+  display: inline-grid;
+  place-items: center;
   width: 30px;
   height: 30px;
   min-width: 30px;
@@ -8,11 +10,14 @@
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.28);
   color: #fff;
+  line-height: 0;
+  vertical-align: middle;
 
   img {
     display: block;
     width: 18px;
     height: 18px;
+    margin: 0;
     opacity: 0.9;
     transition: filter 140ms ease-out, opacity 140ms ease-out;
   }
@@ -38,6 +43,7 @@
   align-items: end;
   gap: clamp(36px, 6vw, 96px);
   margin-top: clamp(6vh, 10vh, 14vh);
+  margin-bottom: clamp(72px, 9vh, 118px);
   padding: clamp(48px, 6vw, 92px);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 16px;
@@ -107,7 +113,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: clamp(180px, 14vw, 240px);
+  width: clamp(200px, 15vw, 250px);
   min-height: clamp(84px, 7.2vw, 116px);
   padding: 18px 24px;
   border-radius: 8px;
@@ -120,6 +126,7 @@
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
+  white-space: nowrap;
   transition: transform 180ms ease-out, filter 180ms ease-out, box-shadow 220ms ease-out;
 
   &:hover {
@@ -168,6 +175,7 @@
   .menu-final-cta {
     gap: 28px;
     margin-top: 9vh;
+    margin-bottom: 88px;
     padding: 36px 28px 30px;
     border-radius: 12px;
   }
