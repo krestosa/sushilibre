@@ -100,23 +100,32 @@ export const setupFinalCtaReveal = (): void => {
     copy.style.width = mobile ? '100%' : 'calc(100% - var(--cta-content-inset))';
     copy.style.marginLeft = mobile ? '0' : 'var(--cta-content-inset)';
     copy.style.paddingTop = 'var(--cta-main-top)';
+    copy.style.display = 'flex';
+    copy.style.flexDirection = 'column';
+    copy.style.alignItems = 'center';
+    copy.style.textAlign = 'center';
 
-    title.style.maxWidth = mobile ? '7.8ch' : 'none';
-    title.style.fontSize = mobile ? 'clamp(64px, 19vw, 92px)' : compact ? 'clamp(82px, 12vw, 132px)' : 'clamp(104px, 11.4vw, 214px)';
-    title.style.lineHeight = mobile ? '0.76' : '0.75';
-    title.style.letterSpacing = '-0.018em';
+    title.style.width = '100%';
+    title.style.maxWidth = mobile ? '8.6ch' : 'none';
+    title.style.marginInline = 'auto';
+    title.style.fontSize = mobile ? 'clamp(60px, 18vw, 86px)' : compact ? 'clamp(82px, 12vw, 132px)' : 'clamp(104px, 11.4vw, 214px)';
+    title.style.lineHeight = mobile ? '0.9' : '0.78';
+    title.style.letterSpacing = mobile ? '-0.01em' : '-0.018em';
+    title.style.textAlign = 'center';
     title.style.whiteSpace = mobile ? 'normal' : 'nowrap';
 
-    text.style.maxWidth = mobile ? '34ch' : '55ch';
-    text.style.marginTop = mobile ? '18px' : 'clamp(22px, 2vw, 30px)';
+    text.style.maxWidth = mobile ? '32ch' : '55ch';
+    text.style.marginTop = mobile ? '20px' : 'clamp(22px, 2vw, 30px)';
+    text.style.marginInline = 'auto';
     text.style.fontSize = mobile ? 'clamp(13px, 3.7vw, 16px)' : 'clamp(15px, 1.1vw, 20px)';
-    text.style.lineHeight = mobile ? '1.17' : '1.14';
+    text.style.lineHeight = mobile ? '1.22' : '1.14';
+    text.style.textAlign = 'center';
 
-    action.style.justifySelf = 'start';
-    action.style.alignSelf = 'start';
+    action.style.justifySelf = 'center';
+    action.style.alignSelf = 'center';
     action.style.width = mobile ? 'min(100%, 320px)' : 'clamp(220px, 17vw, 292px)';
     action.style.minHeight = mobile ? '68px' : 'clamp(72px, 5.4vw, 88px)';
-    action.style.margin = mobile ? '0' : '0 0 0 var(--cta-content-inset)';
+    action.style.margin = '0 auto';
     action.style.padding = mobile ? '16px 22px' : '18px 28px';
     action.style.background = 'var(--orange)';
     action.style.border = '1px solid rgba(255, 255, 255, 0.16)';
