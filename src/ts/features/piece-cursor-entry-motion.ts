@@ -43,8 +43,8 @@ export const setupPieceCursorEntryMotion = (): void => {
     prompt.classList.add('is-entering-from-pointer');
 
     // Keep the helper at scale 0 while its existing spring retargets from any
-    // previous hidden position. On the following paint, reveal from the exact
-    // pointer boundary point instead of from that stale position.
+    // previous hidden position. Then lock the zero-scale center to the exact
+    // pointer boundary point before allowing the 0 -> 100% reveal.
     revealFrame = window.requestAnimationFrame(() => {
       revealFrame = 0;
       revealFrame2 = window.requestAnimationFrame(() => {
@@ -54,6 +54,7 @@ export const setupPieceCursorEntryMotion = (): void => {
         const offset = centerOffsetTo(entryX, entryY);
         prompt.style.setProperty('--piece-entry-x', `${offset.x}px`);
         prompt.style.setProperty('--piece-entry-y', `${offset.y}px`);
+        void prompt.offsetWidth;
         prompt.classList.remove('is-entering-from-pointer');
       });
     });
