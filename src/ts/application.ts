@@ -11,6 +11,8 @@ import { setupVideoLoop } from './features/video-loop';
 import { createRuntimeContext } from './shared/runtime';
 
 const runtime = createRuntimeContext();
+const compactVideo = runtime.compactViewport.matches || runtime.coarsePointer.matches;
+
 setupProposalReveal();
 setupCountdown();
 setupBookingDockLayout();
@@ -20,4 +22,31 @@ setupHeroIntroMotion();
 setupPieceViewer();
 setupPieceCursorPreview();
 setupTapSearchGuard();
-setupVideoLoop(runtime);
+
+if (compactVideo) {
+  const intro = document.querySelector<HTMLVideoElement>('[data-intro-video]');
+  const loop = document.querySelector<HTMLVideoElement>('[data-loop-video]');
+
+  if (intro && loop) {
+    const source = loop.dataset.videoSource;
+    loop.muted = true;
+    loop.playsInline = true;
+    loop.loop = true;
+    loop.preload = 'auto';
+    if (source && !loop.currentSrc && !loop.hasAttribute('src')) {
+      loop.src = source;
+      loop.load();
+    }
+
+    intro.addEventListener('ended', () => {
+      void loop.play().then(() => {
+        loop.classList.add('is-active');
+        intro.classList.remove('is-active');
+      });
+    }, { once: true, passive: true });
+  } else {
+    setupVideoLoop(runtime);
+  }
+} else {
+  setupVideoLoop(runtime);
+}
