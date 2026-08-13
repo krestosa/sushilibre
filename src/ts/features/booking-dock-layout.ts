@@ -16,23 +16,13 @@ export const setupBookingDockLayout = (): void => {
   let activeSuppressedState: boolean | null = null;
   let scheduledFrame = 0;
 
-  const placeMetadata = ({
-    row,
-    padding
-  }: {
-    row: string;
-    padding: string;
-  }): void => {
-    const placements = [
-      { item: venueMeta, column: '1', justify: 'start' },
-      { item: dateMeta, column: '2', justify: 'center' },
-      { item: timeMeta, column: '3', justify: 'end' }
-    ];
+  const placeMetadata = ({ row, padding }: { row: string; padding: string }): void => {
+    const placements = [venueMeta, dateMeta, timeMeta];
 
-    placements.forEach(({ item, column, justify }) => {
-      item.style.gridColumn = column;
+    placements.forEach((item, index) => {
+      item.style.gridColumn = String(index + 1);
       item.style.gridRow = row;
-      item.style.justifySelf = justify;
+      item.style.justifySelf = 'start';
       item.style.width = 'max-content';
       item.style.maxWidth = '100%';
       item.style.minWidth = '0';
@@ -40,50 +30,61 @@ export const setupBookingDockLayout = (): void => {
     });
   };
 
+  const styleCountdownBoundary = (enabled: boolean): void => {
+    countdown.style.boxSizing = 'border-box';
+    countdown.style.marginLeft = enabled ? '4px' : '0';
+    countdown.style.paddingLeft = enabled ? '14px' : '0';
+    countdown.style.borderLeft = enabled ? '1px solid rgba(255, 255, 255, 0.12)' : '0';
+  };
+
   const applySingleRowLayout = ({
     width,
     suppressedWidth,
-    countdownWidth,
     ctaWidth,
-    ctaSuppressed
+    ctaSuppressed,
+    metaGap
   }: {
     width: string;
     suppressedWidth: string;
-    countdownWidth: string;
     ctaWidth: string;
     ctaSuppressed: boolean;
+    metaGap: string;
   }): void => {
     dock.style.width = ctaSuppressed ? suppressedWidth : width;
     dock.style.setProperty('--dock-cta-track', ctaSuppressed ? '0px' : ctaWidth);
-    dock.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) ${countdownWidth} var(--dock-cta-track)`;
+    dock.style.gridTemplateColumns = `max-content max-content max-content minmax(0, 1fr) var(--dock-cta-track)`;
     dock.style.gridTemplateRows = 'minmax(0, 1fr)';
-    dock.style.gap = '9px';
-    dock.style.rowGap = '9px';
+    dock.style.columnGap = metaGap;
+    dock.style.rowGap = '0';
 
-    placeMetadata({ row: '1', padding: '0 8px' });
+    placeMetadata({ row: '1', padding: '0 4px' });
     countdown.style.gridColumn = '4';
     countdown.style.gridRow = '1';
+    styleCountdownBoundary(true);
     cta.style.gridColumn = '5';
     cta.style.gridRow = '1';
   };
 
   const applyEventLiveSingleRowLayout = ({
     width,
-    ctaWidth
+    ctaWidth,
+    metaGap
   }: {
     width: string;
     ctaWidth: string;
+    metaGap: string;
   }): void => {
     dock.style.width = width;
     dock.style.setProperty('--dock-cta-track', ctaWidth);
-    dock.style.gridTemplateColumns = `minmax(0, 1fr) max-content minmax(0, 1fr) var(--dock-cta-track)`;
+    dock.style.gridTemplateColumns = `max-content max-content max-content var(--dock-cta-track)`;
     dock.style.gridTemplateRows = 'minmax(0, 1fr)';
-    dock.style.gap = '9px';
-    dock.style.rowGap = '9px';
+    dock.style.columnGap = metaGap;
+    dock.style.rowGap = '0';
 
-    placeMetadata({ row: '1', padding: '0 8px' });
+    placeMetadata({ row: '1', padding: '0 4px' });
     countdown.style.gridColumn = '';
     countdown.style.gridRow = '';
+    styleCountdownBoundary(false);
     cta.style.gridColumn = '4';
     cta.style.gridRow = '1';
   };
@@ -91,36 +92,38 @@ export const setupBookingDockLayout = (): void => {
   const applyDesktopLayout = (eventLive: boolean, ctaSuppressed: boolean): void => {
     if (eventLive) {
       applyEventLiveSingleRowLayout({
-        width: 'min(760px, calc(100vw - 48px))',
-        ctaWidth: '108px'
+        width: 'min(680px, calc(100vw - 48px))',
+        ctaWidth: '108px',
+        metaGap: '20px'
       });
       return;
     }
 
     applySingleRowLayout({
-      width: 'min(1040px, calc(100vw - 48px))',
-      suppressedWidth: 'min(923px, calc(100vw - 165px))',
-      countdownWidth: 'minmax(0, 2.55fr)',
+      width: 'min(960px, calc(100vw - 48px))',
+      suppressedWidth: 'min(760px, calc(100vw - 96px))',
       ctaWidth: '108px',
-      ctaSuppressed
+      ctaSuppressed,
+      metaGap: '20px'
     });
   };
 
   const applyCompactLayout = (eventLive: boolean, ctaSuppressed: boolean): void => {
     if (eventLive) {
       applyEventLiveSingleRowLayout({
-        width: 'min(700px, calc(100vw - 32px))',
-        ctaWidth: '104px'
+        width: 'min(640px, calc(100vw - 32px))',
+        ctaWidth: '104px',
+        metaGap: '14px'
       });
       return;
     }
 
     applySingleRowLayout({
-      width: 'min(780px, calc(100vw - 32px))',
-      suppressedWidth: 'min(667px, calc(100vw - 145px))',
-      countdownWidth: 'minmax(0, 2.3fr)',
+      width: 'min(740px, calc(100vw - 32px))',
+      suppressedWidth: 'min(620px, calc(100vw - 64px))',
       ctaWidth: '104px',
-      ctaSuppressed
+      ctaSuppressed,
+      metaGap: '14px'
     });
   };
 
@@ -130,15 +133,13 @@ export const setupBookingDockLayout = (): void => {
     dock.style.setProperty('--dock-cta-track', suppressReservation ? '0px' : '96px');
     dock.style.gridTemplateColumns = 'max-content max-content max-content minmax(0, 1fr) var(--dock-cta-track)';
     dock.style.gridTemplateRows = eventLive ? '48px' : '48px 96px';
-    dock.style.columnGap = '12px';
+    dock.style.columnGap = '8px';
     dock.style.rowGap = '8px';
 
-    placeMetadata({ row: '1', padding: '0 4px' });
-    venueMeta.style.justifySelf = 'start';
-    dateMeta.style.justifySelf = 'start';
-    timeMeta.style.justifySelf = 'start';
+    placeMetadata({ row: '1', padding: '0 2px' });
     countdown.style.gridColumn = '1 / span 4';
     countdown.style.gridRow = '2';
+    styleCountdownBoundary(false);
     cta.style.gridColumn = '5';
     cta.style.gridRow = eventLive ? '1' : '1 / span 2';
   };
