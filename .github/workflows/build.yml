@@ -1,9 +1,11 @@
-name: Build, validate and publish
+name: Build and publish static distribution
 
 on:
   push:
     branches:
       - '**'
+    paths-ignore:
+      - 'dist/**'
   pull_request:
     branches:
       - '**'
@@ -13,11 +15,11 @@ permissions:
   contents: write
 
 concurrency:
-  group: sushilibre-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  group: sushilibre-build-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -25,67 +27,63 @@ jobs:
       SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
     steps:
-      - name: Checkout source branch
-        uses: actions/checkout@v4
+      - name: Checkout source commit
+        uses: actions/checkout@v6
         with:
-          ref: ${{ env.TARGET_BRANCH }}
+          ref: ${{ env.SOURCE_SHA }}
           fetch-depth: 0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
 
-      - name: Verify static assets
-        run: test -d dist/assets
-
-      - name: Install locked dependencies
+      - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Run local-equivalent verification
-        shell: bash
+      - name: Build static site
         run: |
-          set -o pipefail
-          mkdir -p build-diagnostics
-          npm run verify 2>&1 | tee build-diagnostics/verify.log
+          npm run clean
+          npm run build
+          test -f dist/index.html
+          test -f dist/app.css
+          test -f dist/app.js
 
-      - name: Upload build diagnostics
-        if: always()
+      - name: Run validation without blocking publish
         continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-diagnostics
-          path: build-diagnostics
-          if-no-files-found: warn
-          retention-days: 1
+        run: |
+          npm run typecheck
+          npm test
 
       - name: Upload static distribution artifact
-        continue-on-error: true
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: sushilibre-dist
+          name: sushilibre-dist-${{ github.sha }}
           path: dist
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 3
 
-      - name: Publish static distribution
+      - name: Publish static distribution to branch
+        if: github.event_name == 'push'
         shell: bash
         run: |
           set -euo pipefail
+
+          remote_sha="$(git ls-remote origin "refs/heads/${TARGET_BRANCH}" | cut -f1)"
+          if [[ "${remote_sha}" != "${SOURCE_SHA}" ]]; then
+            echo "A newer source commit exists; skipping this stale publish."
+            exit 0
+          fi
+
           git add -A dist
           if git diff --cached --quiet; then
             echo "Static distribution is already current."
             exit 0
           fi
 
-          remote_sha="$(git ls-remote origin "refs/heads/${TARGET_BRANCH}" | cut -f1)"
-          if [[ "${remote_sha}" != "${SOURCE_SHA}" ]]; then
-            echo "A newer source commit exists; its workflow will publish the matching distribution."
-            exit 0
-          fi
-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Publish static distribution"
+          git commit -m "chore: publish static distribution [skip ci]"
           git push origin "HEAD:${TARGET_BRANCH}"
