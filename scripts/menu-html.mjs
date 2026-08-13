@@ -148,9 +148,12 @@ const renderMenuItem = (item, sectionPieces, itemIndex) => {
     : '';
   const modifier = item.description ? '' : ' menu-item--simple';
   const revealDelay = Math.min(itemIndex * ITEM_REVEAL_STAGGER_MS, MAX_ITEM_REVEAL_STAGGER_MS);
+  const pieceAttributes = item.image
+    ? ` data-piece-item data-piece-name="${escapeAttribute(item.name)}" data-piece-image="${escapeAttribute(item.image)}"`
+    : '';
 
   return [
-    `          <article class="menu-item${modifier} menu-reveal menu-reveal--item" data-menu-reveal style="--menu-reveal-delay:${revealDelay}ms">`,
+    `          <article class="menu-item${modifier} menu-reveal menu-reveal--item" data-menu-reveal${pieceAttributes} style="--menu-reveal-delay:${revealDelay}ms">`,
     '            <div class="menu-item__header">',
     `              <div class="menu-item__identity"><h4 class="menu-item__name">${escapeText(item.name)}</h4>${controlsMarkup}</div>`,
     '            </div>',
