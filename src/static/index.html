@@ -41,7 +41,29 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="app.css?v=__ASSET_VERSION__" />
-    <link rel="stylesheet" href="assets/hero-fade.css?v=__ASSET_VERSION__" />
+    <style>
+      .hero__gradient {
+        background: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, .93) 16%, rgba(0, 0, 0, .59) 39%, rgba(0, 0, 0, .2) 58%, transparent 69.5%) !important;
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        z-index: 2;
+        right: 0;
+        bottom: -1px;
+        left: 0;
+        height: clamp(72px, 8svh, 104px);
+        pointer-events: none;
+        background: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .92) 18%, rgba(0, 0, 0, .58) 46%, rgba(0, 0, 0, .24) 72%, transparent 100%);
+      }
+      .hero__grain {
+        -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 88%, rgba(0, 0, 0, .42) 93%, transparent 98%) !important;
+        mask-image: linear-gradient(180deg, #000 0%, #000 88%, rgba(0, 0, 0, .42) 93%, transparent 98%) !important;
+      }
+      @media (max-width: 720px) {
+        .hero::after { height: clamp(58px, 7svh, 78px); }
+      }
+    </style>
     <script src="app.js?v=__ASSET_VERSION__" defer></script>
   </head>
   <body>
