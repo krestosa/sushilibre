@@ -1,6 +1,13 @@
+.menu-section {
+  --menu-marquee-height: clamp(198px, 13vw, 240px);
+}
+
 .menu-marquee {
   position: relative;
+  display: flex;
+  align-items: center;
   width: 100vw;
+  height: var(--menu-marquee-height);
   margin-left: calc(50% - 50vw);
   overflow: hidden;
   background: var(--orange);
@@ -10,7 +17,9 @@
 
 .menu-marquee__track {
   display: flex;
+  align-items: center;
   width: max-content;
+  height: 100%;
   transform: translate3d(0, 0, 0);
   will-change: transform;
 }
@@ -19,18 +28,21 @@
   display: flex;
   flex: 0 0 auto;
   align-items: center;
+  height: 100%;
   white-space: nowrap;
 }
 
 .menu-marquee__item {
   display: inline-flex;
-  align-items: flex-start;
-  padding: clamp(22px, 2.7vw, 42px) clamp(24px, 2.8vw, 54px);
+  align-items: center;
+  height: 100%;
+  padding: 0 clamp(30px, 3.25vw, 62px);
   font-family: "Gazzetta", sans-serif;
-  font-size: clamp(66px, 7.8vw, 148px);
+  font-size: clamp(76px, 8.65vw, 166px);
   font-weight: 900;
-  line-height: 0.76;
-  letter-spacing: -0.035em;
+  line-height: 0.78;
+  letter-spacing: -0.018em;
+  word-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -44,28 +56,31 @@
 
 .menu-marquee__separator {
   flex: 0 0 auto;
-  font-size: clamp(18px, 1.45vw, 28px);
+  margin-inline: clamp(4px, 0.45vw, 9px);
+  font-size: clamp(20px, 1.6vw, 31px);
   line-height: 1;
   opacity: 0.72;
 }
 
 .menu-marquee + .menu-final-cta {
-  margin-top: clamp(42px, 6vh, 72px);
+  margin-top: 0;
 }
 
 @media (max-width: 720px) {
+  .menu-section {
+    --menu-marquee-height: clamp(150px, 39vw, 182px);
+  }
+
   .menu-marquee__item {
-    padding: 22px 24px;
-    font-size: clamp(54px, 15.5vw, 78px);
+    padding: 0 28px;
+    font-size: clamp(60px, 17.2vw, 88px);
     line-height: 0.8;
+    word-spacing: 0.12em;
   }
 
   .menu-marquee__separator {
-    font-size: 16px;
-  }
-
-  .menu-marquee + .menu-final-cta {
-    margin-top: 46px;
+    margin-inline: 4px;
+    font-size: 17px;
   }
 }
 
