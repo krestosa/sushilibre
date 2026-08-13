@@ -8,18 +8,14 @@ export const setupMenuDepth = (): void => {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   const coarse = window.matchMedia('(pointer: coarse)');
   let frame = 0;
+  let active = false;
 
   const update = (): void => {
     frame = 0;
-    if (reduce.matches) {
-      background.style.transform = 'none';
-      return;
-    }
+    if (!active || reduce.matches) return;
 
     const rect = section.getBoundingClientRect();
     const viewport = Math.max(1, window.innerHeight);
-    if (rect.bottom < -120 || rect.top > viewport + 120) return;
-
     const distance = Math.max(1, rect.height - viewport);
     const progress = Math.min(1, Math.max(0, -rect.top / distance));
     const centered = progress * 2 - 1;
@@ -32,15 +28,41 @@ export const setupMenuDepth = (): void => {
   };
 
   const schedule = (): void => {
-    if (!frame) frame = requestAnimationFrame(update);
+    if (active && !reduce.matches && !frame) frame = requestAnimationFrame(update);
+  };
+
+  const syncMotion = (): void => {
+    if (reduce.matches) {
+      background.style.transform = 'none';
+      background.style.willChange = 'auto';
+      return;
+    }
+    background.style.willChange = active ? 'transform' : 'auto';
+    schedule();
   };
 
   background.style.transformOrigin = 'center';
-  background.style.willChange = 'transform';
+
+  const observer = new IntersectionObserver((entries) => {
+    active = Boolean(entries[0]?.isIntersecting);
+    background.style.willChange = active && !reduce.matches ? 'transform' : 'auto';
+    if (active) schedule();
+  }, { rootMargin: '120px 0px', threshold: 0 });
+  observer.observe(section);
+
   window.addEventListener('scroll', schedule, { passive: true });
   window.addEventListener('resize', schedule, { passive: true });
   window.addEventListener('orientationchange', schedule, { passive: true });
-  reduce.addEventListener('change', schedule);
+  reduce.addEventListener('change', syncMotion);
   coarse.addEventListener('change', schedule);
-  schedule();
+
+  window.addEventListener('pagehide', () => {
+    observer.disconnect();
+    if (frame) cancelAnimationFrame(frame);
+    window.removeEventListener('scroll', schedule);
+    window.removeEventListener('resize', schedule);
+    window.removeEventListener('orientationchange', schedule);
+    reduce.removeEventListener('change', syncMotion);
+    coarse.removeEventListener('change', schedule);
+  }, { once: true });
 };
