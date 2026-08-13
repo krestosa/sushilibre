@@ -9,3 +9,14 @@
   animation-range: normal !important;
   translate: none !important;
 }
+
+// The blue marquee + final CTA are the complete endcap. Do not leave the
+// former dock-safe black padding after them; mobile reserves the dock inside
+// the CTA itself so the page ends directly against the counter.
+.menu-section__shell {
+  padding-bottom: 0 !important;
+}
+
+html.has-menu-reveal .menu-final-cta.menu-reveal {
+  --menu-reveal-distance: 0px;
+}
