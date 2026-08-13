@@ -185,6 +185,23 @@ const renderMenuGroup = (section) => {
   ].join('\n');
 };
 
+const renderMarqueeItems = () => Array.from({ length: 6 }, () => [
+  '<span class="menu-marquee__item">SUSHI LIBRE<sup>2</sup></span>',
+  '<span class="menu-marquee__separator" aria-hidden="true">•</span>'
+].join('')).join('');
+
+const renderMenuMarquee = () => {
+  const items = renderMarqueeItems();
+  return [
+    '        <div class="menu-marquee" data-scroll-marquee aria-hidden="true">',
+    '          <div class="menu-marquee__track" data-scroll-marquee-track>',
+    `            <div class="menu-marquee__group" data-scroll-marquee-group>${items}</div>`,
+    `            <div class="menu-marquee__group">${items}</div>`,
+    '          </div>',
+    '        </div>'
+  ].join('\n');
+};
+
 const renderMenuCta = () => [
   '        <section class="menu-final-cta menu-reveal menu-reveal--item" data-menu-reveal aria-labelledby="menu-final-cta-title">',
   '          <div class="menu-final-cta__copy">',
@@ -222,6 +239,7 @@ export const renderMenuSection = (menu) => {
     '        <div class="menu-section__groups" data-menu-groups>',
     groups,
     '        </div>',
+    renderMenuMarquee(),
     renderMenuCta(),
     '      </div>',
     '    </section>',
