@@ -17,9 +17,9 @@ const clamp = (value: number, minimum: number, maximum: number): number =>
 
 export const setupPieceCursorPrompt = (): void => {
   const menuRoot = query<HTMLElement>('[data-menu-root]');
-  const menuGroups = query<HTMLElement>('[data-menu-groups]', menuRoot ?? undefined);
+  const itemZones = queryAll<HTMLElement>('.menu-group__items', menuRoot ?? undefined);
   const pieceItems = queryAll<HTMLElement>('[data-piece-item]', menuRoot ?? undefined);
-  if (!menuRoot || !menuGroups || !pieceItems.length) return;
+  if (!menuRoot || !itemZones.length || !pieceItems.length) return;
 
   const desktopPrompt = window.matchMedia(DESKTOP_PROMPT_QUERY);
   const reducedMotion = window.matchMedia(REDUCED_MOTION_QUERY);
@@ -44,6 +44,7 @@ export const setupPieceCursorPrompt = (): void => {
   prompt.append(surface, label, icon);
   document.body.append(prompt);
 
+  let activeZone: HTMLElement | null = null;
   let frameId = 0;
   let lastFrameTime = 0;
   let lastPointerTime = 0;
@@ -186,35 +187,44 @@ export const setupPieceCursorPrompt = (): void => {
     return target.closest<HTMLElement>('[data-piece-item]');
   };
 
-  const showPrompt = (event: PointerEvent): void => {
+  const activateZone = (zone: HTMLElement, event: PointerEvent): void => {
     if (!desktopPrompt.matches) return;
+
+    if (activeZone && activeZone !== zone) {
+      activeZone.classList.remove('has-piece-cursor-prompt');
+    }
+    activeZone = zone;
+    activeZone.classList.add('has-piece-cursor-prompt');
     updateTarget(event);
     prompt.classList.add('is-visible');
-    menuGroups.classList.add('has-piece-cursor-prompt');
     ensureAnimation();
   };
 
-  const hidePrompt = (): void => {
+  const hidePrompt = (zone?: HTMLElement): void => {
+    if (zone && activeZone !== zone) return;
+    activeZone?.classList.remove('has-piece-cursor-prompt');
+    activeZone = null;
     prompt.classList.remove('is-visible');
-    menuGroups.classList.remove('has-piece-cursor-prompt');
     deformationTarget = 0;
     lastPointerTime = 0;
     ensureAnimation();
   };
 
-  menuGroups.addEventListener('pointerenter', showPrompt, { passive: true });
-  menuGroups.addEventListener('pointermove', (event) => {
-    if (!desktopPrompt.matches) return;
-    updateTarget(event);
-    if (!prompt.classList.contains('is-visible')) {
-      prompt.classList.add('is-visible');
-      menuGroups.classList.add('has-piece-cursor-prompt');
-    }
-    ensureAnimation();
-  }, { passive: true });
-  menuGroups.addEventListener('pointerleave', hidePrompt, { passive: true });
+  itemZones.forEach((zone) => {
+    zone.addEventListener('pointerenter', (event) => activateZone(zone, event), { passive: true });
+    zone.addEventListener('pointermove', (event) => {
+      if (!desktopPrompt.matches) return;
+      if (activeZone !== zone || !prompt.classList.contains('is-visible')) {
+        activateZone(zone, event);
+        return;
+      }
+      updateTarget(event);
+      ensureAnimation();
+    }, { passive: true });
+    zone.addEventListener('pointerleave', () => hidePrompt(zone), { passive: true });
+  });
 
-  menuGroups.addEventListener('click', (event) => {
+  menuRoot.addEventListener('click', (event) => {
     if (!desktopPrompt.matches || !resolveItem(event.target)) return;
     markAsUnderstood();
   });

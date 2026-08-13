@@ -18,9 +18,52 @@
   mix-blend-mode: normal;
 }
 
+// Keep the complete area between divider lines inside an interactive menu item.
+// The former margin is moved to the next item's padding so empty visual space
+// still belongs to a clickable article without changing the rhythm.
+.menu-item {
+  margin-bottom: 0;
+}
+
+.menu-item + .menu-item {
+  padding-top: clamp(28px, 4vh, 52px);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .booking-dock__cta:hover {
     filter: brightness(1.06);
+  }
+
+  .menu-group__items.has-piece-cursor-prompt,
+  .menu-group__items.has-piece-cursor-prompt * {
+    cursor: none !important;
+  }
+}
+
+// The inline eye is a touch/tablet affordance only. Desktop uses the inertial
+// cursor prompt, so the menu itself stays visually clean.
+@media (min-width: 1101px) {
+  .menu-item__view {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px), (hover: none), (pointer: coarse) {
+  .menu-item__view {
+    display: inline-grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    min-width: 25px;
+    min-height: 25px;
+    padding: 4px;
+    pointer-events: auto;
+    cursor: pointer;
+
+    img {
+      width: 15px;
+      height: 15px;
+    }
   }
 }
 
@@ -28,6 +71,30 @@
   .hero__grain,
   .menu-section__background::after {
     display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .menu-item {
+    margin-bottom: 0;
+  }
+
+  .menu-item + .menu-item {
+    padding-top: 30px;
+  }
+
+  // Match the 22px mobile quantity pill exactly.
+  .menu-item__view {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    padding: 3px;
+
+    img {
+      width: 13px;
+      height: 13px;
+    }
   }
 }
 

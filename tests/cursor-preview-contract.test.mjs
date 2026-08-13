@@ -26,7 +26,7 @@ test('piece dialog opens from the full card on desktop and mobile', async () => 
   assert.match(viewer, /button\.tabIndex = mobilePieces\.matches \? 0 : -1/);
 });
 
-test('desktop cursor uses an inertial blue prompt with velocity squash and no food image', async () => {
+test('desktop cursor uses directional inertia and speed-driven deformation without food imagery', async () => {
   const [bridge, prompt, styles, application] = await Promise.all([
     readSource('src/ts/features/piece-cursor-preview.ts'),
     readSource('src/ts/features/piece-cursor-prompt.ts'),
@@ -39,20 +39,47 @@ test('desktop cursor uses an inertial blue prompt with velocity squash and no fo
   assert.match(prompt, /DESKTOP_PROMPT_QUERY/);
   assert.match(prompt, /SPRING_STIFFNESS = 112/);
   assert.match(prompt, /SPRING_DAMPING = 19/);
-  assert.match(prompt, /MAX_STRETCH_X = 0\.24/);
-  assert.match(prompt, /MAX_SQUASH_Y = 0\.17/);
-  assert.match(prompt, /MAX_POINTER_SPEED = 1700/);
+  assert.match(prompt, /MAX_POINTER_SPEED = 1_700/);
+  assert.match(prompt, /MAX_STRETCH = 0\.25/);
+  assert.match(prompt, /MAX_SQUASH = 0\.18/);
   assert.match(prompt, /velocityX \+= accelerationX \* delta/);
-  assert.match(prompt, /deformationTarget = clamp/);
-  assert.match(prompt, /scaleX = 1 \+ deformation \* MAX_STRETCH_X/);
-  assert.match(prompt, /scaleY = 1 - deformation \* MAX_SQUASH_Y/);
+  assert.match(prompt, /directionTargetX = deltaX \/ distance/);
+  assert.match(prompt, /directionTargetY = deltaY \/ distance/);
+  assert.match(prompt, /Math\.atan2\(directionY, directionX\)/);
+  assert.match(prompt, /scale\(\$\{stretch\}, \$\{squash\}\)/);
+  assert.match(prompt, /piece-cursor-preview__surface/);
   assert.match(prompt, /label\.textContent = 'CLICKEÁ'/);
   assert.match(prompt, /assets\/visibility\.svg/);
   assert.match(prompt, /prompt\.classList\.add\('has-clicked'\)/);
+  assert.match(styles, /width: 88px/);
+  assert.match(styles, /&\.has-clicked[\s\S]*width: 72px/);
+  assert.match(styles, /\.piece-cursor-preview__surface/);
   assert.doesNotMatch(prompt, /new Image\(/);
   assert.doesNotMatch(prompt, /getContext\('webgl'/);
-  assert.match(styles, /background: var\(--orange\)/);
-  assert.match(styles, /width: 88px/);
-  assert.match(styles, /\.menu-item__view \{ display: none; \}/);
-  assert.match(styles, /\.piece-cursor-preview\.has-clicked/);
+});
+
+test('cursor stays active across each menu item zone and empty spacing remains clickable', async () => {
+  const [prompt, environment] = await Promise.all([
+    readSource('src/ts/features/piece-cursor-prompt.ts'),
+    readSource('src/scss/_environment.scss')
+  ]);
+
+  assert.match(prompt, /queryAll<HTMLElement>\('\.menu-group__items'/);
+  assert.match(prompt, /zone\.addEventListener\('pointerenter'/);
+  assert.match(prompt, /zone\.addEventListener\('pointermove'/);
+  assert.match(prompt, /zone\.addEventListener\('pointerleave'/);
+  assert.match(prompt, /classList\.add\('has-piece-cursor-prompt'\)/);
+  assert.match(environment, /\.menu-group__items\.has-piece-cursor-prompt/);
+  assert.match(environment, /cursor: none !important/);
+  assert.match(environment, /\.menu-item \{\s*margin-bottom: 0;/);
+  assert.match(environment, /\.menu-item \+ \.menu-item \{\s*padding-top: clamp\(28px, 4vh, 52px\)/);
+  assert.match(environment, /padding-top: 30px/);
+});
+
+test('inline eye is hidden on desktop and matches quantity-pill height on tablet and mobile', async () => {
+  const environment = await readSource('src/scss/_environment.scss');
+
+  assert.match(environment, /@media \(min-width: 1101px\)[\s\S]*\.menu-item__view \{\s*display: none/);
+  assert.match(environment, /@media \(max-width: 1100px\)[\s\S]*width: 25px;[\s\S]*height: 25px/);
+  assert.match(environment, /@media \(max-width: 720px\)[\s\S]*\.menu-item__view[\s\S]*width: 22px;[\s\S]*height: 22px/);
 });
