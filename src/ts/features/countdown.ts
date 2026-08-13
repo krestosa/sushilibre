@@ -5,6 +5,7 @@ type CountdownKey = 'days' | 'hours' | 'minutes' | 'seconds';
 const keys: CountdownKey[] = ['days', 'hours', 'minutes', 'seconds'];
 const target = new Date('2026-09-03T20:00:00-03:00').getTime();
 const FINAL_CTA_DOCK_CLEARANCE_PX = 8;
+const DOCK_FADE_MS = 170;
 
 const replaceCtaLabel = (label: HTMLElement, firstLine: string, secondLine: string): void => {
   label.replaceChildren(
@@ -26,6 +27,8 @@ export const setupCountdown = (): void => {
   let finalMenuCtaActionPassedDock = false;
   let finalMenuCtaTriggerScrollY = Number.POSITIVE_INFINITY;
   let measurementFrame = 0;
+  let dockCollapseTimer = 0;
+  let dockTransitionToken = 0;
 
   const nodes: Record<CountdownKey, HTMLElement | null> = {
     days: query<HTMLElement>('[data-countdown="days"]'),
@@ -37,10 +40,44 @@ export const setupCountdown = (): void => {
   const syncDockCtaVisibility = (): void => {
     if (!cta) return;
     const shouldSuppress = finalMenuCtaActionPassedDock && !menuMode;
-    cta.classList.toggle('is-suppressed', shouldSuppress);
-    dock?.classList.toggle('is-cta-suppressed', shouldSuppress);
-    if (shouldSuppress) cta.setAttribute('tabindex', '-1');
-    else cta.removeAttribute('tabindex');
+    const token = ++dockTransitionToken;
+    window.clearTimeout(dockCollapseTimer);
+
+    if (shouldSuppress) {
+      cta.classList.add('is-suppressed');
+      dock?.classList.add('is-cta-suppressed');
+      cta.setAttribute('tabindex', '-1');
+
+      if (!dock) return;
+      if (reducedMotion.matches) {
+        dock.classList.add('is-cta-collapsed');
+        return;
+      }
+
+      dockCollapseTimer = window.setTimeout(() => {
+        if (token !== dockTransitionToken || !dock.classList.contains('is-cta-suppressed')) return;
+        dock.classList.add('is-cta-collapsed');
+      }, DOCK_FADE_MS);
+      return;
+    }
+
+    dock?.classList.remove('is-cta-collapsed');
+
+    const reveal = (): void => {
+      if (token !== dockTransitionToken) return;
+      cta.classList.remove('is-suppressed');
+      dock?.classList.remove('is-cta-suppressed');
+      cta.removeAttribute('tabindex');
+    };
+
+    if (reducedMotion.matches || !dock) {
+      reveal();
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(reveal);
+    });
   };
 
   const syncFinalMenuCtaActionPosition = (): void => {
