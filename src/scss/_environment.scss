@@ -29,18 +29,27 @@
   padding-top: clamp(28px, 4vh, 52px);
 }
 
+// Menu pieces behave as one large control: text cannot be selected and every
+// point inside a piece uses the pointer cursor, including its empty spacing.
+.menu-group__items,
+.menu-group__items * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.menu-item[data-piece-item],
+.menu-item[data-piece-item] * {
+  cursor: pointer;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .booking-dock__cta:hover {
     filter: brightness(1.06);
   }
 
-  // Keep the native mouse visible while the inertial helper follows it.
+  // Keep the native pointer visible while the inertial helper follows it.
   .menu-group__items.has-piece-cursor-prompt,
   .menu-group__items.has-piece-cursor-prompt * {
-    cursor: auto;
-  }
-
-  .menu-item[data-piece-item] {
     cursor: pointer;
   }
 
