@@ -47,6 +47,10 @@
 }
 
 @media (hover: none), (pointer: coarse) {
+  .menu-item[data-piece-item]:active {
+    background: transparent !important;
+  }
+
   .menu-item[data-piece-item]:focus:not(:focus-visible),
   .menu-item__view:focus:not(:focus-visible) {
     outline: none;
