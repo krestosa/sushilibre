@@ -24,7 +24,8 @@ export const setupCountdown = (): void => {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let menuMode = false;
   let finalMenuCtaActionPassedDock = false;
-  let visibilityFrame = 0;
+  let finalMenuCtaTriggerScrollY = Number.POSITIVE_INFINITY;
+  let measurementFrame = 0;
 
   const nodes: Record<CountdownKey, HTMLElement | null> = {
     days: query<HTMLElement>('[data-countdown="days"]'),
@@ -42,43 +43,39 @@ export const setupCountdown = (): void => {
     else cta.removeAttribute('tabindex');
   };
 
-  const hasFinalMenuCtaActionPassedDock = (): boolean => {
-    if (!finalMenuCtaAction || !dock) return false;
-
-    const actionRect = finalMenuCtaAction.getBoundingClientRect();
-    const dockRect = dock.getBoundingClientRect();
-
-    return actionRect.bottom <= dockRect.top - FINAL_CTA_DOCK_CLEARANCE_PX;
-  };
-
   const syncFinalMenuCtaActionPosition = (): void => {
-    const nextPassedState = hasFinalMenuCtaActionPassedDock();
+    const nextPassedState = window.scrollY >= finalMenuCtaTriggerScrollY;
     if (nextPassedState === finalMenuCtaActionPassedDock) return;
     finalMenuCtaActionPassedDock = nextPassedState;
     syncDockCtaVisibility();
   };
 
-  const scheduleFinalMenuCtaActionPositionSync = (): void => {
-    if (visibilityFrame) return;
-    visibilityFrame = window.requestAnimationFrame(() => {
-      visibilityFrame = 0;
-      syncFinalMenuCtaActionPosition();
-    });
+  const measureFinalMenuCtaTrigger = (): void => {
+    measurementFrame = 0;
+    if (!finalMenuCtaAction || !dock) return;
+
+    const scrollY = window.scrollY;
+    const actionRect = finalMenuCtaAction.getBoundingClientRect();
+    const dockRect = dock.getBoundingClientRect();
+    finalMenuCtaTriggerScrollY = Math.max(
+      0,
+      scrollY + actionRect.bottom - dockRect.top + FINAL_CTA_DOCK_CLEARANCE_PX
+    );
+    syncFinalMenuCtaActionPosition();
+  };
+
+  const scheduleFinalMenuCtaTriggerMeasurement = (): void => {
+    if (measurementFrame) return;
+    measurementFrame = window.requestAnimationFrame(measureFinalMenuCtaTrigger);
   };
 
   if (finalMenuCtaAction && dock) {
-    syncFinalMenuCtaActionPosition();
-
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(scheduleFinalMenuCtaActionPositionSync, {
-        threshold: [0, 0.25, 0.5, 0.75, 1]
-      });
-      observer.observe(finalMenuCtaAction);
-    }
-
-    window.addEventListener('scroll', scheduleFinalMenuCtaActionPositionSync, { passive: true });
-    window.addEventListener('resize', scheduleFinalMenuCtaActionPositionSync, { passive: true });
-    window.addEventListener('orientationchange', scheduleFinalMenuCtaActionPositionSync, { passive: true });
+    measureFinalMenuCtaTrigger();
+    window.addEventListener('scroll', syncFinalMenuCtaActionPosition, { passive: true });
+    window.addEventListener('resize', scheduleFinalMenuCtaTriggerMeasurement, { passive: true });
+    window.addEventListener('orientationchange', scheduleFinalMenuCtaTriggerMeasurement, { passive: true });
+    window.visualViewport?.addEventListener('resize', scheduleFinalMenuCtaTriggerMeasurement, { passive: true });
+    document.fonts.ready.then(scheduleFinalMenuCtaTriggerMeasurement).catch(() => undefined);
   }
 
   const handleMenuClick = (event: MouseEvent): void => {

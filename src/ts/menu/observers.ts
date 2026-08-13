@@ -1,6 +1,7 @@
 import { query } from '../shared/dom';
 
 interface OverlapTarget {
+  group: HTMLElement;
   heading: HTMLElement;
   sentinel: HTMLElement;
 }
@@ -10,22 +11,19 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
   const targets = groups.flatMap((group): OverlapTarget[] => {
     const heading = query<HTMLElement>('.menu-group__heading', group);
     const sentinel = query<HTMLElement>('.menu-group__overlap-sentinel', group);
-    return heading && sentinel ? [{ heading, sentinel }] : [];
+    return heading && sentinel ? [{ group, heading, sentinel }] : [];
   });
-
+  const nearbyTargets = new Set<OverlapTarget>();
+  const targetByGroup = new Map(targets.map((target) => [target.group, target]));
   let updateFrame = 0;
   let resizeTimer = 0;
+  let scrollListening = false;
 
   const updateOverlapState = (): void => {
     updateFrame = 0;
-    const mobile = mobileQuery.matches;
+    if (!mobileQuery.matches) return;
 
-    targets.forEach(({ heading, sentinel }) => {
-      if (!mobile) {
-        heading.classList.remove('is-overlapping');
-        return;
-      }
-
+    nearbyTargets.forEach(({ heading, sentinel }) => {
       const headingBounds = heading.getBoundingClientRect();
       const sentinelBounds = sentinel.getBoundingClientRect();
       const overlaps = sentinelBounds.top <= headingBounds.bottom;
@@ -34,7 +32,7 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
   };
 
   const scheduleUpdate = (): void => {
-    if (updateFrame) return;
+    if (updateFrame || !mobileQuery.matches || !nearbyTargets.size) return;
     updateFrame = window.requestAnimationFrame(updateOverlapState);
   };
 
@@ -46,9 +44,56 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
     }, 140);
   };
 
-  scheduleUpdate();
-  mobileQuery.addEventListener('change', scheduleUpdate);
-  window.addEventListener('scroll', scheduleUpdate, { passive: true });
+  const attachScrollListener = (): void => {
+    if (scrollListening) return;
+    scrollListening = true;
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+  };
+
+  const detachScrollListener = (): void => {
+    if (!scrollListening) return;
+    scrollListening = false;
+    window.removeEventListener('scroll', scheduleUpdate);
+  };
+
+  const syncViewportMode = (): void => {
+    if (mobileQuery.matches) {
+      attachScrollListener();
+      scheduleUpdate();
+      return;
+    }
+
+    detachScrollListener();
+    nearbyTargets.clear();
+    targets.forEach(({ heading }) => heading.classList.remove('is-overlapping'));
+  };
+
+  if ('IntersectionObserver' in window) {
+    const proximityObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const target = targetByGroup.get(entry.target as HTMLElement);
+        if (!target) return;
+
+        if (entry.isIntersecting) {
+          nearbyTargets.add(target);
+        } else {
+          nearbyTargets.delete(target);
+          target.heading.classList.remove('is-overlapping');
+        }
+      });
+      scheduleUpdate();
+    }, {
+      rootMargin: '20% 0px 20% 0px',
+      threshold: 0
+    });
+
+    targets.forEach(({ group }) => proximityObserver.observe(group));
+  } else {
+    targets.forEach((target) => nearbyTargets.add(target));
+  }
+
+  syncViewportMode();
+  mobileQuery.addEventListener('change', syncViewportMode);
   window.addEventListener('resize', scheduleResizeSettlement, { passive: true });
   document.fonts.ready.then(scheduleUpdate).catch(() => undefined);
 };

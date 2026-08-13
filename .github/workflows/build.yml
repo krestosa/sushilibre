@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - sushilibre2
+      - refinamientos
   pull_request:
     branches:
       - design/video-hero-sticky-countdown
+      - refinamientos
   workflow_dispatch:
 
 permissions:

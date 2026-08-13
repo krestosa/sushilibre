@@ -7,9 +7,27 @@
   color: var(--orange-light);
 }
 
+.booking-dock {
+  background: rgba(9, 7, 6, 0.92);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.hero__grain,
+.menu-section__background::after {
+  mix-blend-mode: normal;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .booking-dock__cta:hover {
     filter: brightness(1.06);
+  }
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  .hero__grain,
+  .menu-section__background::after {
+    display: none;
   }
 }
 
@@ -22,8 +40,6 @@
 html.is-firefox {
   .booking-dock {
     background: rgba(9, 7, 6, 0.95);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
   }
 
   .hero__grain,

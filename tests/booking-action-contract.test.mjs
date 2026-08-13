@@ -63,7 +63,7 @@ test('countdown converts the CTA into a smooth menu action at zero', async () =>
   assert.match(countdown, /if \(remaining === 0\) activateMenuMode\(\)/);
 });
 
-test('active countdown hides the reservation CTA after the final action fully passes above the dock', async () => {
+test('active countdown caches the final CTA threshold outside the scroll hot path', async () => {
   const [countdown, layout, styles, mobileStyles] = await Promise.all([
     readSource('src/ts/features/countdown.ts'),
     readSource('src/ts/features/booking-dock-layout.ts'),
@@ -73,15 +73,18 @@ test('active countdown hides the reservation CTA after the final action fully pa
 
   assert.match(countdown, /query<HTMLElement>\('\.menu-final-cta__action'\)/);
   assert.match(countdown, /FINAL_CTA_DOCK_CLEARANCE_PX = 8/);
+  assert.match(countdown, /finalMenuCtaTriggerScrollY = Number\.POSITIVE_INFINITY/);
+  assert.match(countdown, /const measureFinalMenuCtaTrigger/);
   assert.match(countdown, /finalMenuCtaAction\.getBoundingClientRect\(\)/);
   assert.match(countdown, /dock\.getBoundingClientRect\(\)/);
-  assert.match(countdown, /actionRect\.bottom <= dockRect\.top - FINAL_CTA_DOCK_CLEARANCE_PX/);
+  assert.match(countdown, /scrollY \+ actionRect\.bottom - dockRect\.top \+ FINAL_CTA_DOCK_CLEARANCE_PX/);
+  assert.match(countdown, /window\.scrollY >= finalMenuCtaTriggerScrollY/);
   assert.match(countdown, /finalMenuCtaActionPassedDock && !menuMode/);
   assert.match(countdown, /classList\.toggle\('is-suppressed', shouldSuppress\)/);
   assert.match(countdown, /classList\.toggle\('is-cta-suppressed', shouldSuppress\)/);
-  assert.match(countdown, /window\.addEventListener\('scroll'/);
-  assert.match(countdown, /window\.addEventListener\('resize'/);
-  assert.match(countdown, /window\.addEventListener\('orientationchange'/);
+  assert.match(countdown, /window\.addEventListener\('scroll', syncFinalMenuCtaActionPosition/);
+  assert.match(countdown, /window\.addEventListener\('resize', scheduleFinalMenuCtaTriggerMeasurement/);
+  assert.doesNotMatch(countdown, /window\.addEventListener\('scroll', scheduleFinalMenuCtaTriggerMeasurement/);
   assert.doesNotMatch(countdown, /overlapHeight|FINAL_CTA_DOCK_OVERLAP_PX/);
   assert.match(layout, /is-cta-suppressed/);
   assert.match(layout, /--dock-cta-track/);
