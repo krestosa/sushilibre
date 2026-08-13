@@ -1,5 +1,6 @@
 @media (max-width: 720px) {
   .menu-group__heading {
-    top: max(20px, env(safe-area-inset-top, 0px)) !important;
+    top: 0 !important;
+    padding-top: 22px !important;
   }
 }
