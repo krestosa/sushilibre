@@ -154,6 +154,10 @@
 }
 
 @media (max-width: 720px) {
+  .menu-group__heading {
+    top: max(12px, env(safe-area-inset-top, 0px)) !important;
+  }
+
   .menu-marquee__item {
     padding-inline: 13px !important;
     font-size: clamp(88px, 27vw, 126px) !important;
