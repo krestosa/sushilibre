@@ -2579,15 +2579,23 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
   padding-top: clamp(28px, 4vh, 52px);
 }
 
+.menu-group__items,
+.menu-group__items * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.menu-item[data-piece-item],
+.menu-item[data-piece-item] * {
+  cursor: pointer;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .booking-dock__cta:hover {
     filter: brightness(1.06);
   }
   .menu-group__items.has-piece-cursor-prompt,
   .menu-group__items.has-piece-cursor-prompt * {
-    cursor: auto;
-  }
-  .menu-item[data-piece-item] {
     cursor: pointer;
   }
   .menu-item__view {
