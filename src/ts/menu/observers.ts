@@ -64,7 +64,6 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
     }
 
     detachScrollListener();
-    nearbyTargets.clear();
     targets.forEach(({ heading }) => heading.classList.remove('is-overlapping'));
   };
 
