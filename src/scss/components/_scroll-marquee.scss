@@ -48,10 +48,11 @@
 
 .menu-marquee__item sup {
   position: relative;
-  top: -0.18em;
+  top: 0;
   margin-left: 0.045em;
   font-size: 0.34em;
   line-height: 1;
+  transform: translate3d(0, -0.58em, 0);
 }
 
 .menu-marquee__separator {
@@ -76,6 +77,10 @@
     font-size: clamp(60px, 17.2vw, 88px);
     line-height: 0.8;
     word-spacing: 0.12em;
+  }
+
+  .menu-marquee__item sup {
+    transform: translate3d(0, -0.54em, 0);
   }
 
   .menu-marquee__separator {
