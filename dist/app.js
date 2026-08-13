@@ -477,228 +477,45 @@
     document.fonts.ready.then(scheduleSync).catch(() => void 0);
   };
 
-  // src/ts/features/piece-cursor-preview.ts
-  var DESKTOP_PREVIEW_QUERY = "(min-width: 721px) and (hover: hover) and (pointer: fine)";
+  // src/ts/features/piece-cursor-prompt.ts
+  var DESKTOP_PROMPT_QUERY = "(min-width: 721px) and (hover: hover) and (pointer: fine)";
   var REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-  var GRID_COLUMNS = 14;
-  var GRID_ROWS = 10;
-  var SPRING_STIFFNESS = 108;
-  var SPRING_DAMPING = 18.5;
+  var SPRING_STIFFNESS = 112;
+  var SPRING_DAMPING = 19;
   var MAX_FRAME_DELTA = 1 / 30;
-  var MAX_WARP_SPEED = 1650;
-  var MAX_ROTATION_DEG = 2.2;
-  var CURSOR_OFFSET_X = 30;
+  var MAX_POINTER_SPEED = 1700;
+  var MAX_STRETCH_X = 0.24;
+  var MAX_SQUASH_Y = 0.17;
+  var CURSOR_OFFSET_X = 28;
   var CURSOR_OFFSET_Y = 20;
-  var EDGE_GUTTER = 14;
+  var EDGE_GUTTER = 12;
   var clamp = (value, minimum, maximum) => Math.min(Math.max(value, minimum), maximum);
-  var compileShader = (gl, type, source) => {
-    const shader = gl.createShader(type);
-    if (!shader) return null;
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) return shader;
-    gl.deleteShader(shader);
-    return null;
-  };
-  var createWebGlRenderer = (canvas) => {
-    const gl = canvas.getContext("webgl", {
-      alpha: true,
-      antialias: true,
-      premultipliedAlpha: true,
-      powerPreference: "high-performance"
-    });
-    if (!gl) return null;
-    const vertexShader = compileShader(gl, gl.VERTEX_SHADER, `
-    attribute vec2 aPosition;
-    attribute vec2 aUv;
-    uniform vec2 uMotion;
-    varying vec2 vUv;
-
-    void main() {
-      vec2 position = aPosition;
-      float speed = min(length(uMotion), 1.0);
-
-      if (speed > 0.0001) {
-        vec2 direction = normalize(uMotion);
-        vec2 tangent = vec2(-direction.y, direction.x);
-        float along = dot(position, direction);
-        float across = dot(position, tangent);
-        float edgeCenter = pow(max(0.0, 1.0 - across * across), 1.55);
-        float leading = smoothstep(-0.08, 1.0, along);
-        float trailing = smoothstep(0.08, 1.0, -along);
-
-        // The leading edge gains a restrained belly while the trailing edge
-        // caves inward. Corners stretch only a few pixels at normal velocity.
-        position += direction * speed * edgeCenter * (
-          0.074 * leading + 0.041 * trailing
-        );
-        position += tangent * across * speed * (0.011 + 0.007 * abs(along));
-        position *= 1.0 + speed * 0.007;
-      }
-
-      gl_Position = vec4(position, 0.0, 1.0);
-      vUv = aUv;
-    }
-  `);
-    const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, `
-    precision mediump float;
-    uniform sampler2D uTexture;
-    uniform vec2 uUvScale;
-    uniform vec2 uUvOffset;
-    varying vec2 vUv;
-
-    void main() {
-      vec2 uv = uUvOffset + vUv * uUvScale;
-      gl_FragColor = texture2D(uTexture, uv);
-    }
-  `);
-    if (!vertexShader || !fragmentShader) return null;
-    const program = gl.createProgram();
-    if (!program) return null;
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    gl.deleteShader(vertexShader);
-    gl.deleteShader(fragmentShader);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      gl.deleteProgram(program);
-      return null;
-    }
-    const positionLocation = gl.getAttribLocation(program, "aPosition");
-    const uvLocation = gl.getAttribLocation(program, "aUv");
-    const motionLocation = gl.getUniformLocation(program, "uMotion");
-    const textureLocation = gl.getUniformLocation(program, "uTexture");
-    const uvScaleLocation = gl.getUniformLocation(program, "uUvScale");
-    const uvOffsetLocation = gl.getUniformLocation(program, "uUvOffset");
-    if (positionLocation < 0 || uvLocation < 0 || !motionLocation || !textureLocation || !uvScaleLocation || !uvOffsetLocation) return null;
-    const vertices = [];
-    for (let row = 0; row <= GRID_ROWS; row += 1) {
-      const v = row / GRID_ROWS;
-      const y = 1 - v * 2;
-      for (let column = 0; column <= GRID_COLUMNS; column += 1) {
-        const u = column / GRID_COLUMNS;
-        const x = u * 2 - 1;
-        vertices.push(x, y, u, v);
-      }
-    }
-    const indices = [];
-    const rowWidth = GRID_COLUMNS + 1;
-    for (let row = 0; row < GRID_ROWS; row += 1) {
-      for (let column = 0; column < GRID_COLUMNS; column += 1) {
-        const topLeft = row * rowWidth + column;
-        const topRight = topLeft + 1;
-        const bottomLeft = topLeft + rowWidth;
-        const bottomRight = bottomLeft + 1;
-        indices.push(
-          topLeft,
-          bottomLeft,
-          topRight,
-          topRight,
-          bottomLeft,
-          bottomRight
-        );
-      }
-    }
-    const vertexBuffer = gl.createBuffer();
-    const indexBuffer = gl.createBuffer();
-    const texture = gl.createTexture();
-    if (!vertexBuffer || !indexBuffer || !texture) return null;
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-    gl.useProgram(program);
-    gl.enableVertexAttribArray(positionLocation);
-    gl.enableVertexAttribArray(uvLocation);
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 16, 0);
-    gl.vertexAttribPointer(uvLocation, 2, gl.FLOAT, false, 16, 8);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.uniform1i(textureLocation, 0);
-    let uvScaleX = 1;
-    let uvScaleY = 1;
-    let uvOffsetX = 0;
-    let uvOffsetY = 0;
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
-      const width = Math.max(1, Math.round(canvas.clientWidth * dpr));
-      const height = Math.max(1, Math.round(canvas.clientHeight * dpr));
-      if (canvas.width === width && canvas.height === height) return;
-      canvas.width = width;
-      canvas.height = height;
-      gl.viewport(0, 0, width, height);
-    };
-    return {
-      setImage(image) {
-        resize();
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(
-          gl.TEXTURE_2D,
-          0,
-          gl.RGBA,
-          gl.RGBA,
-          gl.UNSIGNED_BYTE,
-          image
-        );
-        const imageAspect = image.naturalWidth / Math.max(1, image.naturalHeight);
-        const previewAspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
-        uvScaleX = 1;
-        uvScaleY = 1;
-        uvOffsetX = 0;
-        uvOffsetY = 0;
-        if (imageAspect > previewAspect) {
-          uvScaleX = previewAspect / imageAspect;
-          uvOffsetX = (1 - uvScaleX) * 0.5;
-        } else if (imageAspect < previewAspect) {
-          uvScaleY = imageAspect / previewAspect;
-          uvOffsetY = (1 - uvScaleY) * 0.5;
-        }
-      },
-      render(motionX, motionY) {
-        resize();
-        gl.useProgram(program);
-        gl.uniform2f(motionLocation, motionX, -motionY);
-        gl.uniform2f(uvScaleLocation, uvScaleX, uvScaleY);
-        gl.uniform2f(uvOffsetLocation, uvOffsetX, uvOffsetY);
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-      }
-    };
-  };
-  var setupPieceCursorPreview = () => {
+  var setupPieceCursorPrompt = () => {
     const menuRoot2 = query("[data-menu-root]");
     const pieceItems = queryAll("[data-piece-item]", menuRoot2 ?? void 0);
     if (!menuRoot2 || !pieceItems.length) return;
-    const desktopPreview = window.matchMedia(DESKTOP_PREVIEW_QUERY);
+    const desktopPrompt = window.matchMedia(DESKTOP_PROMPT_QUERY);
     const reducedMotion2 = window.matchMedia(REDUCED_MOTION_QUERY);
-    const preview = document.createElement("div");
-    preview.className = "piece-cursor-preview";
-    preview.setAttribute("aria-hidden", "true");
-    const canvas = document.createElement("canvas");
-    canvas.className = "piece-cursor-preview__canvas";
-    const fallbackImage = document.createElement("img");
-    fallbackImage.className = "piece-cursor-preview__fallback";
-    fallbackImage.alt = "";
-    fallbackImage.decoding = "async";
-    preview.append(canvas, fallbackImage);
-    document.body.append(preview);
-    const renderer = createWebGlRenderer(canvas);
-    if (!renderer) preview.classList.add("is-fallback");
-    const imageCache = /* @__PURE__ */ new Map();
+    const prompt = document.createElement("div");
+    prompt.className = "piece-cursor-preview";
+    prompt.setAttribute("aria-hidden", "true");
+    const label = document.createElement("span");
+    label.className = "piece-cursor-preview__label";
+    label.textContent = "CLICKE\xC1";
+    const icon = document.createElement("img");
+    icon.className = "piece-cursor-preview__icon";
+    icon.src = "assets/visibility.svg";
+    icon.alt = "";
+    icon.width = 24;
+    icon.height = 24;
+    prompt.append(label, icon);
+    document.body.append(prompt);
     let activeItem = null;
-    let activeSource = "";
-    let sourceGeneration = 0;
     let frameId = 0;
     let lastFrameTime = 0;
+    let lastPointerTime = 0;
+    let lastPointerX = 0;
+    let lastPointerY = 0;
     let pointerX = window.innerWidth * 0.5;
     let pointerY = window.innerHeight * 0.5;
     let targetX = pointerX;
@@ -707,61 +524,42 @@
     let currentY = pointerY;
     let velocityX = 0;
     let velocityY = 0;
-    let warpX = 0;
-    let warpY = 0;
-    let previewWidth = 320;
-    let previewHeight = 240;
+    let deformation = 0;
+    let deformationTarget = 0;
+    let promptRadius = 44;
     let hasPosition = false;
-    const measurePreview = () => {
-      const bounds = preview.getBoundingClientRect();
-      if (bounds.width > 0) previewWidth = bounds.width;
-      if (bounds.height > 0) previewHeight = bounds.height;
+    let hasClicked = false;
+    const measurePrompt = () => {
+      const bounds = prompt.getBoundingClientRect();
+      if (bounds.width > 0) promptRadius = bounds.width * 0.5;
     };
-    const getCachedImage = (source) => {
-      const existing = imageCache.get(source);
-      if (existing) return existing;
-      const next = new Image();
-      next.decoding = "async";
-      next.fetchPriority = "low";
-      next.src = source;
-      imageCache.set(source, next);
-      return next;
+    const markAsUnderstood = () => {
+      if (hasClicked) return;
+      hasClicked = true;
+      prompt.classList.add("has-clicked");
     };
-    const commitImage = (source, image, generation) => {
-      if (generation !== sourceGeneration || source !== activeSource || !image.naturalWidth || !image.naturalHeight) return;
-      if (renderer) renderer.setImage(image);
-      else fallbackImage.src = source;
-      preview.classList.add("is-ready");
-    };
-    const selectSource = (source) => {
-      if (source === activeSource && preview.classList.contains("is-ready")) return;
-      activeSource = source;
-      preview.classList.remove("is-ready");
-      const generation = ++sourceGeneration;
-      const image = getCachedImage(source);
-      if (image.complete && image.naturalWidth > 0) {
-        commitImage(source, image, generation);
-        return;
-      }
-      image.addEventListener("load", () => commitImage(source, image, generation), { once: true });
-      image.addEventListener("error", () => {
-        if (generation === sourceGeneration) preview.classList.remove("is-ready");
-      }, { once: true });
-    };
-    const updateTarget = (clientX, clientY) => {
+    const updateTarget = (event) => {
+      const clientX = event.clientX;
+      const clientY = event.clientY;
       pointerX = clientX;
       pointerY = clientY;
-      const halfWidth = previewWidth * 0.5;
-      const halfHeight = previewHeight * 0.5;
+      if (lastPointerTime > 0) {
+        const elapsed = Math.max(8, event.timeStamp - lastPointerTime) / 1e3;
+        const distance = Math.hypot(clientX - lastPointerX, clientY - lastPointerY);
+        deformationTarget = clamp(distance / elapsed / MAX_POINTER_SPEED, 0, 1);
+      }
+      lastPointerTime = event.timeStamp;
+      lastPointerX = clientX;
+      lastPointerY = clientY;
       targetX = clamp(
         clientX + CURSOR_OFFSET_X,
-        halfWidth + EDGE_GUTTER,
-        Math.max(halfWidth + EDGE_GUTTER, window.innerWidth - halfWidth - EDGE_GUTTER)
+        promptRadius + EDGE_GUTTER,
+        Math.max(promptRadius + EDGE_GUTTER, window.innerWidth - promptRadius - EDGE_GUTTER)
       );
       targetY = clamp(
         clientY + CURSOR_OFFSET_Y,
-        halfHeight + EDGE_GUTTER,
-        Math.max(halfHeight + EDGE_GUTTER, window.innerHeight - halfHeight - EDGE_GUTTER)
+        promptRadius + EDGE_GUTTER,
+        Math.max(promptRadius + EDGE_GUTTER, window.innerHeight - promptRadius - EDGE_GUTTER)
       );
       if (!hasPosition) {
         currentX = targetX;
@@ -769,7 +567,7 @@
         hasPosition = true;
       }
     };
-    const shouldKeepAnimating = () => Math.abs(targetX - currentX) > 0.15 || Math.abs(targetY - currentY) > 0.15 || Math.abs(velocityX) > 1 || Math.abs(velocityY) > 1 || Math.abs(warpX) > 2e-3 || Math.abs(warpY) > 2e-3;
+    const shouldKeepAnimating = () => Math.abs(targetX - currentX) > 0.12 || Math.abs(targetY - currentY) > 0.12 || Math.abs(velocityX) > 0.8 || Math.abs(velocityY) > 0.8 || deformation > 1e-3 || deformationTarget > 1e-3;
     const runFrame = (time) => {
       frameId = 0;
       const elapsed = lastFrameTime ? (time - lastFrameTime) / 1e3 : 1 / 60;
@@ -780,8 +578,8 @@
         currentY = targetY;
         velocityX = 0;
         velocityY = 0;
-        warpX = 0;
-        warpY = 0;
+        deformation = 0;
+        deformationTarget = 0;
       } else {
         const accelerationX = (targetX - currentX) * SPRING_STIFFNESS - velocityX * SPRING_DAMPING;
         const accelerationY = (targetY - currentY) * SPRING_STIFFNESS - velocityY * SPRING_DAMPING;
@@ -789,17 +587,13 @@
         velocityY += accelerationY * delta;
         currentX += velocityX * delta;
         currentY += velocityY * delta;
-        const nextWarpX = clamp(velocityX / MAX_WARP_SPEED, -1, 1);
-        const nextWarpY = clamp(velocityY / MAX_WARP_SPEED, -1, 1);
-        const warpBlend = 1 - Math.exp(-delta * 9.5);
-        warpX += (nextWarpX - warpX) * warpBlend;
-        warpY += (nextWarpY - warpY) * warpBlend;
+        const deformationBlend = 1 - Math.exp(-delta * 19);
+        deformation += (deformationTarget - deformation) * deformationBlend;
+        deformationTarget *= Math.exp(-delta * 8.5);
       }
-      const speed = Math.hypot(velocityX, velocityY);
-      const rotation = reducedMotion2.matches ? 0 : clamp(velocityX / 390, -MAX_ROTATION_DEG, MAX_ROTATION_DEG);
-      const scale = reducedMotion2.matches ? 1 : 1 + Math.min(speed / MAX_WARP_SPEED, 1) * 9e-3;
-      preview.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%) rotate(${rotation}deg) scale(${scale})`;
-      renderer?.render(warpX, warpY);
+      const scaleX = 1 + deformation * MAX_STRETCH_X;
+      const scaleY = 1 - deformation * MAX_SQUASH_Y;
+      prompt.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%) scale(${scaleX}, ${scaleY})`;
       if (shouldKeepAnimating()) frameId = window.requestAnimationFrame(runFrame);
       else lastFrameTime = 0;
     };
@@ -807,26 +601,22 @@
       if (frameId) return;
       frameId = window.requestAnimationFrame(runFrame);
     };
-    const showItem = (item, event) => {
-      if (!desktopPreview.matches) return;
-      const source = item.dataset.pieceImage?.trim();
-      if (!source) return;
-      activeItem = item;
-      selectSource(source);
-      updateTarget(event.clientX, event.clientY);
-      preview.classList.add("is-visible");
-      ensureAnimation();
-    };
-    const hidePreview = () => {
-      activeItem = null;
-      preview.classList.remove("is-visible");
-      warpX *= 0.72;
-      warpY *= 0.72;
-      ensureAnimation();
-    };
     const resolveItem = (target2) => {
       if (!(target2 instanceof Element)) return null;
       return target2.closest("[data-piece-item]");
+    };
+    const showItem = (item, event) => {
+      if (!desktopPrompt.matches) return;
+      activeItem = item;
+      updateTarget(event);
+      prompt.classList.add("is-visible");
+      ensureAnimation();
+    };
+    const hidePrompt = () => {
+      activeItem = null;
+      prompt.classList.remove("is-visible");
+      deformationTarget = 0;
+      ensureAnimation();
     };
     menuRoot2.addEventListener("pointerover", (event) => {
       const item = resolveItem(event.target);
@@ -834,12 +624,12 @@
       showItem(item, event);
     }, { passive: true });
     menuRoot2.addEventListener("pointermove", (event) => {
-      if (!desktopPreview.matches) return;
+      if (!desktopPrompt.matches) return;
       const item = resolveItem(event.target);
       if (!item) return;
       if (item !== activeItem) showItem(item, event);
       else {
-        updateTarget(event.clientX, event.clientY);
+        updateTarget(event);
         ensureAnimation();
       }
     }, { passive: true });
@@ -848,24 +638,31 @@
       if (!item || item !== activeItem) return;
       const related = event.relatedTarget;
       if (related instanceof Node && item.contains(related)) return;
-      hidePreview();
+      hidePrompt();
     }, { passive: true });
-    menuRoot2.addEventListener("pointerleave", hidePreview, { passive: true });
-    const syncPreviewMode = () => {
-      if (desktopPreview.matches) {
-        measurePreview();
+    menuRoot2.addEventListener("click", (event) => {
+      if (!desktopPrompt.matches || !resolveItem(event.target)) return;
+      markAsUnderstood();
+    });
+    menuRoot2.addEventListener("pointerleave", hidePrompt, { passive: true });
+    const syncPromptMode = () => {
+      if (desktopPrompt.matches) {
+        measurePrompt();
         return;
       }
-      hidePreview();
+      hidePrompt();
     };
-    desktopPreview.addEventListener("change", syncPreviewMode);
+    desktopPrompt.addEventListener("change", syncPromptMode);
     reducedMotion2.addEventListener("change", ensureAnimation);
     window.addEventListener("resize", () => {
-      measurePreview();
-      if (hasPosition) updateTarget(pointerX, pointerY);
+      measurePrompt();
+      if (hasPosition) {
+        targetX = clamp(pointerX + CURSOR_OFFSET_X, promptRadius + EDGE_GUTTER, Math.max(promptRadius + EDGE_GUTTER, window.innerWidth - promptRadius - EDGE_GUTTER));
+        targetY = clamp(pointerY + CURSOR_OFFSET_Y, promptRadius + EDGE_GUTTER, Math.max(promptRadius + EDGE_GUTTER, window.innerHeight - promptRadius - EDGE_GUTTER));
+      }
       ensureAnimation();
     }, { passive: true });
-    window.requestAnimationFrame(measurePreview);
+    window.requestAnimationFrame(measurePrompt);
   };
 
   // src/ts/features/piece-viewer.ts
@@ -944,27 +741,18 @@
     let scrollCorrectionFrame = 0;
     let lockedScrollY = 0;
     let backgroundLocked = false;
-    const syncMobileInteractivity = () => {
-      const interactive = mobilePieces.matches;
+    const syncInteractivity = () => {
       pieceItems.forEach((item) => {
         const name = item.dataset.pieceName?.trim() || "pieza";
-        if (interactive) {
-          item.setAttribute("role", "button");
-          item.tabIndex = 0;
-          item.setAttribute("aria-haspopup", "dialog");
-          item.setAttribute("aria-controls", "piece-viewer");
-          item.setAttribute("aria-label", `Ver imagen de ${name}`);
-        } else {
-          item.removeAttribute("role");
-          item.removeAttribute("tabindex");
-          item.removeAttribute("aria-haspopup");
-          item.removeAttribute("aria-controls");
-          item.removeAttribute("aria-label");
-        }
+        item.setAttribute("role", "button");
+        item.tabIndex = 0;
+        item.setAttribute("aria-haspopup", "dialog");
+        item.setAttribute("aria-controls", "piece-viewer");
+        item.setAttribute("aria-label", `Ver imagen de ${name}`);
       });
       openButtons.forEach((button) => {
-        button.tabIndex = interactive ? 0 : -1;
-        if (interactive) button.removeAttribute("aria-hidden");
+        button.tabIndex = mobilePieces.matches ? 0 : -1;
+        if (mobilePieces.matches) button.removeAttribute("aria-hidden");
         else button.setAttribute("aria-hidden", "true");
       });
     };
@@ -1063,7 +851,7 @@
       delete dialog.dataset.state;
       const trigger = activeTrigger;
       activeTrigger = null;
-      if (mobilePieces.matches) trigger?.focus({ preventScroll: true });
+      trigger?.focus({ preventScroll: true });
     };
     const finishClose = () => {
       clearMotionSchedules();
@@ -1106,7 +894,6 @@
       });
     };
     const openPiece = (trigger) => {
-      if (!mobilePieces.matches) return;
       const name = trigger.dataset.pieceName?.trim();
       const source = trigger.dataset.pieceImage?.trim();
       if (!name || !source) return;
@@ -1123,12 +910,11 @@
     };
     pieceItems.forEach((item) => {
       item.addEventListener("click", (event) => {
-        if (!mobilePieces.matches) return;
         const button = event.target instanceof Element ? event.target.closest("[data-piece-viewer-open]") : null;
         openPiece(button ?? item);
       });
       item.addEventListener("keydown", (event) => {
-        if (!mobilePieces.matches || event.target !== item) return;
+        if (event.target !== item) return;
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();
         openPiece(item);
@@ -1145,11 +931,8 @@
       event.preventDefault();
       closeDialog();
     });
-    mobilePieces.addEventListener("change", ({ matches }) => {
-      syncMobileInteractivity();
-      if (!matches && dialog.open) closeDialog();
-    });
-    syncMobileInteractivity();
+    mobilePieces.addEventListener("change", syncInteractivity);
+    syncInteractivity();
   };
 
   // src/ts/features/proposal-reveal.ts
@@ -1815,7 +1598,7 @@
   setupHeroTitleLayout();
   setupHeroIntroMotion();
   setupPieceViewer();
-  setupPieceCursorPreview();
+  setupPieceCursorPrompt();
   setupTapSearchGuard();
   setupVideoLoop(runtime);
 
