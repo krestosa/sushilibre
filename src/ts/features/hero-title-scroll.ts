@@ -80,14 +80,12 @@ export const setupHeroTitleScroll = (): void => {
     ky = top + rowH + (compact ? 8 : 12) - k.top;
 
     const kickerBottom = k.bottom + ky;
-    const safeGap = mobile ? 18 : tablet ? 22 : 28;
+    const safeGap = mobile ? 28 : tablet ? 26 : 30;
     copyShiftY = copy ? Math.max(0, kickerBottom + safeGap - copy.top) : 0;
 
     heroTop = window.scrollY + h.top;
     const height = Math.max(hero.offsetHeight, window.innerHeight);
 
-    // Finish the lockup well before it reaches the top edge. Mobile has less
-    // vertical room, so the convergence completes sooner than on desktop.
     start = height * (mobile ? 0.004 : tablet ? 0.006 : 0.01);
     distance = height * (mobile ? 0.13 : tablet ? 0.17 : 0.23);
   };
