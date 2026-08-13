@@ -1,0 +1,11 @@
+// Keep scrolling native and compositor-friendly: no continuous text parallax.
+.proposal__header,
+.proposal__intro,
+.proposal__chips,
+.proposal__prices,
+.proposal__conditions,
+.proposal__legal {
+  animation-timeline: auto !important;
+  animation-range: normal !important;
+  translate: none !important;
+}
