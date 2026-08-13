@@ -294,7 +294,8 @@
     const reducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)");
     let menuMode = false;
     let finalMenuCtaActionPassedDock = false;
-    let visibilityFrame = 0;
+    let finalMenuCtaTriggerScrollY = Number.POSITIVE_INFINITY;
+    let measurementFrame = 0;
     const nodes = {
       days: query('[data-countdown="days"]'),
       hours: query('[data-countdown="hours"]'),
@@ -309,36 +310,35 @@
       if (shouldSuppress) cta.setAttribute("tabindex", "-1");
       else cta.removeAttribute("tabindex");
     };
-    const hasFinalMenuCtaActionPassedDock = () => {
-      if (!finalMenuCtaAction || !dock2) return false;
-      const actionRect = finalMenuCtaAction.getBoundingClientRect();
-      const dockRect = dock2.getBoundingClientRect();
-      return actionRect.bottom <= dockRect.top - FINAL_CTA_DOCK_CLEARANCE_PX;
-    };
     const syncFinalMenuCtaActionPosition = () => {
-      const nextPassedState = hasFinalMenuCtaActionPassedDock();
+      const nextPassedState = window.scrollY >= finalMenuCtaTriggerScrollY;
       if (nextPassedState === finalMenuCtaActionPassedDock) return;
       finalMenuCtaActionPassedDock = nextPassedState;
       syncDockCtaVisibility();
     };
-    const scheduleFinalMenuCtaActionPositionSync = () => {
-      if (visibilityFrame) return;
-      visibilityFrame = window.requestAnimationFrame(() => {
-        visibilityFrame = 0;
-        syncFinalMenuCtaActionPosition();
-      });
+    const measureFinalMenuCtaTrigger = () => {
+      measurementFrame = 0;
+      if (!finalMenuCtaAction || !dock2) return;
+      const scrollY = window.scrollY;
+      const actionRect = finalMenuCtaAction.getBoundingClientRect();
+      const dockRect = dock2.getBoundingClientRect();
+      finalMenuCtaTriggerScrollY = Math.max(
+        0,
+        scrollY + actionRect.bottom - dockRect.top + FINAL_CTA_DOCK_CLEARANCE_PX
+      );
+      syncFinalMenuCtaActionPosition();
+    };
+    const scheduleFinalMenuCtaTriggerMeasurement = () => {
+      if (measurementFrame) return;
+      measurementFrame = window.requestAnimationFrame(measureFinalMenuCtaTrigger);
     };
     if (finalMenuCtaAction && dock2) {
-      syncFinalMenuCtaActionPosition();
-      if ("IntersectionObserver" in window) {
-        const observer = new IntersectionObserver(scheduleFinalMenuCtaActionPositionSync, {
-          threshold: [0, 0.25, 0.5, 0.75, 1]
-        });
-        observer.observe(finalMenuCtaAction);
-      }
-      window.addEventListener("scroll", scheduleFinalMenuCtaActionPositionSync, { passive: true });
-      window.addEventListener("resize", scheduleFinalMenuCtaActionPositionSync, { passive: true });
-      window.addEventListener("orientationchange", scheduleFinalMenuCtaActionPositionSync, { passive: true });
+      measureFinalMenuCtaTrigger();
+      window.addEventListener("scroll", syncFinalMenuCtaActionPosition, { passive: true });
+      window.addEventListener("resize", scheduleFinalMenuCtaTriggerMeasurement, { passive: true });
+      window.addEventListener("orientationchange", scheduleFinalMenuCtaTriggerMeasurement, { passive: true });
+      window.visualViewport?.addEventListener("resize", scheduleFinalMenuCtaTriggerMeasurement, { passive: true });
+      document.fonts.ready.then(scheduleFinalMenuCtaTriggerMeasurement).catch(() => void 0);
     }
     const handleMenuClick = (event) => {
       if (!menu) return;
@@ -813,54 +813,6 @@
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(revealVisibleTargets);
     });
-  };
-
-  // src/ts/features/smooth-scroll.ts
-  var setupEfficientSmoothScroll = ({
-    isFirefox,
-    reducedMotion: reducedMotion2
-  }) => {
-    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-    if (reducedMotion2.matches || isFirefox || !finePointer.matches) return;
-    let targetY = window.scrollY;
-    let frameId = 0;
-    const maximumScroll = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    const clamp2 = (value, minimum, maximum) => Math.min(Math.max(value, minimum), maximum);
-    const stop = () => {
-      if (frameId) window.cancelAnimationFrame(frameId);
-      frameId = 0;
-      targetY = window.scrollY;
-    };
-    const step = () => {
-      const currentY = window.scrollY;
-      const distance = targetY - currentY;
-      if (Math.abs(distance) < 0.6) {
-        window.scrollTo(0, targetY);
-        frameId = 0;
-        return;
-      }
-      window.scrollTo(0, currentY + distance * 0.24);
-      frameId = window.requestAnimationFrame(step);
-    };
-    const onWheel = (event) => {
-      if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-      const isCoarseWheel = event.deltaMode !== 0 || Math.abs(event.deltaY) >= 50;
-      if (!isCoarseWheel) return;
-      event.preventDefault();
-      if (!frameId) targetY = window.scrollY;
-      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
-      const delta = clamp2(event.deltaY * unit, -240, 240);
-      targetY = clamp2(targetY + delta * 0.9, 0, maximumScroll());
-      if (!frameId) frameId = window.requestAnimationFrame(step);
-    };
-    window.addEventListener("wheel", onWheel, { passive: false });
-    window.addEventListener("pointerdown", stop, { passive: true });
-    window.addEventListener("resize", () => {
-      targetY = clamp2(targetY, 0, maximumScroll());
-    }, { passive: true });
-    window.addEventListener("scroll", () => {
-      if (!frameId) targetY = window.scrollY;
-    }, { passive: true });
   };
 
   // src/ts/features/tap-search-guard.ts
@@ -1430,7 +1382,6 @@
   setupHeroIntroMotion();
   setupPieceViewer();
   setupTapSearchGuard();
-  setupEfficientSmoothScroll(runtime);
   setupVideoLoop(runtime);
 
   // src/ts/dock-reveal.ts
@@ -1578,18 +1529,17 @@
     const targets = groups.flatMap((group) => {
       const heading = query(".menu-group__heading", group);
       const sentinel = query(".menu-group__overlap-sentinel", group);
-      return heading && sentinel ? [{ heading, sentinel }] : [];
+      return heading && sentinel ? [{ group, heading, sentinel }] : [];
     });
+    const nearbyTargets = /* @__PURE__ */ new Set();
+    const targetByGroup = new Map(targets.map((target2) => [target2.group, target2]));
     let updateFrame = 0;
     let resizeTimer = 0;
+    let scrollListening = false;
     const updateOverlapState = () => {
       updateFrame = 0;
-      const mobile = mobileQuery2.matches;
-      targets.forEach(({ heading, sentinel }) => {
-        if (!mobile) {
-          heading.classList.remove("is-overlapping");
-          return;
-        }
+      if (!mobileQuery2.matches) return;
+      nearbyTargets.forEach(({ heading, sentinel }) => {
         const headingBounds = heading.getBoundingClientRect();
         const sentinelBounds = sentinel.getBoundingClientRect();
         const overlaps = sentinelBounds.top <= headingBounds.bottom;
@@ -1597,7 +1547,7 @@
       });
     };
     const scheduleUpdate = () => {
-      if (updateFrame) return;
+      if (updateFrame || !mobileQuery2.matches || !nearbyTargets.size) return;
       updateFrame = window.requestAnimationFrame(updateOverlapState);
     };
     const scheduleResizeSettlement = () => {
@@ -1607,9 +1557,49 @@
         scheduleUpdate();
       }, 140);
     };
-    scheduleUpdate();
-    mobileQuery2.addEventListener("change", scheduleUpdate);
-    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    const attachScrollListener = () => {
+      if (scrollListening) return;
+      scrollListening = true;
+      window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    };
+    const detachScrollListener = () => {
+      if (!scrollListening) return;
+      scrollListening = false;
+      window.removeEventListener("scroll", scheduleUpdate);
+    };
+    const syncViewportMode = () => {
+      if (mobileQuery2.matches) {
+        attachScrollListener();
+        scheduleUpdate();
+        return;
+      }
+      detachScrollListener();
+      nearbyTargets.clear();
+      targets.forEach(({ heading }) => heading.classList.remove("is-overlapping"));
+    };
+    if ("IntersectionObserver" in window) {
+      const proximityObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          const target2 = targetByGroup.get(entry.target);
+          if (!target2) return;
+          if (entry.isIntersecting) {
+            nearbyTargets.add(target2);
+          } else {
+            nearbyTargets.delete(target2);
+            target2.heading.classList.remove("is-overlapping");
+          }
+        });
+        scheduleUpdate();
+      }, {
+        rootMargin: "20% 0px 20% 0px",
+        threshold: 0
+      });
+      targets.forEach(({ group }) => proximityObserver.observe(group));
+    } else {
+      targets.forEach((target2) => nearbyTargets.add(target2));
+    }
+    syncViewportMode();
+    mobileQuery2.addEventListener("change", syncViewportMode);
     window.addEventListener("resize", scheduleResizeSettlement, { passive: true });
     document.fonts.ready.then(scheduleUpdate).catch(() => void 0);
   };
