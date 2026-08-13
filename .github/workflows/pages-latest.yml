@@ -23,7 +23,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Checkout latest pushed branch
+      - name: Checkout current pushed branch
         uses: actions/checkout@v6
 
       - name: Set up Node.js
