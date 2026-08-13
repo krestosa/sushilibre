@@ -1574,7 +1574,6 @@
         return;
       }
       detachScrollListener();
-      nearbyTargets.clear();
       targets.forEach(({ heading }) => heading.classList.remove("is-overlapping"));
     };
     if ("IntersectionObserver" in window) {
