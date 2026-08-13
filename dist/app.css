@@ -561,6 +561,89 @@ html.has-piece-viewer body {
     animation-duration: 1.6s, 100ms;
   }
 }
+.piece-cursor-preview {
+  position: fixed;
+  z-index: 18;
+  top: 0;
+  left: 0;
+  width: clamp(260px, 22vw, 360px);
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: #050505;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.34);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate3d(-999px, -999px, 0) translate(-50%, -50%);
+  transform-origin: center;
+  contain: layout paint style;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  transition: opacity 130ms ease-out, visibility 0s linear 140ms;
+}
+.piece-cursor-preview.is-visible.is-ready {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.piece-cursor-preview__canvas,
+.piece-cursor-preview__fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.piece-cursor-preview__canvas {
+  background: #050505;
+}
+
+.piece-cursor-preview__fallback {
+  display: none;
+  object-fit: cover;
+  object-position: center;
+}
+
+.piece-cursor-preview.is-fallback .piece-cursor-preview__canvas {
+  display: none;
+}
+.piece-cursor-preview.is-fallback .piece-cursor-preview__fallback {
+  display: block;
+}
+
+@media (min-width: 721px) and (hover: hover) and (pointer: fine) {
+  .menu-item[data-piece-item] {
+    cursor: default;
+  }
+  .menu-item__view {
+    pointer-events: none;
+    cursor: default;
+  }
+}
+@media (max-width: 720px), (hover: none), (pointer: coarse) {
+  .piece-cursor-preview {
+    display: none;
+  }
+  .menu-item[data-piece-item] {
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .menu-item[data-piece-item]:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 5px;
+  }
+  .menu-item__view {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .piece-cursor-preview {
+    transition-duration: 90ms, 0s;
+  }
+}
 .menu-item__view {
   display: inline-grid;
   place-items: center;
