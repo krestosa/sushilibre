@@ -2,11 +2,11 @@ import { query } from '../shared/dom';
 
 const BASE_SPEED = 68;
 const MAX_SPEED = 820;
-const SCROLL_GAIN = 0.38;
-const IMPULSE_HOLD_MS = 175;
-const ACTIVE_RESPONSE = 22;
-const REVERSE_RESPONSE = 36;
-const IDLE_RESPONSE = 4.2;
+const SCROLL_GAIN = 0.42;
+const IMPULSE_HOLD_MS = 150;
+const ACTIVE_RESPONSE = 30;
+const REVERSE_RESPONSE = 50;
+const IDLE_RESPONSE = 5.2;
 const MAX_FRAME_DELTA = 1 / 30;
 
 const wrap = (value: number, size: number): number => {
