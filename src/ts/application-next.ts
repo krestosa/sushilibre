@@ -1,0 +1,23 @@
+import { setupBookingCtaSheen } from './features/booking-cta-sheen';
+import { setupBookingDockLayout } from './features/booking-dock-layout';
+import { setupCountdown } from './features/countdown';
+import { setupHeroIntroMotion } from './features/hero-intro-motion';
+import { setupHeroTitleLayout } from './features/hero-title-layout';
+import { setupPieceCursorPrompt } from './features/piece-cursor-prompt';
+import { setupPieceViewer } from './features/piece-viewer';
+import { setupProposalReveal } from './features/proposal-reveal';
+import { setupTapSearchGuard } from './features/tap-search-guard';
+import { setupVideoLoop } from './features/video-loop';
+import { createRuntimeContext } from './shared/runtime';
+
+const runtime = createRuntimeContext();
+setupProposalReveal();
+setupCountdown();
+setupBookingDockLayout();
+setupBookingCtaSheen(runtime);
+setupHeroTitleLayout();
+setupHeroIntroMotion();
+setupPieceViewer();
+setupPieceCursorPrompt();
+setupTapSearchGuard();
+setupVideoLoop(runtime);
