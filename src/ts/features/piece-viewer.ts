@@ -92,29 +92,19 @@ export const setupPieceViewer = (): void => {
   let lockedScrollY = 0;
   let backgroundLocked = false;
 
-  const syncMobileInteractivity = (): void => {
-    const interactive = mobilePieces.matches;
-
+  const syncInteractivity = (): void => {
     pieceItems.forEach((item) => {
       const name = item.dataset.pieceName?.trim() || 'pieza';
-      if (interactive) {
-        item.setAttribute('role', 'button');
-        item.tabIndex = 0;
-        item.setAttribute('aria-haspopup', 'dialog');
-        item.setAttribute('aria-controls', 'piece-viewer');
-        item.setAttribute('aria-label', `Ver imagen de ${name}`);
-      } else {
-        item.removeAttribute('role');
-        item.removeAttribute('tabindex');
-        item.removeAttribute('aria-haspopup');
-        item.removeAttribute('aria-controls');
-        item.removeAttribute('aria-label');
-      }
+      item.setAttribute('role', 'button');
+      item.tabIndex = 0;
+      item.setAttribute('aria-haspopup', 'dialog');
+      item.setAttribute('aria-controls', 'piece-viewer');
+      item.setAttribute('aria-label', `Ver imagen de ${name}`);
     });
 
     openButtons.forEach((button) => {
-      button.tabIndex = interactive ? 0 : -1;
-      if (interactive) button.removeAttribute('aria-hidden');
+      button.tabIndex = mobilePieces.matches ? 0 : -1;
+      if (mobilePieces.matches) button.removeAttribute('aria-hidden');
       else button.setAttribute('aria-hidden', 'true');
     });
   };
@@ -234,7 +224,7 @@ export const setupPieceViewer = (): void => {
 
     const trigger = activeTrigger;
     activeTrigger = null;
-    if (mobilePieces.matches) trigger?.focus({ preventScroll: true });
+    trigger?.focus({ preventScroll: true });
   };
 
   const finishClose = (): void => {
@@ -286,8 +276,6 @@ export const setupPieceViewer = (): void => {
   };
 
   const openPiece = (trigger: HTMLElement): void => {
-    if (!mobilePieces.matches) return;
-
     const name = trigger.dataset.pieceName?.trim();
     const source = trigger.dataset.pieceImage?.trim();
     if (!name || !source) return;
@@ -306,7 +294,6 @@ export const setupPieceViewer = (): void => {
 
   pieceItems.forEach((item) => {
     item.addEventListener('click', (event) => {
-      if (!mobilePieces.matches) return;
       const button = event.target instanceof Element
         ? event.target.closest<HTMLElement>('[data-piece-viewer-open]')
         : null;
@@ -314,7 +301,7 @@ export const setupPieceViewer = (): void => {
     });
 
     item.addEventListener('keydown', (event) => {
-      if (!mobilePieces.matches || event.target !== item) return;
+      if (event.target !== item) return;
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
       openPiece(item);
@@ -335,10 +322,6 @@ export const setupPieceViewer = (): void => {
     closeDialog();
   });
 
-  mobilePieces.addEventListener('change', ({ matches }) => {
-    syncMobileInteractivity();
-    if (!matches && dialog.open) closeDialog();
-  });
-
-  syncMobileInteractivity();
+  mobilePieces.addEventListener('change', syncInteractivity);
+  syncInteractivity();
 };
