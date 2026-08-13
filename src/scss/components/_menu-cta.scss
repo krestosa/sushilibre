@@ -58,13 +58,26 @@
   border: 0;
   border-radius: 0;
   background:
-    linear-gradient(
-      180deg,
-      rgba(13, 102, 238, 0.2) 0%,
-      rgba(13, 102, 238, 0.075) 15%,
-      rgba(13, 102, 238, 0) 34%
+    radial-gradient(
+      ellipse at 80% 2%,
+      rgba(0, 134, 173, 0.42) 0%,
+      rgba(0, 134, 173, 0.16) 26%,
+      rgba(0, 134, 173, 0) 50%
     ),
-    #050505;
+    radial-gradient(
+      ellipse at 8% 88%,
+      rgba(0, 76, 113, 0.5) 0%,
+      rgba(0, 76, 113, 0.16) 38%,
+      rgba(0, 76, 113, 0) 64%
+    ),
+    linear-gradient(
+      132deg,
+      #02040a 0%,
+      #05101c 24%,
+      #06253a 51%,
+      #004c71 76%,
+      #001ac5 118%
+    );
   box-shadow: none;
   color: #fff;
   contain: paint;
@@ -77,7 +90,7 @@
     left: var(--cta-x);
     height: 1px;
     background: currentColor;
-    opacity: 0.32;
+    opacity: 0.34;
     pointer-events: none;
   }
 
@@ -87,7 +100,7 @@
     z-index: 1;
     top: var(--cta-top-pad);
     right: var(--cta-x);
-    color: rgba(255, 255, 255, 0.78);
+    color: rgba(255, 255, 255, 0.8);
     font-size: clamp(10px, 0.72vw, 13px);
     font-weight: 700;
     line-height: 1;
@@ -114,7 +127,7 @@
   top: 0;
   left: 0;
   margin: 0;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.8);
   font-size: clamp(10px, 0.72vw, 13px);
   font-weight: 700;
   line-height: 1;
@@ -137,7 +150,7 @@
 .menu-final-cta__text {
   max-width: 47ch;
   margin: clamp(18px, 1.7vw, 26px) 0 0;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.8);
   font-size: clamp(15px, 1.05vw, 19px);
   font-weight: 500;
   line-height: 1.15;
@@ -146,35 +159,42 @@
 }
 
 .menu-final-cta__action {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   justify-self: end;
   align-self: start;
-  width: auto;
-  min-height: 0;
-  margin-top: calc(var(--cta-main-top) + clamp(28px, 4vh, 52px));
-  padding: 0 0 5px;
-  border: 0;
-  border-bottom: 2px solid currentColor;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  width: clamp(220px, 18vw, 300px);
+  min-height: clamp(72px, 5.7vw, 92px);
+  margin-top: calc(var(--cta-main-top) + 12px);
+  padding: 18px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--orange) 0%, #1234e6 100%);
+  box-shadow:
+    0 14px 34px rgba(var(--orange-rgb), 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
   color: #fff;
   font-family: "Gazzetta", sans-serif;
-  font-size: clamp(30px, 3.1vw, 56px);
+  font-size: clamp(24px, 2.05vw, 38px);
   font-weight: 700;
   line-height: 0.9;
   letter-spacing: -0.025em;
-  text-align: right;
+  text-align: center;
   text-decoration: none;
   text-transform: uppercase;
   white-space: nowrap;
-  transition: opacity 160ms ease-out, transform 180ms var(--ease-out);
+  transition:
+    transform 180ms var(--ease-out),
+    filter 180ms ease-out,
+    box-shadow 180ms ease-out;
 
   &:hover {
-    filter: none;
-    box-shadow: none;
-    opacity: 0.62;
-    transform: translate3d(-4px, 0, 0);
+    filter: brightness(1.1);
+    box-shadow:
+      0 18px 42px rgba(var(--orange-rgb), 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    transform: translate3d(0, -3px, 0);
   }
 
   &:focus-visible {
@@ -183,7 +203,7 @@
   }
 
   &:active {
-    transform: translate3d(-2px, 0, 0);
+    transform: scale(0.985);
   }
 }
 
@@ -204,8 +224,10 @@
   }
 
   .menu-final-cta__action {
-    margin-top: calc(var(--cta-main-top) + 24px);
-    font-size: clamp(28px, 4.8vw, 42px);
+    width: clamp(190px, 28vw, 250px);
+    min-height: 72px;
+    margin-top: calc(var(--cta-main-top) + 8px);
+    font-size: clamp(24px, 4vw, 34px);
   }
 }
 
@@ -221,6 +243,14 @@
     align-items: stretch;
     gap: 0;
     padding-bottom: calc(var(--dock-height) + var(--dock-bottom) + 12px);
+    background:
+      radial-gradient(
+        ellipse at 88% 0%,
+        rgba(0, 134, 173, 0.4) 0%,
+        rgba(0, 134, 173, 0.12) 30%,
+        rgba(0, 134, 173, 0) 54%
+      ),
+      linear-gradient(150deg, #02040a 0%, #061827 52%, #004c71 100%);
   }
 
   .menu-final-cta::after,
@@ -248,10 +278,12 @@
 
   .menu-final-cta__action {
     align-self: flex-start;
+    width: min(100%, 340px);
+    min-height: 68px;
     margin-top: 26px;
-    padding-top: 0;
-    font-size: clamp(30px, 9vw, 42px);
-    text-align: left;
+    padding: 16px 24px;
+    font-size: clamp(27px, 8vw, 36px);
+    text-align: center;
   }
 }
 
