@@ -22,6 +22,92 @@ html {
   mix-blend-mode: normal;
 }
 
+// Make the bottom of the hero dissolve into the black section below instead of
+// exposing a hard video edge. This remains a static CSS layer, so it adds no
+// scroll-time work.
+.hero__gradient {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0) 54%,
+      rgba(0, 0, 0, 0.08) 63%,
+      rgba(0, 0, 0, 0.24) 72%,
+      rgba(0, 0, 0, 0.48) 81%,
+      rgba(0, 0, 0, 0.72) 89%,
+      rgba(0, 0, 0, 0.9) 95%,
+      #000 100%
+    ),
+    linear-gradient(
+      180deg,
+      #000 0%,
+      rgba(0, 0, 0, 0.93) 16%,
+      rgba(0, 0, 0, 0.59) 39%,
+      rgba(0, 0, 0, 0.2) 58%,
+      rgba(0, 0, 0, 0) 69.5%
+    );
+}
+
+// Final CTA: the meta copy follows the same left edge as the rule, while the
+// main message, supporting copy and action are centered on the section grid.
+.menu-final-cta {
+  background: #000 !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  column-gap: 0 !important;
+}
+
+.menu-final-cta__copy {
+  width: 100% !important;
+  margin-left: 0 !important;
+  text-align: center;
+}
+
+.menu-final-cta__eyebrow {
+  left: 0;
+  text-align: left;
+}
+
+.menu-final-cta__title {
+  margin-inline: auto !important;
+  text-align: center;
+  letter-spacing: 0.012em !important;
+}
+
+.menu-final-cta__text {
+  margin-right: auto !important;
+  margin-left: auto !important;
+  text-align: center;
+}
+
+.menu-final-cta__action {
+  justify-self: center !important;
+  align-self: center !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+  letter-spacing: 0.045em !important;
+}
+
+// Match the marquee square exactly to the hero lockup: use normal inline text
+// formatting so the same superscript metrics actually resolve the same way.
+.menu-marquee__item {
+  display: inline-block;
+  height: auto;
+}
+
+.menu-marquee__item sup {
+  position: relative;
+  top: -0.44em;
+  display: inline-block;
+  margin-left: 0.06em;
+  vertical-align: top;
+  font-family: "Gazzetta", sans-serif;
+  font-size: 0.24em;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: normal;
+  transform: none;
+}
+
 // Keep a small visual cushion between the moving EXCLUSIVE EXPERIENCE label
 // and the title/body block as both compositions converge on scroll.
 .hero-copy {
@@ -100,6 +186,14 @@ html {
 }
 
 @media (max-width: 720px) {
+  .menu-final-cta__title {
+    max-width: 8.5ch !important;
+  }
+
+  .menu-final-cta__action {
+    margin: 0 auto !important;
+  }
+
   .menu-item {
     margin-bottom: 0;
   }
