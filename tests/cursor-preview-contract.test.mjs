@@ -26,7 +26,7 @@ test('piece dialog opens from the full card on desktop and mobile', async () => 
   assert.match(viewer, /button\.tabIndex = mobilePieces\.matches \? 0 : -1/);
 });
 
-test('desktop cursor uses directional inertia and speed-driven deformation without food imagery', async () => {
+test('desktop cursor uses a fast damped mass and spline membrane deformation', async () => {
   const [bridge, prompt, styles, application] = await Promise.all([
     readSource('src/ts/features/piece-cursor-preview.ts'),
     readSource('src/ts/features/piece-cursor-prompt.ts'),
@@ -36,29 +36,29 @@ test('desktop cursor uses directional inertia and speed-driven deformation witho
 
   assert.match(application, /setupPieceCursorPreview\(\)/);
   assert.match(bridge, /setupPieceCursorPrompt as setupPieceCursorPreview/);
-  assert.match(prompt, /DESKTOP_PROMPT_QUERY/);
-  assert.match(prompt, /SPRING_STIFFNESS = 112/);
-  assert.match(prompt, /SPRING_DAMPING = 19/);
-  assert.match(prompt, /MAX_POINTER_SPEED = 1_700/);
-  assert.match(prompt, /MAX_STRETCH = 0\.25/);
-  assert.match(prompt, /MAX_SQUASH = 0\.18/);
-  assert.match(prompt, /velocityX \+= accelerationX \* delta/);
-  assert.match(prompt, /directionTargetX = deltaX \/ distance/);
-  assert.match(prompt, /directionTargetY = deltaY \/ distance/);
-  assert.match(prompt, /Math\.atan2\(directionY, directionX\)/);
-  assert.match(prompt, /scale\(\$\{stretch\}, \$\{squash\}\)/);
-  assert.match(prompt, /piece-cursor-preview__surface/);
-  assert.match(prompt, /label\.textContent = 'CLICKEÁ'/);
-  assert.match(prompt, /assets\/visibility\.svg/);
-  assert.match(prompt, /prompt\.classList\.add\('has-clicked'\)/);
-  assert.match(styles, /width: 88px/);
-  assert.match(styles, /&\.has-clicked[\s\S]*width: 72px/);
-  assert.match(styles, /\.piece-cursor-preview__surface/);
+  assert.match(prompt, /SPRING_STIFFNESS = 260/);
+  assert.match(prompt, /SPRING_DAMPING = 30/);
+  assert.match(prompt, /MAX_DEFORM_SPEED = 1_450/);
+  assert.match(prompt, /CURSOR_OFFSET_X = 14/);
+  assert.match(prompt, /CURSOR_OFFSET_Y = 10/);
+  assert.match(prompt, /BLOB_POINTS = 18/);
+  assert.match(prompt, /closedSplinePath/);
+  assert.match(prompt, /createElementNS\(SVG_NS, 'svg'\)/);
+  assert.match(prompt, /createElementNS\(SVG_NS, 'path'\)/);
+  assert.match(prompt, /LEADING_BELLY/);
+  assert.match(prompt, /TRAILING_CAVE/);
+  assert.match(prompt, /SIDE_BULGE/);
+  assert.match(prompt, /pointerVelocityX/);
+  assert.match(prompt, /velocityX \* 0\.76 \+ pointerVelocityX \* 0\.24/);
+  assert.match(prompt, /surfacePath\.setAttribute\('d', buildBlobPath/);
   assert.doesNotMatch(prompt, /new Image\(/);
   assert.doesNotMatch(prompt, /getContext\('webgl'/);
+  assert.match(styles, /width: 88px/);
+  assert.match(styles, /&\.has-clicked[\s\S]*width: 70px/);
+  assert.match(styles, /\.piece-cursor-preview__shape/);
 });
 
-test('cursor stays active across each menu item zone and empty spacing remains clickable', async () => {
+test('cursor stays active across each item zone while native mouse remains visible', async () => {
   const [prompt, environment] = await Promise.all([
     readSource('src/ts/features/piece-cursor-prompt.ts'),
     readSource('src/scss/_environment.scss')
@@ -68,18 +68,18 @@ test('cursor stays active across each menu item zone and empty spacing remains c
   assert.match(prompt, /zone\.addEventListener\('pointerenter'/);
   assert.match(prompt, /zone\.addEventListener\('pointermove'/);
   assert.match(prompt, /zone\.addEventListener\('pointerleave'/);
-  assert.match(prompt, /classList\.add\('has-piece-cursor-prompt'\)/);
-  assert.match(environment, /\.menu-group__items\.has-piece-cursor-prompt/);
-  assert.match(environment, /cursor: none !important/);
+  assert.match(environment, /cursor: auto/);
+  assert.doesNotMatch(environment, /cursor: none !important/);
+  assert.match(environment, /\.menu-item\[data-piece-item\][\s\S]*cursor: pointer/);
   assert.match(environment, /\.menu-item \{\s*margin-bottom: 0;/);
   assert.match(environment, /\.menu-item \+ \.menu-item \{\s*padding-top: clamp\(28px, 4vh, 52px\)/);
   assert.match(environment, /padding-top: 30px/);
 });
 
-test('inline eye is hidden on desktop and matches quantity-pill height on tablet and mobile', async () => {
+test('inline eye is hidden for fine pointers and matches quantity-pill height on touch layouts', async () => {
   const environment = await readSource('src/scss/_environment.scss');
 
-  assert.match(environment, /@media \(min-width: 1101px\)[\s\S]*\.menu-item__view \{\s*display: none/);
-  assert.match(environment, /@media \(max-width: 1100px\)[\s\S]*width: 25px;[\s\S]*height: 25px/);
+  assert.match(environment, /@media \(hover: hover\) and \(pointer: fine\)[\s\S]*\.menu-item__view \{\s*display: none/);
+  assert.match(environment, /@media \(hover: none\), \(pointer: coarse\)[\s\S]*width: 25px;[\s\S]*height: 25px/);
   assert.match(environment, /@media \(max-width: 720px\)[\s\S]*\.menu-item__view[\s\S]*width: 22px;[\s\S]*height: 22px/);
 });

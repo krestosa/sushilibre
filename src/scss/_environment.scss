@@ -34,21 +34,23 @@
     filter: brightness(1.06);
   }
 
+  // Keep the native mouse visible while the inertial helper follows it.
   .menu-group__items.has-piece-cursor-prompt,
   .menu-group__items.has-piece-cursor-prompt * {
-    cursor: none !important;
+    cursor: auto;
   }
-}
 
-// The inline eye is a touch/tablet affordance only. Desktop uses the inertial
-// cursor prompt, so the menu itself stays visually clean.
-@media (min-width: 1101px) {
+  .menu-item[data-piece-item] {
+    cursor: pointer;
+  }
+
+  // Fine-pointer layouts use the floating prompt, never the inline eye.
   .menu-item__view {
     display: none;
   }
 }
 
-@media (max-width: 1100px), (hover: none), (pointer: coarse) {
+@media (hover: none), (pointer: coarse) {
   .menu-item__view {
     display: inline-grid;
     place-items: center;
