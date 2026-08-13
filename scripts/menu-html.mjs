@@ -205,7 +205,7 @@ const renderMenuMarquee = () => {
 const renderMenuCta = () => [
   '        <section class="menu-final-cta menu-reveal menu-reveal--item" data-menu-reveal aria-labelledby="menu-final-cta-title">',
   '          <div class="menu-final-cta__copy">',
-  '            <p class="menu-final-cta__eyebrow">UNA NOCHE. PIEZAS ILIMITADAS. SIN APURO.</p>',
+  '            <p class="menu-final-cta__eyebrow">SUSHI. LIBRE. SIN APURO.</p>',
   '            <h3 class="menu-final-cta__title" id="menu-final-cta-title">¿ESTÁS LISTO?</h3>',
   '            <p class="menu-final-cta__text">RESERVÁ TU LUGAR Y VIVÍ SUSHI LIBRE: UNA EXPERIENCIA PARA RECORRER LOS SABORES MÁS REPRESENTATIVOS DE SUSHICLUB.</p>',
   '          </div>',
