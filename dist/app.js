@@ -874,6 +874,7 @@
   var CLOSE_FALLBACK_MS = 320;
   var REDUCED_CLOSE_FALLBACK_MS = 170;
   var PRELOAD_CONCURRENCY = 3;
+  var MOBILE_PIECE_QUERY = "(max-width: 720px)";
   var SCROLL_KEYS = /* @__PURE__ */ new Set([
     "ArrowDown",
     "ArrowLeft",
@@ -889,9 +890,9 @@
   var isInteractiveTarget = (target2) => target2 instanceof Element && Boolean(target2.closest(
     'a[href], button, input, textarea, select, [contenteditable="true"]'
   ));
-  var preloadPieceImages = (buttons) => {
+  var preloadPieceImages = (triggers) => {
     const sources = Array.from(new Set(
-      buttons.map((button) => button.dataset.pieceImage?.trim()).filter((source) => Boolean(source))
+      triggers.map((trigger) => trigger.dataset.pieceImage?.trim()).filter((source) => Boolean(source))
     ));
     if (!sources.length) return;
     const pending = /* @__PURE__ */ new Set();
@@ -931,16 +932,42 @@
     const statusText = query("[data-piece-viewer-status-text]", dialog ?? void 0);
     const closeButton = query("[data-piece-viewer-close]", dialog ?? void 0);
     const openButtons = queryAll("[data-piece-viewer-open]");
-    if (!dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
-    preloadPieceImages(openButtons);
+    const pieceItems = queryAll("[data-piece-item]");
+    if (!dialog || !image || !status || !statusText || !closeButton || !pieceItems.length) return;
+    preloadPieceImages(pieceItems);
     const reducedMotion2 = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let activeButton = null;
+    const mobilePieces = window.matchMedia(MOBILE_PIECE_QUERY);
+    let activeTrigger = null;
     let closeTimer = 0;
     let openFrame = 0;
     let imageFrame = 0;
     let scrollCorrectionFrame = 0;
     let lockedScrollY = 0;
     let backgroundLocked = false;
+    const syncMobileInteractivity = () => {
+      const interactive = mobilePieces.matches;
+      pieceItems.forEach((item) => {
+        const name = item.dataset.pieceName?.trim() || "pieza";
+        if (interactive) {
+          item.setAttribute("role", "button");
+          item.tabIndex = 0;
+          item.setAttribute("aria-haspopup", "dialog");
+          item.setAttribute("aria-controls", "piece-viewer");
+          item.setAttribute("aria-label", `Ver imagen de ${name}`);
+        } else {
+          item.removeAttribute("role");
+          item.removeAttribute("tabindex");
+          item.removeAttribute("aria-haspopup");
+          item.removeAttribute("aria-controls");
+          item.removeAttribute("aria-label");
+        }
+      });
+      openButtons.forEach((button) => {
+        button.tabIndex = interactive ? 0 : -1;
+        if (interactive) button.removeAttribute("aria-hidden");
+        else button.setAttribute("aria-hidden", "true");
+      });
+    };
     const preventBackgroundScroll = (event) => {
       if (event.cancelable) event.preventDefault();
     };
@@ -1034,9 +1061,9 @@
       status.hidden = false;
       image.hidden = true;
       delete dialog.dataset.state;
-      const button = activeButton;
-      activeButton = null;
-      button?.focus({ preventScroll: true });
+      const trigger = activeTrigger;
+      activeTrigger = null;
+      if (mobilePieces.matches) trigger?.focus({ preventScroll: true });
     };
     const finishClose = () => {
       clearMotionSchedules();
@@ -1078,12 +1105,13 @@
         });
       });
     };
-    const openPiece = (button) => {
-      const name = button.dataset.pieceName?.trim();
-      const source = button.dataset.pieceImage?.trim();
+    const openPiece = (trigger) => {
+      if (!mobilePieces.matches) return;
+      const name = trigger.dataset.pieceName?.trim();
+      const source = trigger.dataset.pieceImage?.trim();
       if (!name || !source) return;
       clearMotionSchedules();
-      activeButton = button;
+      activeTrigger = trigger;
       dialog.setAttribute("aria-label", `Imagen de ${name}`);
       image.alt = name;
       image.removeAttribute("src");
@@ -1093,8 +1121,18 @@
       openDialog();
       beginOpenAnimation(source);
     };
-    openButtons.forEach((button) => {
-      button.addEventListener("click", () => openPiece(button));
+    pieceItems.forEach((item) => {
+      item.addEventListener("click", (event) => {
+        if (!mobilePieces.matches) return;
+        const button = event.target instanceof Element ? event.target.closest("[data-piece-viewer-open]") : null;
+        openPiece(button ?? item);
+      });
+      item.addEventListener("keydown", (event) => {
+        if (!mobilePieces.matches || event.target !== item) return;
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        openPiece(item);
+      });
     });
     image.addEventListener("load", setReadyState);
     image.addEventListener("error", setErrorState);
@@ -1107,6 +1145,11 @@
       event.preventDefault();
       closeDialog();
     });
+    mobilePieces.addEventListener("change", ({ matches }) => {
+      syncMobileInteractivity();
+      if (!matches && dialog.open) closeDialog();
+    });
+    syncMobileInteractivity();
   };
 
   // src/ts/features/proposal-reveal.ts
