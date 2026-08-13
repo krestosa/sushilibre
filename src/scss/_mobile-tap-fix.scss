@@ -1,0 +1,15 @@
+.menu-item[data-piece-item],
+.menu-item[data-piece-item] *,
+.menu-item__view,
+.menu-item__view * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .menu-item[data-piece-item],
+  .menu-item[data-piece-item]:active,
+  .menu-item[data-piece-item]:focus:not(:focus-visible) {
+    background: transparent !important;
+    outline: none;
+  }
+}
