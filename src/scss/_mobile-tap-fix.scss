@@ -14,70 +14,34 @@
   }
 }
 
+.booking-dock {
+  transition:
+    width 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    --dock-cta-track 190ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .booking-dock__meta {
-  transition: opacity 150ms ease-out, visibility 0s linear 0s;
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  transform-origin: center;
+  transition:
+    transform 180ms ease-out,
+    opacity 150ms ease-out,
+    visibility 0s linear 0s;
 }
 
-.booking-dock.is-cta-suppressed:not(.is-event-live) {
-  width: min(460px, calc(100vw - 48px)) !important;
-  grid-template-columns: 1fr !important;
-  grid-template-rows: 1fr !important;
-  gap: 0 !important;
-}
-
-.booking-dock.is-cta-suppressed:not(.is-event-live) .booking-dock__meta,
-.booking-dock.is-cta-suppressed:not(.is-event-live) .booking-dock__cta {
-  display: none !important;
-}
-
-.booking-dock.is-cta-suppressed:not(.is-event-live) .countdown {
-  grid-column: 1 !important;
-  grid-row: 1 !important;
-  width: 100%;
-}
-
-.menu-final-cta {
-  --cta-top-pad: 40px !important;
-  --cta-meta-line: 82px !important;
-  --cta-main-top: 132px !important;
-}
-
-.menu-final-cta__title {
-  max-width: none !important;
-  font-size: clamp(82px, 9.2vw, 168px) !important;
-  white-space: nowrap !important;
-}
-
-@media (max-width: 1100px) {
-  .booking-dock.is-cta-suppressed:not(.is-event-live) {
-    width: min(430px, calc(100vw - 32px)) !important;
-  }
-  .menu-final-cta__title {
-    font-size: clamp(54px, 8.2vw, 90px) !important;
-  }
-}
-
-@media (max-width: 840px) {
-  .booking-dock.is-cta-suppressed:not(.is-event-live) {
-    width: min(390px, calc(100vw - 24px)) !important;
-    height: 112px !important;
-    grid-template-rows: 96px !important;
-  }
-}
-
-@media (max-width: 720px) {
-  .menu-final-cta {
-    --cta-top-pad: 28px !important;
-    --cta-meta-line: 62px !important;
-    --cta-main-top: 96px !important;
-  }
-  .menu-final-cta__title {
-    font-size: clamp(28px, 9vw, 58px) !important;
-    white-space: nowrap !important;
-  }
+.booking-dock.is-cta-suppressed:not(.is-event-live) .booking-dock__meta {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: scale(0.96);
+  transition-delay: 0s, 0s, 150ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .booking-dock,
   .booking-dock__meta {
     transition: none;
   }
