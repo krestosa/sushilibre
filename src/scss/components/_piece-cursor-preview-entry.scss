@@ -5,7 +5,7 @@
   transition:
     width 140ms cubic-bezier(0.22, 1, 0.36, 1),
     height 140ms cubic-bezier(0.22, 1, 0.36, 1),
-    visibility 0s linear 190ms;
+    visibility 0s linear 200ms;
 }
 
 .piece-cursor-preview.is-visible {
@@ -18,13 +18,39 @@
 .piece-cursor-preview__icon {
   transform: scale(0);
   transform-origin: center;
-  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 190ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .piece-cursor-preview.is-visible .piece-cursor-preview__surface,
 .piece-cursor-preview.is-visible .piece-cursor-preview__label,
 .piece-cursor-preview.is-visible .piece-cursor-preview__icon {
   transform: scale(1);
+}
+
+.piece-cursor-preview.is-entering-from-pointer .piece-cursor-preview__surface,
+.piece-cursor-preview.is-entering-from-pointer .piece-cursor-preview__label,
+.piece-cursor-preview.is-entering-from-pointer .piece-cursor-preview__icon {
+  transform: translate3d(var(--piece-entry-x, 0px), var(--piece-entry-y, 0px), 0) scale(0);
+  transition: none;
+}
+
+.piece-cursor-preview.is-exiting-to-pointer .piece-cursor-preview__surface,
+.piece-cursor-preview.is-exiting-to-pointer .piece-cursor-preview__label,
+.piece-cursor-preview.is-exiting-to-pointer .piece-cursor-preview__icon {
+  transform: translate3d(var(--piece-exit-x, 0px), var(--piece-exit-y, 0px), 0) scale(0);
+}
+
+.menu-item[data-piece-item],
+.menu-item[data-piece-item] *,
+.menu-item__view {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .menu-item[data-piece-item]:focus:not(:focus-visible),
+  .menu-item__view:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
