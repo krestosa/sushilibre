@@ -1,3 +1,11 @@
+.menu-section {
+  overflow-x: clip;
+}
+
+.menu-marquee {
+  overflow: clip !important;
+}
+
 .menu-marquee__item {
   padding: clamp(30px, 3.35vw, 54px) clamp(30px, 3.25vw, 62px);
   font-size: clamp(76px, 8.65vw, 166px);
