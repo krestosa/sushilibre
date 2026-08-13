@@ -1,6 +1,7 @@
 import { query, queryAll } from '../shared/dom';
 
 const TITLE_TEXT = '¿ESTÁS PREPARADO?';
+const CTA_TEXT = 'UNA EXPERIENCIA PARA RECORRER LOS SABORES MÁS REPRESENTATIVOS DE SUSHICLUB.';
 const LINE_TOP_TOLERANCE_PX = 3;
 const EASE_OUT = 'cubic-bezier(0.22, 1, 0.36, 1)';
 
@@ -76,6 +77,7 @@ export const setupFinalCtaReveal = (): void => {
   if (!copy || !title || !text || !action) return;
 
   title.textContent = TITLE_TEXT;
+  text.textContent = CTA_TEXT;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const originalText = text.innerHTML;
   let resizeTimer = 0;
@@ -154,7 +156,11 @@ export const setupFinalCtaReveal = (): void => {
     action.style.border = '1px solid rgba(255, 255, 255, 0.16)';
     action.style.borderRadius = '6px';
     action.style.boxShadow = '0 12px 30px rgba(var(--orange-rgb), 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.12)';
-    action.style.fontSize = mobile ? 'clamp(27px, 8vw, 36px)' : 'clamp(24px, 2vw, 36px)';
+    action.style.fontFamily = '"Inter", sans-serif';
+    action.style.fontSize = '16px';
+    action.style.fontWeight = '700';
+    action.style.lineHeight = '0.92';
+    action.style.letterSpacing = '-0.04em';
   };
 
   const splitLines = (): void => {
