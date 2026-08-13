@@ -266,11 +266,30 @@ export const setupPieceCursorPrompt = (): void => {
   const activateZone = (zone: HTMLElement, event: PointerEvent): void => {
     if (!desktopPrompt.matches) return;
 
-    if (activeZone && activeZone !== zone) {
+    const freshEntry = activeZone !== zone;
+    if (activeZone && freshEntry) {
       activeZone.classList.remove('has-piece-cursor-prompt');
     }
+
     activeZone = zone;
     activeZone.classList.add('has-piece-cursor-prompt');
+
+    if (freshEntry) {
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      currentX = event.clientX;
+      currentY = event.clientY;
+      targetX = currentX;
+      targetY = currentY;
+      velocityX = 0;
+      velocityY = 0;
+      pointerVelocityX = 0;
+      pointerVelocityY = 0;
+      lastPointerTime = 0;
+      hasPosition = true;
+      prompt.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
+    }
+
     updateTarget(event);
     prompt.classList.add('is-visible');
     ensureAnimation();
