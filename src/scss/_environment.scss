@@ -18,6 +18,12 @@
   mix-blend-mode: normal;
 }
 
+// Keep a small visual cushion between the moving EXCLUSIVE EXPERIENCE label
+// and the title/body block as both compositions converge on scroll.
+.hero-copy {
+  padding-top: 14px;
+}
+
 // Keep the complete area between divider lines inside an interactive menu item.
 // The former margin is moved to the next item's padding so empty visual space
 // still belongs to a clickable article without changing the rhythm.
@@ -83,6 +89,10 @@
   .menu-section__background::after {
     display: none;
   }
+
+  .hero-copy {
+    padding-top: 12px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -106,6 +116,12 @@
       width: 13px;
       height: 13px;
     }
+  }
+}
+
+@media (max-width: 620px) {
+  .hero-copy {
+    padding-top: 10px;
   }
 }
 
