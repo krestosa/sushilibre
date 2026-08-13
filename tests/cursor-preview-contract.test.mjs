@@ -10,7 +10,7 @@ test('piece cards expose full-card image metadata for mobile and desktop preview
   assert.match(generator, /data-piece-item/);
   assert.match(generator, /data-piece-name=/);
   assert.match(generator, /data-piece-image=/);
-  assert.match(generator, /<article class=\\"menu-item/);
+  assert.match(generator, /<article class="menu-item/);
 });
 
 test('piece dialog opens only from full cards on mobile', async () => {
