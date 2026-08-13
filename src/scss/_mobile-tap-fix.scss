@@ -13,3 +13,22 @@
     outline: none;
   }
 }
+
+.booking-dock__meta {
+  transition:
+    opacity 150ms ease-out,
+    visibility 0s linear 0s;
+}
+
+.booking-dock.is-cta-suppressed .booking-dock__meta {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition-delay: 0s, 150ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booking-dock__meta {
+    transition: none;
+  }
+}
