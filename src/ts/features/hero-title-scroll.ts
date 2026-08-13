@@ -24,18 +24,20 @@ export const setupHeroTitleScroll = (): void => {
   let ky = 0;
   let finalScale = 1;
   let copyShiftY = 0;
+  let mobileMotion = false;
 
   [sushi, libre, kicker].forEach((el) => {
     el.style.transformOrigin = '0 0';
     el.style.willChange = 'transform';
   });
-
+  kicker.style.willChange = 'transform, opacity';
   if (heroCopy) heroCopy.style.willChange = 'translate, opacity';
 
   const clear = (): void => {
     sushi.style.transform = '';
     libre.style.transform = '';
     kicker.style.transform = '';
+    kicker.style.opacity = '';
     if (heroCopy) {
       heroCopy.style.translate = '';
       heroCopy.style.opacity = '';
@@ -44,7 +46,6 @@ export const setupHeroTitleScroll = (): void => {
 
   const measure = (): void => {
     clear();
-
     const box = lockup.getBoundingClientRect();
     const s = sushi.getBoundingClientRect();
     const l = libre.getBoundingClientRect();
@@ -59,6 +60,7 @@ export const setupHeroTitleScroll = (): void => {
       ? Math.max(4, Math.min(8, viewportWidth * 0.012))
       : Math.max(6, Math.min(14, viewportWidth * 0.006));
 
+    mobileMotion = mobile;
     finalScale = compact
       ? Math.max(0.56, Math.min(1, (box.width - 16 - gap) / (s.width + l.width)))
       : 1;
@@ -70,24 +72,24 @@ export const setupHeroTitleScroll = (): void => {
     const rowH = Math.max(sh, lh);
     const joinedW = sw + gap + lw;
     const left = box.left + (box.width - joinedW) / 2;
-    const top = compact ? s.top : Math.min(s.top, l.top);
+    const drop = mobile ? Math.max(18, Math.min(24, viewportWidth * 0.058)) : 0;
+    const top = (compact ? s.top : Math.min(s.top, l.top)) + drop;
 
     sx = left - s.left;
     sy = top + (rowH - sh) / 2 - s.top;
     lx = left + sw + gap - l.left;
     ly = top + (rowH - lh) / 2 - l.top;
     kx = box.left + (box.width - k.width) / 2 - k.left;
-    ky = top + rowH + (compact ? 8 : 12) - k.top;
+    ky = top + rowH + (compact ? 13 : 12) - k.top;
 
     const kickerBottom = k.bottom + ky;
-    const safeGap = mobile ? 28 : tablet ? 26 : 30;
+    const safeGap = mobile ? 30 : tablet ? 26 : 30;
     copyShiftY = copy ? Math.max(0, kickerBottom + safeGap - copy.top) : 0;
 
     heroTop = window.scrollY + h.top;
     const height = Math.max(hero.offsetHeight, window.innerHeight);
-
     start = height * (mobile ? 0.004 : tablet ? 0.006 : 0.01);
-    distance = height * (mobile ? 0.13 : tablet ? 0.17 : 0.23);
+    distance = height * (mobile ? 0.15 : tablet ? 0.17 : 0.23);
   };
 
   const render = (): void => {
@@ -98,7 +100,17 @@ export const setupHeroTitleScroll = (): void => {
 
     sushi.style.transform = `translate3d(${sx * p}px, ${sy * p}px, 0) scale(${scale})`;
     libre.style.transform = `translate3d(${lx * p}px, ${ly * p}px, 0) scale(${scale})`;
-    kicker.style.transform = `translate3d(${kx * p}px, ${ky * p}px, 0)`;
+
+    if (mobileMotion) {
+      const kp = ease(clamp((raw - 0.08) / 0.76));
+      const before = 1 - ease(clamp(raw / 0.2));
+      const after = ease(clamp((raw - 0.68) / 0.24));
+      kicker.style.transform = `translate3d(${kx * kp}px, ${ky * kp}px, 0)`;
+      kicker.style.opacity = String(Math.max(before, after));
+    } else {
+      kicker.style.transform = `translate3d(${kx * p}px, ${ky * p}px, 0)`;
+      kicker.style.opacity = '';
+    }
 
     if (heroCopy) {
       const copyP = ease(clamp((raw - 0.18) / 0.7));
@@ -123,6 +135,5 @@ export const setupHeroTitleScroll = (): void => {
   window.addEventListener('resize', refresh, { passive: true });
   window.addEventListener('orientationchange', refresh, { passive: true });
   document.fonts.ready.then(refresh).catch(() => undefined);
-
   refresh();
 };
