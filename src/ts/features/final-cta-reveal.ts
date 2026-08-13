@@ -4,6 +4,8 @@ const TITLE_TEXT = '¿ESTÁS PREPARADO?';
 const LINE_TOP_TOLERANCE_PX = 3;
 const EASE_OUT = 'cubic-bezier(0.22, 1, 0.36, 1)';
 
+const clampValue = (min: number, value: number, max: number): number => Math.min(max, Math.max(min, value));
+
 const wrapWords = (element: HTMLElement): void => {
   const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
   const textNodes: Text[] = [];
@@ -79,6 +81,27 @@ export const setupFinalCtaReveal = (): void => {
   let resizeTimer = 0;
   let revealed = false;
 
+  const fitTitle = (mobile: boolean, compact: boolean): void => {
+    const desiredSize = mobile
+      ? clampValue(56, window.innerWidth * 0.18, 86)
+      : compact
+        ? clampValue(82, window.innerWidth * 0.12, 132)
+        : clampValue(104, window.innerWidth * 0.114, 214);
+
+    title.style.width = 'max-content';
+    title.style.maxWidth = 'none';
+    title.style.fontSize = `${desiredSize}px`;
+    title.style.whiteSpace = 'nowrap';
+
+    const availableWidth = Math.max(1, copy.getBoundingClientRect().width - (mobile ? 2 : 8));
+    const renderedWidth = title.getBoundingClientRect().width;
+    if (renderedWidth > availableWidth) {
+      title.style.fontSize = `${desiredSize * (availableWidth / renderedWidth) * 0.995}px`;
+    }
+
+    title.style.width = 'auto';
+  };
+
   const applyLayout = (): void => {
     const mobile = window.innerWidth <= 720;
     const compact = window.innerWidth <= 1100;
@@ -86,15 +109,15 @@ export const setupFinalCtaReveal = (): void => {
     root.style.background = '#050505';
     root.style.gridTemplateColumns = '1fr';
     root.style.gridTemplateRows = 'auto auto';
-    root.style.alignContent = 'start';
-    root.style.alignItems = 'start';
+    root.style.alignContent = 'center';
+    root.style.alignItems = 'center';
     root.style.rowGap = mobile ? '22px' : 'clamp(24px, 3vh, 34px)';
     root.style.setProperty('--cta-content-inset', mobile ? '0px' : compact ? 'clamp(0px, 10vw, 96px)' : 'clamp(0px, 18vw, 320px)');
     root.style.setProperty('--cta-main-top', mobile ? '86px' : compact ? 'clamp(100px, 10vh, 118px)' : 'clamp(108px, 12vh, 136px)');
     root.style.display = mobile ? 'flex' : 'grid';
     if (mobile) {
       root.style.flexDirection = 'column';
-      root.style.alignItems = 'stretch';
+      root.style.alignItems = 'center';
     }
 
     copy.style.width = mobile ? '100%' : 'calc(100% - var(--cta-content-inset))';
@@ -105,21 +128,21 @@ export const setupFinalCtaReveal = (): void => {
     copy.style.alignItems = 'center';
     copy.style.textAlign = 'center';
 
-    title.style.width = '100%';
-    title.style.maxWidth = mobile ? '8.6ch' : 'none';
+    title.style.maxWidth = 'none';
     title.style.marginInline = 'auto';
-    title.style.fontSize = mobile ? 'clamp(60px, 18vw, 86px)' : compact ? 'clamp(82px, 12vw, 132px)' : 'clamp(104px, 11.4vw, 214px)';
-    title.style.lineHeight = mobile ? '0.9' : '0.78';
-    title.style.letterSpacing = mobile ? '-0.01em' : '-0.018em';
+    title.style.lineHeight = mobile ? '0.86' : '0.78';
+    title.style.letterSpacing = mobile ? '0.006em' : '0.012em';
     title.style.textAlign = 'center';
-    title.style.whiteSpace = mobile ? 'normal' : 'nowrap';
+    title.style.whiteSpace = 'nowrap';
+    fitTitle(mobile, compact);
 
-    text.style.maxWidth = mobile ? '32ch' : '55ch';
+    text.style.maxWidth = mobile ? '34ch' : '52ch';
     text.style.marginTop = mobile ? '20px' : 'clamp(22px, 2vw, 30px)';
     text.style.marginInline = 'auto';
     text.style.fontSize = mobile ? 'clamp(13px, 3.7vw, 16px)' : 'clamp(15px, 1.1vw, 20px)';
-    text.style.lineHeight = mobile ? '1.22' : '1.14';
+    text.style.lineHeight = mobile ? '1.22' : '1.2';
     text.style.textAlign = 'center';
+    text.style.textWrap = 'balance';
 
     action.style.justifySelf = 'center';
     action.style.alignSelf = 'center';
