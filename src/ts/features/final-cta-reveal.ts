@@ -90,7 +90,7 @@ export const setupFinalCtaReveal = (): void => {
     root.style.alignItems = 'start';
     root.style.rowGap = mobile ? '22px' : 'clamp(24px, 3vh, 34px)';
     root.style.setProperty('--cta-content-inset', mobile ? '0px' : compact ? 'clamp(0px, 10vw, 96px)' : 'clamp(0px, 18vw, 320px)');
-    root.style.setProperty('--cta-main-top', mobile ? '58px' : compact ? 'clamp(68px, 7vh, 84px)' : 'clamp(72px, 8vh, 96px)');
+    root.style.setProperty('--cta-main-top', mobile ? '86px' : compact ? 'clamp(100px, 10vh, 118px)' : 'clamp(108px, 12vh, 136px)');
     root.style.display = mobile ? 'flex' : 'grid';
     if (mobile) {
       root.style.flexDirection = 'column';
