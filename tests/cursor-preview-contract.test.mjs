@@ -58,7 +58,7 @@ test('desktop cursor uses a fast damped mass and spline membrane deformation', a
   assert.match(styles, /\.piece-cursor-preview__shape/);
 });
 
-test('cursor stays active across each item zone while native mouse remains visible', async () => {
+test('cursor stays active across each item zone while the native pointer remains visible', async () => {
   const [prompt, environment] = await Promise.all([
     readSource('src/ts/features/piece-cursor-prompt.ts'),
     readSource('src/scss/_environment.scss')
@@ -68,9 +68,10 @@ test('cursor stays active across each item zone while native mouse remains visib
   assert.match(prompt, /zone\.addEventListener\('pointerenter'/);
   assert.match(prompt, /zone\.addEventListener\('pointermove'/);
   assert.match(prompt, /zone\.addEventListener\('pointerleave'/);
-  assert.match(environment, /cursor: auto/);
   assert.doesNotMatch(environment, /cursor: none !important/);
-  assert.match(environment, /\.menu-item\[data-piece-item\][\s\S]*cursor: pointer/);
+  assert.match(environment, /\.menu-item\[data-piece-item\],[\s\S]*\.menu-item\[data-piece-item\] \*[\s\S]*cursor: pointer/);
+  assert.match(environment, /\.menu-group__items\.has-piece-cursor-prompt,[\s\S]*cursor: pointer/);
+  assert.match(environment, /\.menu-group__items,[\s\S]*user-select: none/);
   assert.match(environment, /\.menu-item \{\s*margin-bottom: 0;/);
   assert.match(environment, /\.menu-item \+ \.menu-item \{\s*padding-top: clamp\(28px, 4vh, 52px\)/);
   assert.match(environment, /padding-top: 30px/);
