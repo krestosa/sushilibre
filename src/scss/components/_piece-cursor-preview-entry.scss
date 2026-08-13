@@ -1,0 +1,36 @@
+.piece-cursor-preview {
+  opacity: 1;
+  visibility: hidden;
+  transform: translate3d(0, 0, 0) translate(-50%, -50%);
+  transition:
+    width 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 190ms;
+}
+
+.piece-cursor-preview.is-visible {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.piece-cursor-preview__surface,
+.piece-cursor-preview__label,
+.piece-cursor-preview__icon {
+  transform: scale(0);
+  transform-origin: center;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.piece-cursor-preview.is-visible .piece-cursor-preview__surface,
+.piece-cursor-preview.is-visible .piece-cursor-preview__label,
+.piece-cursor-preview.is-visible .piece-cursor-preview__icon {
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .piece-cursor-preview__surface,
+  .piece-cursor-preview__label,
+  .piece-cursor-preview__icon {
+    transition-duration: 0s;
+  }
+}
