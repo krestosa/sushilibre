@@ -1,4 +1,5 @@
 import { query } from '../shared/dom';
+import { setupHeroTitleScroll } from './hero-title-scroll';
 
 const STACKED_CLASS = 'is-stacked';
 const INLINE_WIDTH = 'min(1600px, calc(100vw - 48px))';
@@ -20,8 +21,6 @@ export const setupHeroTitleLayout = (): void => {
     const wasStacked = lockup.classList.contains(STACKED_CLASS);
     const previousWidth = lockup.style.width;
 
-    // Always measure the real single-line composition. The temporary changes are
-    // restored within the same animation frame, before the browser paints.
     if (wasStacked) lockup.classList.remove(STACKED_CLASS);
     lockup.style.width = INLINE_WIDTH;
 
@@ -69,4 +68,5 @@ export const setupHeroTitleLayout = (): void => {
   }
 
   document.fonts.ready.then(scheduleSync).catch(() => undefined);
+  setupHeroTitleScroll();
 };
