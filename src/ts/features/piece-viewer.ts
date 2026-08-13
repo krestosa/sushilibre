@@ -5,6 +5,7 @@ const ERROR_MESSAGE = 'IMAGEN NO DISPONIBLE';
 const CLOSE_FALLBACK_MS = 320;
 const REDUCED_CLOSE_FALLBACK_MS = 170;
 const PRELOAD_CONCURRENCY = 3;
+const MOBILE_PIECE_QUERY = '(max-width: 720px)';
 const SCROLL_KEYS = new Set([
   'ArrowDown',
   'ArrowLeft',
@@ -23,10 +24,10 @@ const isInteractiveTarget = (target: EventTarget | null): boolean =>
     'a[href], button, input, textarea, select, [contenteditable="true"]'
   ));
 
-const preloadPieceImages = (buttons: readonly HTMLButtonElement[]): void => {
+const preloadPieceImages = (triggers: readonly HTMLElement[]): void => {
   const sources = Array.from(new Set(
-    buttons
-      .map((button) => button.dataset.pieceImage?.trim())
+    triggers
+      .map((trigger) => trigger.dataset.pieceImage?.trim())
       .filter((source): source is string => Boolean(source))
   ));
 
@@ -62,8 +63,6 @@ const preloadPieceImages = (buttons: readonly HTMLButtonElement[]): void => {
     }
   };
 
-  // Start immediately after the first paint so the menu artwork warms the HTTP/image
-  // cache in the background without competing with the initial render at normal priority.
   window.requestAnimationFrame(() => {
     window.setTimeout(pump, 0);
   });
@@ -77,19 +76,48 @@ export const setupPieceViewer = (): void => {
   const statusText = query<HTMLElement>('[data-piece-viewer-status-text]', dialog ?? undefined);
   const closeButton = query<HTMLButtonElement>('[data-piece-viewer-close]', dialog ?? undefined);
   const openButtons = queryAll<HTMLButtonElement>('[data-piece-viewer-open]');
+  const pieceItems = queryAll<HTMLElement>('[data-piece-item]');
 
-  if (!dialog || !image || !status || !statusText || !closeButton || !openButtons.length) return;
+  if (!dialog || !image || !status || !statusText || !closeButton || !pieceItems.length) return;
 
-  preloadPieceImages(openButtons);
+  preloadPieceImages(pieceItems);
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let activeButton: HTMLButtonElement | null = null;
+  const mobilePieces = window.matchMedia(MOBILE_PIECE_QUERY);
+  let activeTrigger: HTMLElement | null = null;
   let closeTimer = 0;
   let openFrame = 0;
   let imageFrame = 0;
   let scrollCorrectionFrame = 0;
   let lockedScrollY = 0;
   let backgroundLocked = false;
+
+  const syncMobileInteractivity = (): void => {
+    const interactive = mobilePieces.matches;
+
+    pieceItems.forEach((item) => {
+      const name = item.dataset.pieceName?.trim() || 'pieza';
+      if (interactive) {
+        item.setAttribute('role', 'button');
+        item.tabIndex = 0;
+        item.setAttribute('aria-haspopup', 'dialog');
+        item.setAttribute('aria-controls', 'piece-viewer');
+        item.setAttribute('aria-label', `Ver imagen de ${name}`);
+      } else {
+        item.removeAttribute('role');
+        item.removeAttribute('tabindex');
+        item.removeAttribute('aria-haspopup');
+        item.removeAttribute('aria-controls');
+        item.removeAttribute('aria-label');
+      }
+    });
+
+    openButtons.forEach((button) => {
+      button.tabIndex = interactive ? 0 : -1;
+      if (interactive) button.removeAttribute('aria-hidden');
+      else button.setAttribute('aria-hidden', 'true');
+    });
+  };
 
   const preventBackgroundScroll = (event: Event): void => {
     if (event.cancelable) event.preventDefault();
@@ -204,9 +232,9 @@ export const setupPieceViewer = (): void => {
     image.hidden = true;
     delete dialog.dataset.state;
 
-    const button = activeButton;
-    activeButton = null;
-    button?.focus({ preventScroll: true });
+    const trigger = activeTrigger;
+    activeTrigger = null;
+    if (mobilePieces.matches) trigger?.focus({ preventScroll: true });
   };
 
   const finishClose = (): void => {
@@ -244,7 +272,6 @@ export const setupPieceViewer = (): void => {
       openFrame = 0;
       if (!dialog.open || dialog.classList.contains('is-closing')) return;
 
-      // Commit one complete loading-state paint before starting the entrance.
       void dialog.getBoundingClientRect();
       openFrame = window.requestAnimationFrame(() => {
         openFrame = 0;
@@ -258,13 +285,15 @@ export const setupPieceViewer = (): void => {
     });
   };
 
-  const openPiece = (button: HTMLButtonElement): void => {
-    const name = button.dataset.pieceName?.trim();
-    const source = button.dataset.pieceImage?.trim();
+  const openPiece = (trigger: HTMLElement): void => {
+    if (!mobilePieces.matches) return;
+
+    const name = trigger.dataset.pieceName?.trim();
+    const source = trigger.dataset.pieceImage?.trim();
     if (!name || !source) return;
 
     clearMotionSchedules();
-    activeButton = button;
+    activeTrigger = trigger;
     dialog.setAttribute('aria-label', `Imagen de ${name}`);
     image.alt = name;
     image.removeAttribute('src');
@@ -275,8 +304,21 @@ export const setupPieceViewer = (): void => {
     beginOpenAnimation(source);
   };
 
-  openButtons.forEach((button) => {
-    button.addEventListener('click', () => openPiece(button));
+  pieceItems.forEach((item) => {
+    item.addEventListener('click', (event) => {
+      if (!mobilePieces.matches) return;
+      const button = event.target instanceof Element
+        ? event.target.closest<HTMLElement>('[data-piece-viewer-open]')
+        : null;
+      openPiece(button ?? item);
+    });
+
+    item.addEventListener('keydown', (event) => {
+      if (!mobilePieces.matches || event.target !== item) return;
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      openPiece(item);
+    });
   });
 
   image.addEventListener('load', setReadyState);
@@ -292,4 +334,11 @@ export const setupPieceViewer = (): void => {
     event.preventDefault();
     closeDialog();
   });
+
+  mobilePieces.addEventListener('change', ({ matches }) => {
+    syncMobileInteractivity();
+    if (!matches && dialog.open) closeDialog();
+  });
+
+  syncMobileInteractivity();
 };
