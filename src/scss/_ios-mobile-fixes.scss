@@ -1,0 +1,44 @@
+.booking-dock__external-arrow {
+  position: relative;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-left: 3px;
+  overflow: visible;
+  color: currentColor;
+  font-size: 0;
+  line-height: 0;
+  vertical-align: -1px;
+}
+
+.booking-dock__external-arrow::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  bottom: 1px;
+  width: 9px;
+  height: 1.5px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: rotate(-45deg);
+  transform-origin: center;
+}
+
+.booking-dock__external-arrow::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 5px;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+}
+
+@media (max-width: 620px) {
+  .hero-copy {
+    // Move the copy slightly lower so LIBRE² has breathing room while still
+    // keeping a safe cushion above the fixed booking dock on short iOS views.
+    bottom: calc(var(--dock-height) + var(--dock-bottom) + 12px);
+  }
+}
