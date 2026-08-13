@@ -44,8 +44,8 @@ html.has-proposal-reveal .proposal-reveal--prices.is-visible {
   animation-name: proposal-reveal-fade;
 }
 
-// Native responsive line splitting: JS only measures/re-splits on layout changes;
-// the actual reveal is CSS, line-indexed and contains no per-frame scroll work.
+// Responsive line splitting: JS only measures/re-splits on layout changes;
+// line reveal and all continuous scroll movement stay in CSS.
 .proposal-line-mask {
   display: inline-block;
   overflow: hidden;
@@ -100,26 +100,47 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
   animation: none !important;
 }
 
-// Progressive CSS scroll-driven parallax. The heading travels farther and over
-// a longer view range than the content, so it visually catches up more slowly.
+// Continuous CSS view-timeline parallax. Each text layer keeps drifting while
+// it crosses the viewport instead of reaching its final position and freezing.
+// Different travel distances create a very small depth separation without a JS
+// scroll loop or layout reads on every frame.
 @supports (animation-timeline: view(block)) {
   @media (prefers-reduced-motion: no-preference) {
-    .proposal__header {
-      animation-name: proposal-heading-parallax;
+    .proposal__header,
+    .proposal__intro,
+    .proposal__chips,
+    .proposal__prices,
+    .proposal__conditions,
+    .proposal__legal {
       animation-duration: 1s;
       animation-timing-function: linear;
       animation-fill-mode: both;
       animation-timeline: view(block);
-      animation-range: entry 0% cover 48%;
+      animation-range: entry 0% exit 100%;
     }
 
-    .proposal__content {
-      animation-name: proposal-content-parallax;
-      animation-duration: 1s;
-      animation-timing-function: linear;
-      animation-fill-mode: both;
-      animation-timeline: view(block);
-      animation-range: entry 0% cover 31%;
+    .proposal__header {
+      animation-name: proposal-float-heading;
+    }
+
+    .proposal__intro {
+      animation-name: proposal-float-intro;
+    }
+
+    .proposal__chips {
+      animation-name: proposal-float-chips;
+    }
+
+    .proposal__prices {
+      animation-name: proposal-float-prices;
+    }
+
+    .proposal__conditions {
+      animation-name: proposal-float-conditions;
+    }
+
+    .proposal__legal {
+      animation-name: proposal-float-legal;
     }
   }
 }
@@ -181,22 +202,32 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
   }
 }
 
-@keyframes proposal-heading-parallax {
-  from {
-    translate: 0 72px;
-  }
-
-  to {
-    translate: 0 0;
-  }
+@keyframes proposal-float-heading {
+  from { translate: 0 72px; }
+  to { translate: 0 -28px; }
 }
 
-@keyframes proposal-content-parallax {
-  from {
-    translate: 0 24px;
-  }
+@keyframes proposal-float-intro {
+  from { translate: 0 26px; }
+  to { translate: 0 -14px; }
+}
 
-  to {
-    translate: 0 0;
-  }
+@keyframes proposal-float-chips {
+  from { translate: 0 20px; }
+  to { translate: 0 -12px; }
+}
+
+@keyframes proposal-float-prices {
+  from { translate: 0 17px; }
+  to { translate: 0 -13px; }
+}
+
+@keyframes proposal-float-conditions {
+  from { translate: 0 13px; }
+  to { translate: 0 -11px; }
+}
+
+@keyframes proposal-float-legal {
+  from { translate: 0 8px; }
+  to { translate: 0 -8px; }
 }
