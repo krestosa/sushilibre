@@ -116,12 +116,12 @@
 }
 
 .menu-final-cta__text {
-  width: min(100%, 52ch) !important;
-  max-width: 52ch !important;
+  width: min(100%, 58ch) !important;
+  max-width: 58ch !important;
   margin: clamp(20px, 2vh, 28px) auto 0 !important;
   line-height: 1.2 !important;
   text-align: center !important;
-  text-wrap: balance;
+  text-wrap: pretty !important;
 }
 
 .menu-final-cta__action {
@@ -180,9 +180,9 @@
   }
 
   .menu-final-cta__text {
-    width: min(100%, 34ch) !important;
-    max-width: 34ch !important;
-    text-wrap: balance;
+    width: min(100%, 42ch) !important;
+    max-width: 42ch !important;
+    text-wrap: pretty !important;
   }
 }
 
