@@ -152,7 +152,7 @@ export const setupBookingDockLayout = (): void => {
   const syncLayout = (): void => {
     const nextMode = resolveMode();
     const nextLiveState = dock.classList.contains('is-event-live');
-    const nextSuppressedState = dock.classList.contains('is-cta-suppressed') && !nextLiveState;
+    const nextSuppressedState = dock.classList.contains('is-cta-collapsed') && !nextLiveState;
     if (
       nextMode === activeMode
       && nextLiveState === activeLiveState
