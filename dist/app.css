@@ -570,24 +570,48 @@ html.has-piece-viewer body {
   place-items: center;
   width: 88px;
   height: 88px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--orange);
+  overflow: visible;
   color: #fff;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transform: translate3d(-999px, -999px, 0) translate(-50%, -50%);
   transform-origin: center;
-  contain: layout paint style;
+  contain: layout style;
   backface-visibility: hidden;
   will-change: transform, opacity;
-  transition: opacity 120ms ease-out, visibility 0s linear 130ms;
+  transition: width 150ms cubic-bezier(0.22, 1, 0.36, 1), height 150ms cubic-bezier(0.22, 1, 0.36, 1), opacity 120ms ease-out, visibility 0s linear 130ms;
 }
 .piece-cursor-preview.is-visible {
   opacity: 1;
   visibility: visible;
   transition-delay: 0s;
+}
+.piece-cursor-preview.has-clicked {
+  width: 72px;
+  height: 72px;
+}
+.piece-cursor-preview.has-clicked .piece-cursor-preview__label {
+  display: none;
+}
+.piece-cursor-preview.has-clicked .piece-cursor-preview__icon {
+  display: block;
+}
+
+.piece-cursor-preview__surface {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--orange);
+  transform-origin: center;
+  will-change: transform;
+}
+
+.piece-cursor-preview__label,
+.piece-cursor-preview__icon {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .piece-cursor-preview__label {
@@ -600,47 +624,19 @@ html.has-piece-viewer body {
 
 .piece-cursor-preview__icon {
   display: none;
-  width: 25px;
-  height: 25px;
+  width: 23px;
+  height: 23px;
   filter: brightness(0) invert(1);
 }
 
-.piece-cursor-preview.has-clicked .piece-cursor-preview__label {
-  display: none;
-}
-.piece-cursor-preview.has-clicked .piece-cursor-preview__icon {
-  display: block;
-}
-
-@media (min-width: 721px) and (hover: hover) and (pointer: fine) {
-  .menu-item[data-piece-item] {
-    cursor: pointer;
-  }
-  .menu-item__view {
-    display: none;
-  }
-}
-@media (max-width: 720px), (hover: none), (pointer: coarse) {
+@media (hover: none), (pointer: coarse) {
   .piece-cursor-preview {
     display: none;
-  }
-  .menu-item[data-piece-item] {
-    cursor: pointer;
-    touch-action: manipulation;
-  }
-  .menu-item[data-piece-item]:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.9);
-    outline-offset: 5px;
-  }
-  .menu-item__view {
-    display: inline-grid;
-    pointer-events: auto;
-    cursor: pointer;
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .piece-cursor-preview {
-    transition-duration: 90ms, 0s;
+    transition-duration: 0s;
   }
 }
 .menu-item__view {
@@ -2572,15 +2568,68 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
   mix-blend-mode: normal;
 }
 
+.menu-item {
+  margin-bottom: 0;
+}
+
+.menu-item + .menu-item {
+  padding-top: clamp(28px, 4vh, 52px);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .booking-dock__cta:hover {
     filter: brightness(1.06);
+  }
+  .menu-group__items.has-piece-cursor-prompt,
+  .menu-group__items.has-piece-cursor-prompt * {
+    cursor: none !important;
+  }
+}
+@media (min-width: 1101px) {
+  .menu-item__view {
+    display: none;
+  }
+}
+@media (max-width: 1100px), (hover: none), (pointer: coarse) {
+  .menu-item__view {
+    display: inline-grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    min-width: 25px;
+    min-height: 25px;
+    padding: 4px;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .menu-item__view img {
+    width: 15px;
+    height: 15px;
   }
 }
 @media (max-width: 900px), (pointer: coarse) {
   .hero__grain,
   .menu-section__background::after {
     display: none;
+  }
+}
+@media (max-width: 720px) {
+  .menu-item {
+    margin-bottom: 0;
+  }
+  .menu-item + .menu-item {
+    padding-top: 30px;
+  }
+  .menu-item__view {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    padding: 3px;
+  }
+  .menu-item__view img {
+    width: 13px;
+    height: 13px;
   }
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
