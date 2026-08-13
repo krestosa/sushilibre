@@ -6,8 +6,8 @@ html.has-proposal-reveal .proposal-reveal {
 }
 
 html.has-proposal-reveal .proposal-reveal--heading {
-  --proposal-reveal-distance: 20px;
-  --proposal-reveal-duration: 560ms;
+  --proposal-reveal-distance: 46px;
+  --proposal-reveal-duration: 760ms;
 }
 
 html.has-proposal-reveal .proposal-reveal--intro {
@@ -44,6 +44,50 @@ html.has-proposal-reveal .proposal-reveal--prices.is-visible {
   animation-name: proposal-reveal-fade;
 }
 
+// Native responsive line splitting: JS only measures/re-splits on layout changes;
+// the actual reveal is CSS, line-indexed and contains no per-frame scroll work.
+.proposal-line-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: baseline;
+}
+
+.proposal-line-word {
+  display: inline-block;
+}
+
+html.has-proposal-reveal .proposal-reveal.has-line-split {
+  opacity: 1;
+  transform: none;
+}
+
+html.has-proposal-reveal .proposal-reveal.has-line-split .proposal-line-word {
+  opacity: 0;
+  transform: translate3d(0, 112%, 0);
+}
+
+html.has-proposal-reveal .proposal-reveal.has-line-split.is-visible {
+  animation: none;
+}
+
+html.has-proposal-reveal
+  .proposal-reveal.has-line-split.is-visible:not(.is-line-split-settled)
+  .proposal-line-word {
+  animation: proposal-line-reveal 680ms var(--ease-out)
+    calc(var(--proposal-reveal-delay, 0ms) + var(--proposal-line-index, 0) * 58ms) both;
+}
+
+html.has-proposal-reveal
+  .proposal-reveal.has-line-split.is-line-split-settled
+  .proposal-line-word,
+html.has-proposal-reveal
+  .proposal-reveal.has-line-split.is-reveal-bypassed
+  .proposal-line-word {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
 html.has-proposal-reveal .proposal-reveal.is-visible.is-reveal-bypassed {
   opacity: 1;
   transform: none;
@@ -54,6 +98,30 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
   opacity: 1;
   transform: none;
   animation: none !important;
+}
+
+// Progressive CSS scroll-driven parallax. The heading travels farther and over
+// a longer view range than the content, so it visually catches up more slowly.
+@supports (animation-timeline: view(block)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .proposal__header {
+      animation-name: proposal-heading-parallax;
+      animation-duration: 1s;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view(block);
+      animation-range: entry 0% cover 48%;
+    }
+
+    .proposal__content {
+      animation-name: proposal-content-parallax;
+      animation-duration: 1s;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view(block);
+      animation-range: entry 0% cover 31%;
+    }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -69,6 +137,12 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
   }
 
   html.has-proposal-reveal .proposal-reveal.is-visible.is-reveal-bypassed {
+    animation: none;
+  }
+
+  html.has-proposal-reveal .proposal-reveal.has-line-split .proposal-line-word {
+    opacity: 1;
+    transform: none;
     animation: none;
   }
 }
@@ -92,5 +166,37 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
 
   to {
     opacity: 1;
+  }
+}
+
+@keyframes proposal-line-reveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 112%, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes proposal-heading-parallax {
+  from {
+    translate: 0 72px;
+  }
+
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes proposal-content-parallax {
+  from {
+    translate: 0 24px;
+  }
+
+  to {
+    translate: 0 0;
   }
 }
