@@ -171,25 +171,27 @@
 }
 
 @media (max-width: 840px) {
-  .booking-dock__cta {
-    flex-direction: column;
-    gap: 11px;
-
-    &::after {
-      content: "CUPOS\A LIMITADOS";
-      position: relative;
-      z-index: 2;
-      display: block;
-      font-size: 8px;
-      font-weight: 600;
-      line-height: 1.05;
-      letter-spacing: 0.08em;
-      white-space: pre-line;
-      text-align: center;
-    }
+  .booking-dock::after {
+    content: "CUPOS\A LIMITADOS";
+    grid-column: 4;
+    grid-row: 1;
+    align-self: center;
+    justify-self: start;
+    display: block;
+    padding-left: 2px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 8px;
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: 0.08em;
+    white-space: pre-line;
+    text-align: left;
+    pointer-events: none;
   }
 
-  .booking-dock.is-event-live .booking-dock__cta::after {
+  .booking-dock.is-event-live::after,
+  .booking-dock.is-cta-suppressed::after,
+  .booking-dock.is-cta-collapsed::after {
     content: none;
   }
 }
