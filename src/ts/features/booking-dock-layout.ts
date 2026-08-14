@@ -133,7 +133,7 @@ export const setupBookingDockLayout = (): void => {
     dock.style.setProperty('--dock-cta-track', suppressReservation ? '0px' : '96px');
     dock.style.gridTemplateColumns = 'max-content max-content max-content minmax(0, 1fr) var(--dock-cta-track)';
     dock.style.gridTemplateRows = eventLive ? '48px' : '48px 96px';
-    dock.style.columnGap = '8px';
+    dock.style.columnGap = '12px';
     dock.style.rowGap = '8px';
 
     placeMetadata({ row: '1', padding: '0 2px' });
@@ -141,7 +141,7 @@ export const setupBookingDockLayout = (): void => {
     countdown.style.gridRow = '2';
     styleCountdownBoundary(false);
     cta.style.gridColumn = '5';
-    cta.style.gridRow = eventLive ? '1' : '1 / span 2';
+    cta.style.gridRow = eventLive ? '1' : '2';
   };
 
   const resolveMode = (): DockLayoutMode => {
