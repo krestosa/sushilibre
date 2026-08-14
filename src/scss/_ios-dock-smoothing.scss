@@ -1,0 +1,14 @@
+@media (max-width: 840px) {
+  html.is-ios-mobile .booking-dock {
+    transform: translate3d(
+      0,
+      calc(
+        var(
+            --ios-dock-smoothed-bottom,
+            var(--ios-dock-visual-bottom, 100dvh)
+          ) - var(--ios-dock-box-height) - var(--dock-bottom)
+      ),
+      0
+    );
+  }
+}
