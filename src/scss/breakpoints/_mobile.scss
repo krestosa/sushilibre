@@ -95,6 +95,29 @@
   }
 }
 
+// iOS 26 can paint bottom-fixed elements against the wrong viewport while
+// Safari's floating browser chrome expands/collapses. Avoid that WebKit path on
+// touch Safari by using the same sticky strategy as desktop, but anchor it to
+// the dynamic viewport height so the dock remains visually pinned near bottom.
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 840px) {
+    .booking-dock {
+      position: sticky;
+      top: calc(100dvh - var(--dock-height) - var(--dock-bottom));
+      right: auto;
+      bottom: auto;
+      left: auto;
+      width: min(680px, calc(100vw - 24px));
+      margin: 0 auto calc(-1 * var(--dock-height));
+    }
+
+    .booking-dock.is-cta-collapsed:not(.is-event-live) {
+      top: calc(100dvh - 112px - var(--dock-bottom));
+      margin-bottom: -112px;
+    }
+  }
+}
+
 @media (max-width: 720px) {
   .menu-section__background {
     background-position: 58% center;
