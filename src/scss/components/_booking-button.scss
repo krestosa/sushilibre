@@ -170,6 +170,29 @@
   }
 }
 
+@media (max-width: 840px) {
+  .booking-dock__cta {
+    flex-direction: column;
+    gap: 6px;
+
+    &::after {
+      content: "CUPOS LIMITADOS";
+      position: relative;
+      z-index: 2;
+      display: block;
+      font-size: 8px;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+  }
+
+  .booking-dock.is-event-live .booking-dock__cta::after {
+    content: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .booking-dock,
   .booking-dock__cta {
