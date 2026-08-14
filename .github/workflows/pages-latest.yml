@@ -35,8 +35,8 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Build static site
-        run: npm run clean && npm run build
+      - name: Verify and build static site
+        run: npm run verify
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
