@@ -1,4 +1,5 @@
-import { query } from '../shared/dom';
+import { query, queryAll } from '../shared/dom';
+import { MOTION_DURATION, MOTION_EASE_OUT } from '../shared/motion';
 
 type CountdownKey = 'days' | 'hours' | 'minutes' | 'seconds';
 
@@ -6,6 +7,7 @@ const keys: CountdownKey[] = ['days', 'hours', 'minutes', 'seconds'];
 const target = new Date('2026-09-03T20:00:00-03:00').getTime();
 const FINAL_CTA_DOCK_CLEARANCE_PX = 8;
 const DOCK_FADE_MS = 170;
+const DOCK_REVEAL_DELAY_MS = 90;
 
 const replaceCtaLabel = (label: HTMLElement, firstLine: string, secondLine: string): void => {
   label.replaceChildren(
@@ -23,11 +25,21 @@ export const setupCountdown = (): void => {
   const menu = query<HTMLElement>('#menu');
   const finalMenuCtaAction = query<HTMLElement>('.menu-final-cta__action');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const countdownUnits = countdown ? queryAll<HTMLElement>('.countdown__unit', countdown) : [];
+
+  let dockSurface = dock ? query<HTMLElement>('.booking-dock__surface', dock) : null;
+  if (dock && !dockSurface) {
+    dockSurface = document.createElement('div');
+    dockSurface.className = 'booking-dock__surface';
+    dockSurface.setAttribute('aria-hidden', 'true');
+    dock.prepend(dockSurface);
+  }
+
   let menuMode = false;
   let finalMenuCtaActionPassedDock = false;
   let finalMenuCtaTriggerScrollY = Number.POSITIVE_INFINITY;
   let measurementFrame = 0;
-  let dockCollapseTimer = 0;
+  let dockPhaseTimer = 0;
   let dockTransitionToken = 0;
 
   const nodes: Record<CountdownKey, HTMLElement | null> = {
@@ -37,11 +49,74 @@ export const setupCountdown = (): void => {
     seconds: query<HTMLElement>('[data-countdown="seconds"]')
   };
 
+  const animateDockGeometryChange = (mutate: () => void): void => {
+    if (!dock || !dockSurface || reducedMotion.matches || typeof dockSurface.animate !== 'function') {
+      mutate();
+      return;
+    }
+
+    const beforeSurface = dockSurface.getBoundingClientRect();
+    const beforeUnits = countdownUnits.map((unit) => unit.getBoundingClientRect());
+    dockSurface.getAnimations().forEach((animation) => animation.cancel());
+    countdownUnits.forEach((unit) => unit.getAnimations().forEach((animation) => animation.cancel()));
+
+    mutate();
+
+    const afterSurface = dockSurface.getBoundingClientRect();
+    const surfaceWidth = Math.max(1, afterSurface.width);
+    const surfaceHeight = Math.max(1, afterSurface.height);
+    const surfaceDx = beforeSurface.left - afterSurface.left;
+    const surfaceDy = beforeSurface.top - afterSurface.top;
+    const surfaceScaleX = beforeSurface.width / surfaceWidth;
+    const surfaceScaleY = beforeSurface.height / surfaceHeight;
+
+    dockSurface.style.willChange = 'transform';
+    const surfaceAnimation = dockSurface.animate([
+      {
+        transformOrigin: '0 0',
+        transform: `translate3d(${surfaceDx}px, ${surfaceDy}px, 0) scale(${surfaceScaleX}, ${surfaceScaleY})`
+      },
+      {
+        transformOrigin: '0 0',
+        transform: 'translate3d(0, 0, 0) scale(1, 1)'
+      }
+    ], {
+      duration: MOTION_DURATION.standard,
+      easing: MOTION_EASE_OUT,
+      fill: 'none'
+    });
+
+    surfaceAnimation.addEventListener('finish', () => {
+      dockSurface!.style.willChange = 'auto';
+    }, { once: true });
+    surfaceAnimation.addEventListener('cancel', () => {
+      dockSurface!.style.willChange = 'auto';
+    }, { once: true });
+
+    countdownUnits.forEach((unit, index) => {
+      const before = beforeUnits[index];
+      if (!before) return;
+      const after = unit.getBoundingClientRect();
+      const dx = before.left - after.left;
+      const dy = before.top - after.top;
+      if (Math.abs(dx) < 0.25 && Math.abs(dy) < 0.25) return;
+
+      unit.animate([
+        { transform: `translate3d(${dx}px, ${dy}px, 0)` },
+        { transform: 'translate3d(0, 0, 0)' }
+      ], {
+        duration: MOTION_DURATION.standard,
+        easing: MOTION_EASE_OUT,
+        fill: 'none'
+      });
+    });
+  };
+
   const syncDockCtaVisibility = (): void => {
     if (!cta) return;
     const shouldSuppress = finalMenuCtaActionPassedDock && !menuMode;
     const token = ++dockTransitionToken;
-    window.clearTimeout(dockCollapseTimer);
+    window.clearTimeout(dockPhaseTimer);
 
     if (shouldSuppress) {
       cta.classList.add('is-suppressed');
@@ -54,14 +129,19 @@ export const setupCountdown = (): void => {
         return;
       }
 
-      dockCollapseTimer = window.setTimeout(() => {
+      dockPhaseTimer = window.setTimeout(() => {
         if (token !== dockTransitionToken || !dock.classList.contains('is-cta-suppressed')) return;
-        dock.classList.add('is-cta-collapsed');
+        animateDockGeometryChange(() => dock.classList.add('is-cta-collapsed'));
       }, DOCK_FADE_MS);
       return;
     }
 
-    dock?.classList.remove('is-cta-collapsed');
+    const wasCollapsed = Boolean(dock?.classList.contains('is-cta-collapsed'));
+    if (dock && wasCollapsed) {
+      animateDockGeometryChange(() => dock.classList.remove('is-cta-collapsed'));
+    } else {
+      dock?.classList.remove('is-cta-collapsed');
+    }
 
     const reveal = (): void => {
       if (token !== dockTransitionToken) return;
@@ -70,14 +150,12 @@ export const setupCountdown = (): void => {
       cta.removeAttribute('tabindex');
     };
 
-    if (reducedMotion.matches || !dock) {
+    if (reducedMotion.matches || !dock || !wasCollapsed) {
       reveal();
       return;
     }
 
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(reveal);
-    });
+    dockPhaseTimer = window.setTimeout(reveal, DOCK_REVEAL_DELAY_MS);
   };
 
   const syncFinalMenuCtaActionPosition = (): void => {

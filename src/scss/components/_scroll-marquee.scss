@@ -1,5 +1,6 @@
 .menu-section {
   --menu-marquee-height: clamp(198px, 13vw, 240px);
+  overflow-x: clip;
 }
 
 .menu-marquee {
@@ -9,7 +10,7 @@
   width: 100vw;
   height: var(--menu-marquee-height);
   margin-left: calc(50% - 50vw);
-  overflow: hidden;
+  overflow: clip;
   background: var(--orange);
   color: #fff;
   contain: paint;

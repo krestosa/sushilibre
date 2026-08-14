@@ -99,7 +99,7 @@ export async function syncStaticFiles(assetVersion) {
 
 export async function compileStyles() {
   const stylesheet = sass.compile(stylesEntry, {
-    style: 'expanded',
+    style: 'compressed',
     loadPaths: [resolve(root, 'src/scss')],
     sourceMap: false
   });
@@ -118,7 +118,7 @@ export async function bundleScripts() {
     target: ['es2020'],
     legalComments: 'none',
     sourcemap: false,
-    minify: false,
+    minify: true,
     logLevel: 'info',
     write: false
   });

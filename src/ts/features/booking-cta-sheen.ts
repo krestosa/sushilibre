@@ -1,4 +1,5 @@
 import { queryAll, setStyles } from '../shared/dom';
+import { MOTION_EASE_OUT } from '../shared/motion';
 import type { RuntimeContext } from '../shared/runtime';
 
 export const setupBookingCtaSheen = ({
@@ -15,23 +16,36 @@ export const setupBookingCtaSheen = ({
     if (typeof cta.animate !== 'function') return;
 
     const isFinalCta = cta.classList.contains('menu-final-cta__action');
-    cta.style.filter = 'none';
     cta.style.overflow = 'hidden';
     cta.style.isolation = 'isolate';
     cta.classList.add('has-runtime-sheen');
 
-    let label = cta.querySelector<HTMLElement>(':scope > span');
+    let label = cta.querySelector<HTMLElement>(':scope > span:not(.booking-cta-glow)');
     if (!label) {
       label = document.createElement('span');
       while (cta.firstChild) label.append(cta.firstChild);
       cta.append(label);
     }
-    setStyles(label, {
-      position: 'relative',
-      zIndex: '2'
+    setStyles(label, { position: 'relative', zIndex: '2' });
+
+    const glow = document.createElement('span');
+    glow.className = 'booking-cta-glow';
+    glow.setAttribute('aria-hidden', 'true');
+    setStyles(glow, {
+      position: 'absolute',
+      zIndex: '0',
+      inset: '-28%',
+      borderRadius: 'inherit',
+      opacity: '0',
+      pointerEvents: 'none',
+      transform: 'scale(0.92)',
+      transformOrigin: 'center',
+      background: 'radial-gradient(circle at 50% 50%, rgba(107,124,255,.38) 0%, rgba(0,26,197,.25) 38%, rgba(0,26,197,0) 72%)',
+      willChange: 'transform, opacity'
     });
 
     const sheen = document.createElement('i');
+    sheen.className = 'booking-cta-sheen';
     sheen.setAttribute('aria-hidden', 'true');
     setStyles(sheen, {
       position: 'absolute',
@@ -47,13 +61,13 @@ export const setupBookingCtaSheen = ({
       filter: 'blur(6px)',
       willChange: 'transform, opacity'
     });
-    cta.prepend(sheen);
+    cta.prepend(glow, sheen);
 
     const initialDelay = isFinalCta ? 550 : 1_500;
     const regularDelay = 7_400;
     const duration = compact ? 1_450 : 1_800;
     let timerId = 0;
-    let activeAnimation: Animation | null = null;
+    let activeSheen: Animation | null = null;
     let activeGlow: Animation | null = null;
     let interactionArmed = true;
     let initialPending = true;
@@ -66,9 +80,9 @@ export const setupBookingCtaSheen = ({
     };
 
     const stopAnimations = (): void => {
-      activeAnimation?.cancel();
+      activeSheen?.cancel();
       activeGlow?.cancel();
-      activeAnimation = null;
+      activeSheen = null;
       activeGlow = null;
     };
 
@@ -86,7 +100,7 @@ export const setupBookingCtaSheen = ({
       clearTimer();
       stopAnimations();
 
-      const animation = sheen.animate([
+      const sheenAnimation = sheen.animate([
         { transform: 'translate3d(-145%, 0, 0) skewX(-18deg)', opacity: 0 },
         { transform: 'translate3d(-122%, 0, 0) skewX(-18deg)', opacity: 0, offset: 0.1 },
         { transform: 'translate3d(-78%, 0, 0) skewX(-18deg)', opacity: 0.82, offset: 0.28 },
@@ -94,26 +108,26 @@ export const setupBookingCtaSheen = ({
         { transform: 'translate3d(215%, 0, 0) skewX(-18deg)', opacity: 0 }
       ], {
         duration,
-        easing: 'cubic-bezier(.22, 1, .36, 1)',
+        easing: MOTION_EASE_OUT,
         fill: 'none'
       });
 
-      const glow = cta.animate([
-        { boxShadow: '0 0 0 rgba(0,26,197,0)', filter: 'brightness(1)' },
-        { boxShadow: '0 0 0 rgba(0,26,197,0)', filter: 'brightness(1)', offset: 0.18 },
-        { boxShadow: '0 0 28px rgba(0,26,197,.34)', filter: 'brightness(1.08)', offset: 0.55 },
-        { boxShadow: '0 0 0 rgba(0,26,197,0)', filter: 'brightness(1)' }
+      const glowAnimation = glow.animate([
+        { opacity: 0, transform: 'scale(0.92)' },
+        { opacity: 0, transform: 'scale(0.92)', offset: 0.16 },
+        { opacity: 0.9, transform: 'scale(1)', offset: 0.55 },
+        { opacity: 0, transform: 'scale(1.04)' }
       ], {
         duration,
-        easing: 'ease-in-out',
+        easing: MOTION_EASE_OUT,
         fill: 'none'
       });
 
-      activeAnimation = animation;
-      activeGlow = glow;
-      animation.addEventListener('finish', () => {
-        if (activeAnimation === animation) activeAnimation = null;
-        if (activeGlow === glow) activeGlow = null;
+      activeSheen = sheenAnimation;
+      activeGlow = glowAnimation;
+      sheenAnimation.addEventListener('finish', () => {
+        if (activeSheen === sheenAnimation) activeSheen = null;
+        if (activeGlow === glowAnimation) activeGlow = null;
         scheduleRegularLoop();
       }, { once: true });
     }
@@ -156,28 +170,32 @@ export const setupBookingCtaSheen = ({
       armInitial();
     }
 
-    cta.addEventListener('pointerenter', triggerInteractionSheen, { passive: true });
-    cta.addEventListener('pointerleave', () => {
-      interactionArmed = true;
-    }, { passive: true });
+    if (!compact) {
+      cta.addEventListener('pointerenter', triggerInteractionSheen, { passive: true });
+      cta.addEventListener('pointerleave', () => {
+        interactionArmed = true;
+      }, { passive: true });
+    }
     cta.addEventListener('focus', triggerInteractionSheen);
     cta.addEventListener('blur', () => {
       interactionArmed = true;
     });
 
-    document.addEventListener('visibilitychange', () => {
+    const handleVisibility = (): void => {
       if (document.hidden) {
         clearTimer();
         stopAnimations();
         return;
       }
       scheduleRegularLoop(initialPending ? 650 : regularDelay);
-    });
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
 
     window.addEventListener('pagehide', () => {
       clearTimer();
       stopAnimations();
       observer?.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibility);
     }, { once: true });
   });
 };

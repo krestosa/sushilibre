@@ -9,14 +9,11 @@ const MAX_DEFORM_SPEED = 1_450;
 const CURSOR_OFFSET_X = 14;
 const CURSOR_OFFSET_Y = 10;
 const EDGE_GUTTER = 10;
-const BLOB_POINTS = 18;
+const BLOB_POINTS = 16;
 const BLOB_RADIUS = 43;
 const BLOB_CENTER = 50;
-const MAX_STRETCH = 0.22;
-const MAX_SQUASH = 0.13;
-const LEADING_BELLY = 4.6;
-const TRAILING_CAVE = 2.8;
-const SIDE_BULGE = 1.35;
+const MAX_STRETCH = 0.18;
+const MAX_SQUASH = 0.1;
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 type Point = { x: number; y: number };
@@ -42,45 +39,25 @@ const closedSplinePath = (points: readonly Point[]): string => {
     const control1Y = current.y + (next.y - previous.y) / 6;
     const control2X = next.x - (afterNext.x - current.x) / 6;
     const control2Y = next.y - (afterNext.y - current.y) / 6;
-
     path += ` C ${control1X.toFixed(3)} ${control1Y.toFixed(3)}, ${control2X.toFixed(3)} ${control2Y.toFixed(3)}, ${next.x.toFixed(3)} ${next.y.toFixed(3)}`;
   }
+
   return `${path} Z`;
 };
 
-const buildBlobPath = (deformation: number, directionX: number, directionY: number): string => {
-  const directionLength = Math.hypot(directionX, directionY) || 1;
-  const dx = directionX / directionLength;
-  const dy = directionY / directionLength;
-  const px = -dy;
-  const py = dx;
-  const stretch = 1 + deformation * MAX_STRETCH;
-  const squash = 1 - deformation * MAX_SQUASH;
+const buildStaticBlobPath = (): string => {
   const points: Point[] = [];
-
   for (let index = 0; index < BLOB_POINTS; index += 1) {
     const angle = (index / BLOB_POINTS) * Math.PI * 2;
-    const ux = Math.cos(angle);
-    const uy = Math.sin(angle);
-    const axial = ux * dx + uy * dy;
-    const lateral = ux * px + uy * py;
-    const leading = Math.max(0, axial) ** 2;
-    const trailing = Math.max(0, -axial) ** 2;
-    const side = Math.max(0, 1 - Math.abs(axial)) ** 1.6;
-
-    const along = BLOB_RADIUS * axial * stretch;
-    const across = BLOB_RADIUS * lateral * squash;
-    let x = BLOB_CENTER + dx * along + px * across;
-    let y = BLOB_CENTER + dy * along + py * across;
-
-    const directionalPush = deformation * (LEADING_BELLY * leading - TRAILING_CAVE * trailing);
-    const sidePush = deformation * SIDE_BULGE * side;
-    x += dx * directionalPush + ux * sidePush;
-    y += dy * directionalPush + uy * sidePush;
-
-    points.push({ x, y });
+    const organic = 1
+      + Math.sin(angle * 3 + 0.8) * 0.035
+      + Math.sin(angle * 5 - 0.45) * 0.018;
+    const radius = BLOB_RADIUS * organic;
+    points.push({
+      x: BLOB_CENTER + Math.cos(angle) * radius,
+      y: BLOB_CENTER + Math.sin(angle) * radius
+    });
   }
-
   return closedSplinePath(points);
 };
 
@@ -96,6 +73,9 @@ export const setupPieceCursorPrompt = (): void => {
   prompt.className = 'piece-cursor-preview';
   prompt.setAttribute('aria-hidden', 'true');
 
+  const inner = document.createElement('div');
+  inner.className = 'piece-cursor-preview__inner';
+
   const surface = document.createElementNS(SVG_NS, 'svg');
   surface.classList.add('piece-cursor-preview__surface');
   surface.setAttribute('viewBox', '0 0 100 100');
@@ -103,7 +83,7 @@ export const setupPieceCursorPrompt = (): void => {
   surface.setAttribute('focusable', 'false');
   const surfacePath = document.createElementNS(SVG_NS, 'path');
   surfacePath.classList.add('piece-cursor-preview__shape');
-  surfacePath.setAttribute('d', buildBlobPath(0, 1, 0));
+  surfacePath.setAttribute('d', buildStaticBlobPath());
   surface.append(surfacePath);
 
   const label = document.createElement('span');
@@ -117,7 +97,8 @@ export const setupPieceCursorPrompt = (): void => {
   icon.width = 24;
   icon.height = 24;
 
-  prompt.append(surface, label, icon);
+  inner.append(surface, label, icon);
+  prompt.append(inner);
   document.body.append(prompt);
 
   let activeZone: HTMLElement | null = null;
@@ -152,7 +133,6 @@ export const setupPieceCursorPrompt = (): void => {
     if (hasClicked) return;
     hasClicked = true;
     prompt.classList.add('has-clicked');
-    window.requestAnimationFrame(measurePrompt);
   };
 
   const updateTarget = (event: PointerEvent): void => {
@@ -215,6 +195,7 @@ export const setupPieceCursorPrompt = (): void => {
       pointerVelocityX = 0;
       pointerVelocityY = 0;
       deformation = 0;
+      surface.style.transform = 'none';
     } else {
       const accelerationX = (targetX - currentX) * SPRING_STIFFNESS - velocityX * SPRING_DAMPING;
       const accelerationY = (targetY - currentY) * SPRING_STIFFNESS - velocityY * SPRING_DAMPING;
@@ -244,10 +225,14 @@ export const setupPieceCursorPrompt = (): void => {
       const pointerDecay = Math.exp(-delta * 13);
       pointerVelocityX *= pointerDecay;
       pointerVelocityY *= pointerDecay;
+
+      const angle = Math.atan2(directionY, directionX) * (180 / Math.PI);
+      const stretch = 1 + deformation * MAX_STRETCH;
+      const squash = 1 - deformation * MAX_SQUASH;
+      surface.style.transform = `rotate(${angle.toFixed(2)}deg) scale(${stretch.toFixed(4)}, ${squash.toFixed(4)})`;
     }
 
     prompt.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
-    surfacePath.setAttribute('d', buildBlobPath(deformation, directionX, directionY));
 
     if (shouldKeepAnimating()) frameId = window.requestAnimationFrame(runFrame);
     else lastFrameTime = 0;
@@ -266,9 +251,7 @@ export const setupPieceCursorPrompt = (): void => {
   const activateZone = (zone: HTMLElement, event: PointerEvent): void => {
     if (!desktopPrompt.matches) return;
 
-    if (activeZone && activeZone !== zone) {
-      activeZone.classList.remove('has-piece-cursor-prompt');
-    }
+    if (activeZone && activeZone !== zone) activeZone.classList.remove('has-piece-cursor-prompt');
     activeZone = zone;
     activeZone.classList.add('has-piece-cursor-prompt');
     updateTarget(event);

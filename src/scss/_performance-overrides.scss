@@ -1,15 +1,3 @@
-// Keep scrolling native and compositor-friendly: no continuous text parallax.
-.proposal__header,
-.proposal__intro,
-.proposal__chips,
-.proposal__prices,
-.proposal__conditions,
-.proposal__legal {
-  animation-timeline: auto !important;
-  animation-range: normal !important;
-  translate: none !important;
-}
-
 // The blue marquee + final CTA are the complete endcap. Do not leave the
 // former dock-safe black padding after them; mobile reserves the dock inside
 // the CTA itself so the page ends directly against the counter.

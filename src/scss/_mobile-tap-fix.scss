@@ -18,11 +18,34 @@
   }
 }
 
+// The dock changes its real layout instantly. Its surface and countdown units
+// carry the visual FLIP, so no width/height transition can force layout every frame.
 .booking-dock {
-  transition:
-    width 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    height 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    --dock-cta-track 190ms cubic-bezier(0.22, 1, 0.36, 1);
+  isolation: isolate;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: none !important;
+}
+
+.booking-dock__surface {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: inherit;
+  background: rgba(9, 7, 6, 0.92);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  transform-origin: 0 0;
+}
+
+.booking-dock > :not(.booking-dock__surface) {
+  position: relative;
+  z-index: 1;
 }
 
 .booking-dock__meta {
@@ -31,8 +54,8 @@
   transform: scale(1);
   transform-origin: center;
   transition:
-    transform 180ms ease-out,
-    opacity 150ms ease-out,
+    transform 180ms var(--ease-out),
+    opacity 150ms var(--ease-out),
     visibility 0s linear 0s;
 }
 
@@ -65,6 +88,15 @@
   border-left: 0 !important;
 }
 
+// Defer the 1.6 MB menu background until JS marks the menu as near viewport.
+.menu-section {
+  --menu-background-image: none !important;
+}
+
+.menu-section.is-background-ready {
+  --menu-background-image: url("assets/menu_bg.webp") !important;
+}
+
 .menu-marquee__item {
   padding-inline: clamp(14px, 1.45vw, 28px) !important;
   font-size: clamp(102px, 11.4vw, 218px) !important;
@@ -86,6 +118,25 @@
   justify-content: center !important;
   gap: clamp(24px, 2.5vh, 34px) !important;
   padding-top: 112px !important;
+}
+
+.menu-final-cta.has-runtime-availability::after {
+  content: none !important;
+}
+
+.menu-final-cta__availability {
+  position: absolute;
+  z-index: 1;
+  top: var(--cta-top-pad);
+  right: var(--cta-x);
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: clamp(10px, 0.72vw, 13px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+  pointer-events: none;
 }
 
 .menu-final-cta__copy {
@@ -154,10 +205,6 @@
 }
 
 @media (max-width: 720px) {
-  .menu-group__heading {
-    top: max(12px, env(safe-area-inset-top, 0px)) !important;
-  }
-
   .menu-marquee__item {
     padding-inline: 13px !important;
     font-size: clamp(88px, 27vw, 126px) !important;
@@ -171,6 +218,10 @@
     --cta-meta-line: 68px !important;
     gap: 22px !important;
     padding-top: 92px !important;
+  }
+
+  .menu-final-cta__availability {
+    font-size: 9px;
   }
 
   .menu-final-cta__title {
@@ -187,8 +238,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .booking-dock,
   .booking-dock__meta {
     transition: none;
+  }
+
+  .booking-dock__surface {
+    transform: none !important;
+    will-change: auto !important;
   }
 }

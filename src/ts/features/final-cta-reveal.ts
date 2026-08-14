@@ -1,9 +1,9 @@
 import { query, queryAll } from '../shared/dom';
+import { MOTION_EASE_OUT } from '../shared/motion';
 
 const TITLE_TEXT = '¿ESTÁS PREPARADO?';
 const CTA_TEXT = 'UNA EXPERIENCIA PARA RECORRER LOS SABORES MÁS REPRESENTATIVOS DE SUSHICLUB.';
 const LINE_TOP_TOLERANCE_PX = 3;
-const EASE_OUT = 'cubic-bezier(0.22, 1, 0.36, 1)';
 
 const clampValue = (min: number, value: number, max: number): number => Math.min(max, Math.max(min, value));
 
@@ -55,7 +55,7 @@ const animateIn = (element: HTMLElement, distance: number, duration: number, del
   ], {
     duration,
     delay,
-    easing: EASE_OUT,
+    easing: MOTION_EASE_OUT,
     fill: 'forwards'
   });
 
@@ -75,6 +75,15 @@ export const setupFinalCtaReveal = (): void => {
   const eyebrow = query<HTMLElement>('.menu-final-cta__eyebrow', root);
   const action = query<HTMLElement>('.menu-final-cta__action', root);
   if (!copy || !title || !text || !action) return;
+
+  let availability = query<HTMLElement>('.menu-final-cta__availability', root);
+  if (!availability) {
+    availability = document.createElement('p');
+    availability.className = 'menu-final-cta__availability';
+    availability.textContent = 'CUPOS LIMITADOS';
+    root.append(availability);
+  }
+  root.classList.add('has-runtime-availability');
 
   title.textContent = TITLE_TEXT;
   text.textContent = CTA_TEXT;
@@ -138,13 +147,13 @@ export const setupFinalCtaReveal = (): void => {
     title.style.whiteSpace = 'nowrap';
     fitTitle(mobile, compact);
 
-    text.style.maxWidth = mobile ? '34ch' : '52ch';
+    text.style.maxWidth = mobile ? '42ch' : '58ch';
     text.style.marginTop = mobile ? '20px' : 'clamp(22px, 2vw, 30px)';
     text.style.marginInline = 'auto';
     text.style.fontSize = mobile ? 'clamp(13px, 3.7vw, 16px)' : 'clamp(15px, 1.1vw, 20px)';
     text.style.lineHeight = mobile ? '1.22' : '1.2';
     text.style.textAlign = 'center';
-    text.style.textWrap = 'balance';
+    text.style.textWrap = 'pretty';
 
     action.style.justifySelf = 'center';
     action.style.alignSelf = 'center';
@@ -193,7 +202,7 @@ export const setupFinalCtaReveal = (): void => {
     applyLayout();
     splitLines();
     if (!revealed && !reducedMotion.matches) {
-      [eyebrow, title, action].forEach((element) => {
+      [eyebrow, availability, title, action].forEach((element) => {
         if (!element) return;
         element.style.opacity = '0';
         element.style.transform = `translate3d(0, ${element === title ? 46 : 14}px, 0)`;
@@ -206,13 +215,14 @@ export const setupFinalCtaReveal = (): void => {
     revealed = true;
 
     if (reducedMotion.matches) {
-      [eyebrow, title, action, ...queryAll<HTMLElement>('.final-cta-line-word', text)].forEach((element) => {
+      [eyebrow, availability, title, action, ...queryAll<HTMLElement>('.final-cta-line-word', text)].forEach((element) => {
         if (element) settle(element);
       });
       return;
     }
 
     if (eyebrow) animateIn(eyebrow, 14, 460, 0);
+    animateIn(availability, 14, 460, 20);
     animateIn(title, 46, 760, 40);
 
     queryAll<HTMLElement>('.final-cta-line-word', text).forEach((word) => {

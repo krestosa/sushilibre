@@ -4,7 +4,8 @@ const LOADING_MESSAGE = 'CARGANDO IMAGEN';
 const ERROR_MESSAGE = 'IMAGEN NO DISPONIBLE';
 const CLOSE_FALLBACK_MS = 320;
 const REDUCED_CLOSE_FALLBACK_MS = 170;
-const PRELOAD_CONCURRENCY = 3;
+const STATUS_FADE_MS = 150;
+const PRELOAD_CONCURRENCY = 2;
 const MOBILE_PIECE_QUERY = '(max-width: 720px)';
 const SCROLL_KEYS = new Set([
   'ArrowDown',
@@ -24,35 +25,30 @@ const isInteractiveTarget = (target: EventTarget | null): boolean =>
     'a[href], button, input, textarea, select, [contenteditable="true"]'
   ));
 
-const preloadPieceImages = (triggers: readonly HTMLElement[]): void => {
-  const sources = Array.from(new Set(
-    triggers
-      .map((trigger) => trigger.dataset.pieceImage?.trim())
-      .filter((source): source is string => Boolean(source))
-  ));
-
-  if (!sources.length) return;
-
-  const pending = new Set<HTMLImageElement>();
-  let cursor = 0;
+const setupProgressivePreload = (pieceItems: readonly HTMLElement[]): (() => void) => {
+  const queued = new Set<string>();
+  const completed = new Set<string>();
+  const queue: string[] = [];
+  const pendingImages = new Set<HTMLImageElement>();
+  const listeners: Array<{ element: HTMLElement; type: string; handler: EventListener }> = [];
   let active = 0;
 
   const pump = (): void => {
-    while (active < PRELOAD_CONCURRENCY && cursor < sources.length) {
-      const source = sources[cursor];
-      cursor += 1;
-      if (!source) continue;
+    while (active < PRELOAD_CONCURRENCY && queue.length) {
+      const source = queue.shift();
+      if (!source || completed.has(source)) continue;
 
       const preload = new Image();
       active += 1;
-      pending.add(preload);
+      pendingImages.add(preload);
       preload.decoding = 'async';
       preload.fetchPriority = 'low';
 
       const settle = (): void => {
         preload.onload = null;
         preload.onerror = null;
-        pending.delete(preload);
+        pendingImages.delete(preload);
+        completed.add(source);
         active -= 1;
         pump();
       };
@@ -63,9 +59,55 @@ const preloadPieceImages = (triggers: readonly HTMLElement[]): void => {
     }
   };
 
-  window.requestAnimationFrame(() => {
+  const enqueueSource = (source?: string): void => {
+    const normalized = source?.trim();
+    if (!normalized || queued.has(normalized) || completed.has(normalized)) return;
+    queued.add(normalized);
+    queue.push(normalized);
     window.setTimeout(pump, 0);
+  };
+
+  const enqueueItems = (items: readonly HTMLElement[]): void => {
+    items.forEach((item) => enqueueSource(item.dataset.pieceImage));
+  };
+
+  const groups = queryAll<HTMLElement>('[data-menu-group]');
+  const groupObserver = 'IntersectionObserver' in window
+    ? new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const group = entry.target as HTMLElement;
+          enqueueItems(queryAll<HTMLElement>('[data-piece-item]', group));
+          observer.unobserve(group);
+        });
+      }, { rootMargin: '70% 0px 70% 0px', threshold: 0 })
+    : null;
+
+  if (groupObserver) groups.forEach((group) => groupObserver.observe(group));
+
+  pieceItems.forEach((item) => {
+    const preloadOwnImage = (): void => enqueueSource(item.dataset.pieceImage);
+    ['pointerenter', 'pointerdown', 'focusin'].forEach((type) => {
+      item.addEventListener(type, preloadOwnImage, { passive: true });
+      listeners.push({ element: item, type, handler: preloadOwnImage });
+    });
   });
+
+  if (!groupObserver) {
+    const firstGroup = groups[0];
+    if (firstGroup) enqueueItems(queryAll<HTMLElement>('[data-piece-item]', firstGroup));
+  }
+
+  return () => {
+    groupObserver?.disconnect();
+    listeners.forEach(({ element, type, handler }) => element.removeEventListener(type, handler));
+    queue.length = 0;
+    pendingImages.forEach((image) => {
+      image.onload = null;
+      image.onerror = null;
+    });
+    pendingImages.clear();
+  };
 };
 
 export const setupPieceViewer = (): void => {
@@ -80,12 +122,12 @@ export const setupPieceViewer = (): void => {
 
   if (!dialog || !image || !status || !statusText || !closeButton || !pieceItems.length) return;
 
-  preloadPieceImages(pieceItems);
-
+  const cleanupPreload = setupProgressivePreload(pieceItems);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const mobilePieces = window.matchMedia(MOBILE_PIECE_QUERY);
   let activeTrigger: HTMLElement | null = null;
   let closeTimer = 0;
+  let statusFadeTimer = 0;
   let openFrame = 0;
   let imageFrame = 0;
   let scrollCorrectionFrame = 0;
@@ -163,6 +205,8 @@ export const setupPieceViewer = (): void => {
 
   const setLoadingState = (): void => {
     if (imageFrame) window.cancelAnimationFrame(imageFrame);
+    if (statusFadeTimer) window.clearTimeout(statusFadeTimer);
+    statusFadeTimer = 0;
     dialog.dataset.state = 'loading';
     statusText.textContent = LOADING_MESSAGE;
     status.hidden = false;
@@ -177,12 +221,17 @@ export const setupPieceViewer = (): void => {
       imageFrame = 0;
       if (!dialog.open || dialog.classList.contains('is-closing')) return;
       dialog.dataset.state = 'ready';
-      status.hidden = true;
+      statusFadeTimer = window.setTimeout(() => {
+        statusFadeTimer = 0;
+        if (dialog.dataset.state === 'ready') status.hidden = true;
+      }, reducedMotion.matches ? 90 : STATUS_FADE_MS);
     });
   };
 
   const setErrorState = (): void => {
     if (!dialog.open || dialog.classList.contains('is-closing')) return;
+    if (statusFadeTimer) window.clearTimeout(statusFadeTimer);
+    statusFadeTimer = 0;
     dialog.dataset.state = 'error';
     statusText.textContent = ERROR_MESSAGE;
     status.hidden = false;
@@ -202,9 +251,11 @@ export const setupPieceViewer = (): void => {
 
   const clearMotionSchedules = (): void => {
     if (closeTimer) window.clearTimeout(closeTimer);
+    if (statusFadeTimer) window.clearTimeout(statusFadeTimer);
     if (openFrame) window.cancelAnimationFrame(openFrame);
     if (imageFrame) window.cancelAnimationFrame(imageFrame);
     closeTimer = 0;
+    statusFadeTimer = 0;
     openFrame = 0;
     imageFrame = 0;
     dialog.removeEventListener('transitionend', handleCloseTransition);
@@ -323,5 +374,6 @@ export const setupPieceViewer = (): void => {
   });
 
   mobilePieces.addEventListener('change', syncInteractivity);
+  window.addEventListener('pagehide', cleanupPreload, { once: true });
   syncInteractivity();
 };

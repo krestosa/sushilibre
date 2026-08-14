@@ -1,5 +1,7 @@
 import { query } from '../shared/dom';
 
+const MENU_BACKGROUND_SOURCE = 'assets/menu_bg.webp';
+
 export const setupMenuDepth = (): void => {
   const section = query<HTMLElement>('.menu-section');
   const background = query<HTMLElement>('.menu-section__background');
@@ -9,6 +11,27 @@ export const setupMenuDepth = (): void => {
   const coarse = window.matchMedia('(pointer: coarse)');
   let frame = 0;
   let active = false;
+  let backgroundRequested = false;
+
+  const requestBackground = (): void => {
+    if (backgroundRequested || section.classList.contains('is-background-ready')) return;
+    backgroundRequested = true;
+
+    const preload = new Image();
+    preload.decoding = 'async';
+    preload.fetchPriority = 'low';
+    preload.onload = () => {
+      section.classList.add('is-background-ready');
+      preload.onload = null;
+      preload.onerror = null;
+    };
+    preload.onerror = () => {
+      backgroundRequested = false;
+      preload.onload = null;
+      preload.onerror = null;
+    };
+    preload.src = MENU_BACKGROUND_SOURCE;
+  };
 
   const update = (): void => {
     frame = 0;
@@ -33,6 +56,8 @@ export const setupMenuDepth = (): void => {
 
   const syncMotion = (): void => {
     if (reduce.matches) {
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
       background.style.transform = 'none';
       background.style.willChange = 'auto';
       return;
@@ -43,12 +68,27 @@ export const setupMenuDepth = (): void => {
 
   background.style.transformOrigin = 'center';
 
-  const observer = new IntersectionObserver((entries) => {
+  const motionObserver = new IntersectionObserver((entries) => {
     active = Boolean(entries[0]?.isIntersecting);
     background.style.willChange = active && !reduce.matches ? 'transform' : 'auto';
     if (active) schedule();
+    else if (frame) {
+      cancelAnimationFrame(frame);
+      frame = 0;
+    }
   }, { rootMargin: '120px 0px', threshold: 0 });
-  observer.observe(section);
+  motionObserver.observe(section);
+
+  const preloadObserver = 'IntersectionObserver' in window
+    ? new IntersectionObserver((entries, observer) => {
+        if (!entries[0]?.isIntersecting) return;
+        requestBackground();
+        observer.disconnect();
+      }, { rootMargin: '120% 0px 120% 0px', threshold: 0 })
+    : null;
+
+  if (preloadObserver) preloadObserver.observe(section);
+  else requestBackground();
 
   window.addEventListener('scroll', schedule, { passive: true });
   window.addEventListener('resize', schedule, { passive: true });
@@ -57,7 +97,8 @@ export const setupMenuDepth = (): void => {
   coarse.addEventListener('change', schedule);
 
   window.addEventListener('pagehide', () => {
-    observer.disconnect();
+    motionObserver.disconnect();
+    preloadObserver?.disconnect();
     if (frame) cancelAnimationFrame(frame);
     window.removeEventListener('scroll', schedule);
     window.removeEventListener('resize', schedule);

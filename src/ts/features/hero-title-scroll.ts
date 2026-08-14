@@ -12,8 +12,10 @@ export const setupHeroTitleScroll = (): void => {
   const heroCopy = query<HTMLElement>('.hero-copy');
   if (!hero || !lockup || !sushi || !libre || !kicker) return;
 
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let frame = 0;
   let heroTop = 0;
+  let heroHeight = 1;
   let start = 0;
   let distance = 1;
   let sx = 0;
@@ -25,19 +27,27 @@ export const setupHeroTitleScroll = (): void => {
   let finalScale = 1;
   let copyShiftY = 0;
   let mobileMotion = false;
+  let active = true;
+
+  const setWillChange = (enabled: boolean): void => {
+    const value = enabled ? 'transform' : 'auto';
+    sushi.style.willChange = value;
+    libre.style.willChange = value;
+    kicker.style.willChange = enabled ? 'transform, opacity' : 'auto';
+    lockup.style.willChange = enabled && mobileMotion ? 'translate' : 'auto';
+    if (heroCopy) heroCopy.style.willChange = enabled ? 'translate, opacity' : 'auto';
+  };
 
   [sushi, libre, kicker].forEach((el) => {
     el.style.transformOrigin = '0 0';
-    el.style.willChange = 'transform';
   });
-  kicker.style.willChange = 'transform, opacity';
-  if (heroCopy) heroCopy.style.willChange = 'translate, opacity';
 
   const clear = (): void => {
     sushi.style.transform = '';
     libre.style.transform = '';
     kicker.style.transform = '';
     kicker.style.opacity = '';
+    lockup.style.translate = '';
     if (heroCopy) {
       heroCopy.style.translate = '';
       heroCopy.style.opacity = '';
@@ -87,13 +97,19 @@ export const setupHeroTitleScroll = (): void => {
     copyShiftY = copy ? Math.max(0, kickerBottom + safeGap - copy.top) : 0;
 
     heroTop = window.scrollY + h.top;
-    const height = Math.max(hero.offsetHeight, window.innerHeight);
-    start = height * (mobile ? 0.004 : tablet ? 0.006 : 0.01);
-    distance = height * (mobile ? 0.15 : tablet ? 0.17 : 0.23);
+    heroHeight = Math.max(hero.offsetHeight, window.innerHeight);
+    start = heroHeight * (mobile ? 0.004 : tablet ? 0.006 : 0.01);
+    distance = heroHeight * (mobile ? 0.15 : tablet ? 0.17 : 0.23);
+    setWillChange(active && !reducedMotion.matches);
   };
 
-  const render = (): void => {
+  const render = (force = false): void => {
     frame = 0;
+    if ((!active && !force) || reducedMotion.matches) {
+      if (reducedMotion.matches) clear();
+      return;
+    }
+
     const raw = clamp((window.scrollY - heroTop - start) / distance);
     const p = ease(raw);
     const scale = 1 + (finalScale - 1) * p;
@@ -107,9 +123,14 @@ export const setupHeroTitleScroll = (): void => {
       const after = ease(clamp((raw - 0.68) / 0.24));
       kicker.style.transform = `translate3d(${kx * kp}px, ${ky * kp}px, 0)`;
       kicker.style.opacity = String(Math.max(before, after));
+
+      const heroProgress = clamp((window.scrollY - heroTop) / heroHeight);
+      const follow = ease(clamp((heroProgress - 0.1) / 0.34));
+      lockup.style.translate = `0 ${follow * 72}px`;
     } else {
       kicker.style.transform = `translate3d(${kx * p}px, ${ky * p}px, 0)`;
       kicker.style.opacity = '';
+      lockup.style.translate = '';
     }
 
     if (heroCopy) {
@@ -120,20 +141,55 @@ export const setupHeroTitleScroll = (): void => {
   };
 
   const scheduleRender = (): void => {
-    if (frame) return;
-    frame = window.requestAnimationFrame(render);
+    if (!active || reducedMotion.matches || frame) return;
+    frame = window.requestAnimationFrame(() => render());
   };
 
   const refresh = (): void => {
     window.requestAnimationFrame(() => {
       measure();
-      render();
+      render(true);
     });
   };
+
+  const syncReducedMotion = (): void => {
+    if (reducedMotion.matches) {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = 0;
+      clear();
+      setWillChange(false);
+      return;
+    }
+    refresh();
+  };
+
+  const observer = 'IntersectionObserver' in window
+    ? new IntersectionObserver((entries) => {
+        const nextActive = Boolean(entries[0]?.isIntersecting);
+        if (nextActive === active) return;
+        if (!nextActive) render(true);
+        active = nextActive;
+        setWillChange(active && !reducedMotion.matches);
+        if (active) scheduleRender();
+      }, { rootMargin: '140px 0px', threshold: 0 })
+    : null;
+  observer?.observe(hero);
 
   window.addEventListener('scroll', scheduleRender, { passive: true });
   window.addEventListener('resize', refresh, { passive: true });
   window.addEventListener('orientationchange', refresh, { passive: true });
+  reducedMotion.addEventListener('change', syncReducedMotion);
   document.fonts.ready.then(refresh).catch(() => undefined);
+
+  window.addEventListener('pagehide', () => {
+    observer?.disconnect();
+    if (frame) window.cancelAnimationFrame(frame);
+    window.removeEventListener('scroll', scheduleRender);
+    window.removeEventListener('resize', refresh);
+    window.removeEventListener('orientationchange', refresh);
+    reducedMotion.removeEventListener('change', syncReducedMotion);
+    setWillChange(false);
+  }, { once: true });
+
   refresh();
 };

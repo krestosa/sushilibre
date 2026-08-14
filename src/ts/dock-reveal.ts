@@ -1,4 +1,5 @@
 import { query } from './shared/dom';
+import { MOTION_EASE_OUT } from './shared/motion';
 
 const dock = query<HTMLElement>('.booking-dock');
 const heroTitle = query<HTMLElement>('.title-lockup');
@@ -6,7 +7,6 @@ const heroTitle = query<HTMLElement>('.title-lockup');
 if (dock && heroTitle) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const supportsIntersectionObserver = typeof globalThis.IntersectionObserver === 'function';
-  const easeOut = 'cubic-bezier(.22, 1, .36, 1)';
   let resolved = false;
   let observer: IntersectionObserver | null = null;
 
@@ -57,7 +57,7 @@ if (dock && heroTitle) {
       }
     ], {
       duration: 190,
-      easing: easeOut,
+      easing: MOTION_EASE_OUT,
       fill: 'both'
     });
 

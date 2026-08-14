@@ -13,25 +13,29 @@
   font-family: inherit;
   cursor: pointer;
   transition:
-    border-color 140ms ease-out,
-    background-color 140ms ease-out,
-    color 140ms ease-out,
-    scale 120ms ease-out;
+    border-color 140ms var(--ease-out),
+    background-color 140ms var(--ease-out),
+    color 140ms var(--ease-out),
+    scale 120ms var(--ease-out);
 
-  &:hover,
   &:focus-visible {
     border-color: rgba(255, 255, 255, 0.9);
     background: #fff;
     color: #000;
-  }
-
-  &:focus-visible {
     outline: 2px solid #fff;
     outline-offset: 3px;
   }
 
   &:active {
     scale: 0.97;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .menu-item__view:hover {
+    border-color: rgba(255, 255, 255, 0.9);
+    background: #fff;
+    color: #000;
   }
 }
 
@@ -62,13 +66,13 @@ html.has-piece-viewer {
   scale: 0.97;
   transform-origin: center;
   transition:
-    opacity 180ms ease-in,
-    scale 180ms ease-in;
+    opacity 180ms var(--ease-out),
+    scale 180ms var(--ease-out);
 
   &::backdrop {
     background: rgba(0, 0, 0, 0.62);
     opacity: 0;
-    transition: opacity 160ms ease-in;
+    transition: opacity 160ms var(--ease-out);
   }
 
   &.is-open {
@@ -78,7 +82,7 @@ html.has-piece-viewer {
 
     &::backdrop {
       opacity: 1;
-      animation: piece-viewer-backdrop-open 220ms ease-out both;
+      animation: piece-viewer-backdrop-open 220ms var(--ease-out) both;
     }
   }
 
@@ -122,20 +126,22 @@ html.has-piece-viewer {
   background: rgba(0, 0, 0, 0.68);
   color: #fff;
   cursor: pointer;
-  transition: background-color 140ms ease-out, scale 120ms ease-out;
+  transition: background-color 140ms var(--ease-out), scale 120ms var(--ease-out);
 
-  &:hover,
   &:focus-visible {
     background: rgba(0, 0, 0, 0.9);
-  }
-
-  &:focus-visible {
     outline: 2px solid #fff;
     outline-offset: 2px;
   }
 
   &:active {
     scale: 0.94;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .piece-viewer__close:hover {
+    background: rgba(0, 0, 0, 0.9);
   }
 }
 
@@ -179,7 +185,7 @@ html.has-piece-viewer {
   object-fit: contain;
   object-position: center;
   opacity: 0;
-  transition: opacity 180ms ease-out;
+  transition: opacity 180ms var(--ease-out);
 }
 
 .piece-viewer[data-state="ready"] .piece-viewer__image {
@@ -193,11 +199,17 @@ html.has-piece-viewer {
   display: grid;
   place-items: center;
   margin: 0;
+  opacity: 1;
   pointer-events: none;
+  transition: opacity 150ms var(--ease-out);
 
   &[hidden] {
     display: none;
   }
+}
+
+.piece-viewer[data-state="ready"] .piece-viewer__status {
+  opacity: 0;
 }
 
 .piece-viewer__loader {
@@ -208,7 +220,7 @@ html.has-piece-viewer {
   border-radius: 50%;
   animation:
     piece-viewer-loader 720ms linear infinite,
-    piece-viewer-loader-enter 220ms ease-out both;
+    piece-viewer-loader-enter 220ms var(--ease-out) both;
 }
 
 .piece-viewer__status-text {
@@ -274,29 +286,17 @@ html.has-piece-viewer {
 }
 
 @keyframes piece-viewer-backdrop-open {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes piece-viewer-loader {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes piece-viewer-loader-enter {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -331,7 +331,8 @@ html.has-piece-viewer {
     }
   }
 
-  .piece-viewer__image {
+  .piece-viewer__image,
+  .piece-viewer__status {
     transition-duration: 100ms;
   }
 

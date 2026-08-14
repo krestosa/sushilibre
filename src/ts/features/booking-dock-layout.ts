@@ -13,7 +13,6 @@ export const setupBookingDockLayout = (): void => {
 
   let activeMode: DockLayoutMode | null = null;
   let activeLiveState: boolean | null = null;
-  let activeSuppressedState: boolean | null = null;
   let scheduledFrame = 0;
 
   const placeMetadata = ({ row, padding }: { row: string; padding: string }): void => {
@@ -39,19 +38,15 @@ export const setupBookingDockLayout = (): void => {
 
   const applySingleRowLayout = ({
     width,
-    suppressedWidth,
     ctaWidth,
-    ctaSuppressed,
     metaGap
   }: {
     width: string;
-    suppressedWidth: string;
     ctaWidth: string;
-    ctaSuppressed: boolean;
     metaGap: string;
   }): void => {
-    dock.style.width = ctaSuppressed ? suppressedWidth : width;
-    dock.style.setProperty('--dock-cta-track', ctaSuppressed ? '0px' : ctaWidth);
+    dock.style.width = width;
+    dock.style.setProperty('--dock-cta-track', ctaWidth);
     dock.style.gridTemplateColumns = `max-content max-content max-content minmax(0, 1fr) var(--dock-cta-track)`;
     dock.style.gridTemplateRows = 'minmax(0, 1fr)';
     dock.style.columnGap = metaGap;
@@ -89,7 +84,7 @@ export const setupBookingDockLayout = (): void => {
     cta.style.gridRow = '1';
   };
 
-  const applyDesktopLayout = (eventLive: boolean, ctaSuppressed: boolean): void => {
+  const applyDesktopLayout = (eventLive: boolean): void => {
     if (eventLive) {
       applyEventLiveSingleRowLayout({
         width: 'min(680px, calc(100vw - 48px))',
@@ -101,14 +96,12 @@ export const setupBookingDockLayout = (): void => {
 
     applySingleRowLayout({
       width: 'min(960px, calc(100vw - 48px))',
-      suppressedWidth: 'min(760px, calc(100vw - 96px))',
       ctaWidth: '108px',
-      ctaSuppressed,
       metaGap: '20px'
     });
   };
 
-  const applyCompactLayout = (eventLive: boolean, ctaSuppressed: boolean): void => {
+  const applyCompactLayout = (eventLive: boolean): void => {
     if (eventLive) {
       applyEventLiveSingleRowLayout({
         width: 'min(640px, calc(100vw - 32px))',
@@ -120,17 +113,14 @@ export const setupBookingDockLayout = (): void => {
 
     applySingleRowLayout({
       width: 'min(740px, calc(100vw - 32px))',
-      suppressedWidth: 'min(620px, calc(100vw - 64px))',
       ctaWidth: '104px',
-      ctaSuppressed,
       metaGap: '14px'
     });
   };
 
-  const applyMobileLayout = (eventLive: boolean, ctaSuppressed: boolean): void => {
-    const suppressReservation = ctaSuppressed && !eventLive;
+  const applyMobileLayout = (eventLive: boolean): void => {
     dock.style.width = 'min(680px, calc(100vw - 24px))';
-    dock.style.setProperty('--dock-cta-track', suppressReservation ? '0px' : '96px');
+    dock.style.setProperty('--dock-cta-track', '96px');
     dock.style.gridTemplateColumns = 'max-content max-content max-content minmax(0, 1fr) var(--dock-cta-track)';
     dock.style.gridTemplateRows = eventLive ? '48px' : '48px 96px';
     dock.style.columnGap = '8px';
@@ -153,19 +143,13 @@ export const setupBookingDockLayout = (): void => {
   const syncLayout = (): void => {
     const nextMode = resolveMode();
     const nextLiveState = dock.classList.contains('is-event-live');
-    const nextSuppressedState = dock.classList.contains('is-cta-collapsed') && !nextLiveState;
-    if (
-      nextMode === activeMode
-      && nextLiveState === activeLiveState
-      && nextSuppressedState === activeSuppressedState
-    ) return;
+    if (nextMode === activeMode && nextLiveState === activeLiveState) return;
 
     activeMode = nextMode;
     activeLiveState = nextLiveState;
-    activeSuppressedState = nextSuppressedState;
-    if (nextMode === 'mobile') applyMobileLayout(nextLiveState, nextSuppressedState);
-    else if (nextMode === 'compact') applyCompactLayout(nextLiveState, nextSuppressedState);
-    else applyDesktopLayout(nextLiveState, nextSuppressedState);
+    if (nextMode === 'mobile') applyMobileLayout(nextLiveState);
+    else if (nextMode === 'compact') applyCompactLayout(nextLiveState);
+    else applyDesktopLayout(nextLiveState);
   };
 
   const scheduleSync = (): void => {
