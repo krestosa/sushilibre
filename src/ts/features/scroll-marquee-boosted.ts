@@ -57,6 +57,12 @@ export const setupScrollMarquee = (): void => {
     }
   };
 
+  const resetRate = (): void => {
+    currentRate = 1;
+    targetRate = 1;
+    safelySetRate(1);
+  };
+
   const buildAnimation = (): void => {
     const nextWidth = firstGroup.getBoundingClientRect().width;
     if (nextWidth <= 0) return;
@@ -103,9 +109,7 @@ export const setupScrollMarquee = (): void => {
     currentRate += (desiredRate - currentRate) * blend;
 
     if (idle && Math.abs(currentRate - 1) <= RATE_EPSILON) {
-      currentRate = 1;
-      targetRate = 1;
-      safelySetRate(1);
+      resetRate();
       lastRateFrameAt = 0;
       return;
     }
@@ -143,14 +147,18 @@ export const setupScrollMarquee = (): void => {
     if (!baseAnimation) return;
     if (reducedMotion.matches) {
       cancelRateFrame();
+      resetRate();
       baseAnimation.pause();
       baseAnimation.currentTime = 0;
       track.style.transform = 'translate3d(0, 0, 0)';
+      track.style.willChange = 'auto';
       return;
     }
 
     track.style.transform = '';
     if (isVisible) {
+      if (performance.now() - lastScrollAt > IMPULSE_HOLD_MS) resetRate();
+      track.style.willChange = 'transform';
       baseAnimation.play();
       safelySetRate(currentRate);
     }
@@ -171,11 +179,15 @@ export const setupScrollMarquee = (): void => {
         if (!baseAnimation) return;
 
         if (isVisible && !reducedMotion.matches) {
+          if (performance.now() - lastScrollAt > IMPULSE_HOLD_MS) resetRate();
+          track.style.willChange = 'transform';
           baseAnimation.play();
           safelySetRate(currentRate);
         } else {
           cancelRateFrame();
+          resetRate();
           baseAnimation.pause();
+          track.style.willChange = 'auto';
         }
       }, { rootMargin: '180px 0px', threshold: 0 })
     : null;
@@ -183,7 +195,10 @@ export const setupScrollMarquee = (): void => {
   if (visibilityObserver) visibilityObserver.observe(root);
   else {
     isVisible = true;
-    if (!reducedMotion.matches) baseAnimation?.play();
+    if (!reducedMotion.matches) {
+      track.style.willChange = 'transform';
+      baseAnimation?.play();
+    }
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -197,6 +212,7 @@ export const setupScrollMarquee = (): void => {
     resizeObserver?.disconnect();
     visibilityObserver?.disconnect();
     baseAnimation?.cancel();
+    track.style.willChange = 'auto';
     window.removeEventListener('scroll', onScroll);
     window.removeEventListener('resize', buildAnimation);
     reducedMotion.removeEventListener('change', syncMotionPreference);
