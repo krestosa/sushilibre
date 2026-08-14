@@ -167,7 +167,9 @@ if (compactVideo) {
 
       const incoming = loops[nextIndex];
       if (!incoming) return;
-      const outgoing = activeIndex >= 0 ? loops[activeIndex] ?? intro : intro;
+      const outgoing: HTMLVideoElement = activeIndex >= 0
+        ? loops[activeIndex] ?? intro!
+        : intro!;
 
       if (incoming === outgoing) {
         incoming.loop = true;
