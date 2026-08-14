@@ -63,6 +63,11 @@ export const setupScrollMarquee = (): void => {
     safelySetRate(1);
   };
 
+  const playBaseAnimation = (): void => {
+    const animation = baseAnimation as Animation | null;
+    animation?.play();
+  };
+
   const buildAnimation = (): void => {
     const nextWidth = firstGroup.getBoundingClientRect().width;
     if (nextWidth <= 0) return;
@@ -159,7 +164,7 @@ export const setupScrollMarquee = (): void => {
     if (isVisible) {
       if (performance.now() - lastScrollAt > IMPULSE_HOLD_MS) resetRate();
       track.style.willChange = 'transform';
-      baseAnimation.play();
+      playBaseAnimation();
       safelySetRate(currentRate);
     }
   };
@@ -181,7 +186,7 @@ export const setupScrollMarquee = (): void => {
         if (isVisible && !reducedMotion.matches) {
           if (performance.now() - lastScrollAt > IMPULSE_HOLD_MS) resetRate();
           track.style.willChange = 'transform';
-          baseAnimation.play();
+          playBaseAnimation();
           safelySetRate(currentRate);
         } else {
           cancelRateFrame();
@@ -197,7 +202,7 @@ export const setupScrollMarquee = (): void => {
     isVisible = true;
     if (!reducedMotion.matches) {
       track.style.willChange = 'transform';
-      baseAnimation?.play();
+      playBaseAnimation();
     }
   }
 
