@@ -38,6 +38,21 @@ if (menuGroups) {
     target.heading.style.setProperty('--menu-heading-exit-offset', '0%');
   };
 
+  const seedNearbyTargets = (): void => {
+    nearbyTargets.clear();
+    if (!mobileQuery.matches) return;
+
+    const viewport = Math.max(1, window.innerHeight);
+    targets.forEach((target) => {
+      const bounds = target.group.getBoundingClientRect();
+      if (bounds.bottom >= -viewport && bounds.top <= viewport * 2) {
+        nearbyTargets.add(target);
+      } else {
+        resetTarget(target);
+      }
+    });
+  };
+
   const measureTargets = (): void => {
     if (!mobileQuery.matches) return;
     targets.forEach((target) => {
@@ -85,6 +100,7 @@ if (menuGroups) {
 
   const syncMode = (): void => {
     if (mobileQuery.matches) {
+      seedNearbyTargets();
       measureTargets();
       attachScroll();
       scheduleUpdate();
@@ -100,6 +116,7 @@ if (menuGroups) {
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => {
       resizeTimer = 0;
+      seedNearbyTargets();
       measureTargets();
       scheduleUpdate();
     }, 100);
