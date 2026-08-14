@@ -172,7 +172,7 @@
 
 @media (max-width: 840px) {
   .booking-dock::after {
-    content: "CUPOS\A LIMITADOS";
+    content: "CUPOS LIMITADOS";
     grid-column: 4;
     grid-row: 1;
     align-self: center;
@@ -182,9 +182,9 @@
     color: rgba(255, 255, 255, 0.78);
     font-size: 8px;
     font-weight: 600;
-    line-height: 1.05;
+    line-height: 1;
     letter-spacing: 0.08em;
-    white-space: pre-line;
+    white-space: nowrap;
     text-align: left;
     pointer-events: none;
   }
