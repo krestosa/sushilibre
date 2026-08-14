@@ -2,6 +2,12 @@ import { query, queryAll } from '../shared/dom';
 
 type DockLayoutMode = 'desktop' | 'compact' | 'mobile';
 
+const isIosDevice = (): boolean => {
+  const ua = navigator.userAgent;
+  return /iPad|iPhone|iPod/i.test(ua)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+};
+
 export const setupBookingDockLayout = (): void => {
   const dock = query<HTMLElement>('.booking-dock');
   const metadata = queryAll<HTMLElement>('.booking-dock__meta');
@@ -11,10 +17,45 @@ export const setupBookingDockLayout = (): void => {
 
   if (!dock || !venueMeta || !dateMeta || !timeMeta || !countdown || !cta) return;
 
+  const root = document.documentElement;
+  const ios = isIosDevice();
+  const visualViewport = window.visualViewport;
+
   let activeMode: DockLayoutMode | null = null;
   let activeLiveState: boolean | null = null;
   let activeSuppressedState: boolean | null = null;
   let scheduledFrame = 0;
+  let viewportFrame = 0;
+
+  const syncIosViewport = (): void => {
+    viewportFrame = 0;
+    if (!ios) return;
+
+    const pageTop = visualViewport
+      ? visualViewport.pageTop
+      : window.scrollY;
+    const viewportHeight = visualViewport
+      ? visualViewport.height
+      : window.innerHeight;
+    const visualBottom = Math.max(0, pageTop + viewportHeight);
+
+    root.style.setProperty('--ios-dock-visual-bottom', `${visualBottom.toFixed(2)}px`);
+  };
+
+  const scheduleIosViewportSync = (): void => {
+    if (!ios || viewportFrame) return;
+    viewportFrame = window.requestAnimationFrame(syncIosViewport);
+  };
+
+  if (ios) {
+    root.classList.add('is-ios-mobile');
+    syncIosViewport();
+    window.addEventListener('scroll', scheduleIosViewportSync, { passive: true });
+    window.addEventListener('resize', scheduleIosViewportSync, { passive: true });
+    window.addEventListener('orientationchange', scheduleIosViewportSync, { passive: true });
+    visualViewport?.addEventListener('scroll', scheduleIosViewportSync, { passive: true });
+    visualViewport?.addEventListener('resize', scheduleIosViewportSync, { passive: true });
+  }
 
   const placeMetadata = ({ row, padding }: { row: string; padding: string }): void => {
     const placements = [venueMeta, dateMeta, timeMeta];
@@ -174,6 +215,7 @@ export const setupBookingDockLayout = (): void => {
     scheduledFrame = window.requestAnimationFrame(() => {
       scheduledFrame = 0;
       syncLayout();
+      scheduleIosViewportSync();
     });
   };
 
@@ -192,4 +234,15 @@ export const setupBookingDockLayout = (): void => {
   }
 
   document.fonts.ready.then(scheduleSync).catch(() => undefined);
+
+  if (ios) {
+    window.addEventListener('pagehide', () => {
+      if (viewportFrame) window.cancelAnimationFrame(viewportFrame);
+      window.removeEventListener('scroll', scheduleIosViewportSync);
+      window.removeEventListener('resize', scheduleIosViewportSync);
+      window.removeEventListener('orientationchange', scheduleIosViewportSync);
+      visualViewport?.removeEventListener('scroll', scheduleIosViewportSync);
+      visualViewport?.removeEventListener('resize', scheduleIosViewportSync);
+    }, { once: true });
+  }
 };
