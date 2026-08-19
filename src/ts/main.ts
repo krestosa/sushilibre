@@ -1,4 +1,3 @@
-import './scroll-shell';
 import './application';
 import './dock-reveal';
 import './menu-bootstrap';
