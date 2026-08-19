@@ -1,4 +1,5 @@
 import { query } from '../shared/dom';
+import { addScrollListener, getScrollY, getViewportHeight } from '../shared/scroll-root';
 
 const clamp = (n: number): number => Math.max(0, Math.min(1, n));
 const ease = (n: number): number => n * n * (3 - 2 * n);
@@ -16,9 +17,10 @@ export const setupMobileHeroFollowV2 = (): void => {
   let lastTranslate: number | null = null;
 
   const measure = (): void => {
+    const scrollY = getScrollY();
     const rect = hero.getBoundingClientRect();
-    heroTop = window.scrollY + rect.top;
-    heroHeight = Math.max(hero.offsetHeight, window.innerHeight);
+    heroTop = scrollY + rect.top;
+    heroHeight = Math.max(hero.offsetHeight, getViewportHeight());
   };
 
   const writeTranslate = (value: number): void => {
@@ -37,7 +39,7 @@ export const setupMobileHeroFollowV2 = (): void => {
       return;
     }
 
-    const heroProgress = clamp((window.scrollY - heroTop) / heroHeight);
+    const heroProgress = clamp((getScrollY() - heroTop) / heroHeight);
     const progress = ease(clamp((heroProgress - 0.10) / 0.34));
     writeTranslate(progress * 72);
   };
@@ -53,8 +55,16 @@ export const setupMobileHeroFollowV2 = (): void => {
   };
 
   refresh();
-  window.addEventListener('scroll', schedule, { passive: true });
+  const removeScrollListener = addScrollListener(schedule);
   window.addEventListener('resize', refresh, { passive: true });
   window.addEventListener('orientationchange', refresh, { passive: true });
   mobileQuery.addEventListener('change', refresh);
+
+  window.addEventListener('pagehide', () => {
+    if (frame) window.cancelAnimationFrame(frame);
+    removeScrollListener();
+    window.removeEventListener('resize', refresh);
+    window.removeEventListener('orientationchange', refresh);
+    mobileQuery.removeEventListener('change', refresh);
+  }, { once: true });
 };

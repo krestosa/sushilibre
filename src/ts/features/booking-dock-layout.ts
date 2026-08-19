@@ -5,12 +5,6 @@ type DockLayoutMode = 'desktop' | 'compact' | 'mobile';
 const MOBILE_QUERY = '(max-width: 840px)';
 const COMPACT_QUERY = '(max-width: 1100px)';
 
-const isIosDevice = (): boolean => {
-  const ua = navigator.userAgent;
-  return /iPad|iPhone|iPod/i.test(ua)
-    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-};
-
 export const setupBookingDockLayout = (): void => {
   const dock = query<HTMLElement>('.booking-dock');
   const metadata = queryAll<HTMLElement>('.booking-dock__meta');
@@ -20,9 +14,6 @@ export const setupBookingDockLayout = (): void => {
 
   if (!dock || !venueMeta || !dateMeta || !timeMeta || !countdown || !cta) return;
 
-  const root = document.documentElement;
-  const ios = isIosDevice();
-  const visualViewport = window.visualViewport;
   const mobileQuery = window.matchMedia(MOBILE_QUERY);
   const compactQuery = window.matchMedia(COMPACT_QUERY);
 
@@ -30,44 +21,6 @@ export const setupBookingDockLayout = (): void => {
   let activeLiveState: boolean | null = null;
   let activeSuppressedState: boolean | null = null;
   let scheduledFrame = 0;
-  let viewportFrame = 0;
-  let lastVisualBottom: number | null = null;
-
-  const syncIosViewport = (): void => {
-    viewportFrame = 0;
-    if (!ios || !mobileQuery.matches) return;
-
-    const pageTop = visualViewport?.pageTop ?? window.scrollY;
-    const viewportHeight = visualViewport?.height ?? window.innerHeight;
-    const rawVisualBottom = Math.max(0, pageTop + viewportHeight);
-    const pixelRatio = Math.max(1, window.devicePixelRatio || 1);
-    const visualBottom = Math.round(rawVisualBottom * pixelRatio) / pixelRatio;
-
-    if (
-      lastVisualBottom !== null
-      && Math.abs(lastVisualBottom - visualBottom) < 0.5 / pixelRatio
-    ) {
-      return;
-    }
-
-    lastVisualBottom = visualBottom;
-    dock.style.setProperty('--ios-dock-visual-bottom', `${visualBottom}px`);
-  };
-
-  const scheduleIosViewportSync = (): void => {
-    if (!ios || viewportFrame) return;
-    viewportFrame = window.requestAnimationFrame(syncIosViewport);
-  };
-
-  if (ios) {
-    root.classList.add('is-ios-mobile');
-    syncIosViewport();
-    window.addEventListener('scroll', scheduleIosViewportSync, { passive: true });
-    window.addEventListener('resize', scheduleIosViewportSync, { passive: true });
-    window.addEventListener('orientationchange', scheduleIosViewportSync, { passive: true });
-    visualViewport?.addEventListener('scroll', scheduleIosViewportSync, { passive: true });
-    visualViewport?.addEventListener('resize', scheduleIosViewportSync, { passive: true });
-  }
 
   const placeMetadata = ({ row, padding }: { row: string; padding: string }): void => {
     const placements = [venueMeta, dateMeta, timeMeta];
@@ -219,8 +172,6 @@ export const setupBookingDockLayout = (): void => {
     if (nextMode === 'mobile') applyMobileLayout(nextLiveState, nextSuppressedState);
     else if (nextMode === 'compact') applyCompactLayout(nextLiveState, nextSuppressedState);
     else applyDesktopLayout(nextLiveState, nextSuppressedState);
-
-    scheduleIosViewportSync();
   };
 
   const scheduleSync = (): void => {
@@ -229,7 +180,6 @@ export const setupBookingDockLayout = (): void => {
     scheduledFrame = window.requestAnimationFrame(() => {
       scheduledFrame = 0;
       syncLayout();
-      scheduleIosViewportSync();
     });
   };
 
@@ -250,15 +200,4 @@ export const setupBookingDockLayout = (): void => {
   }
 
   document.fonts.ready.then(scheduleSync).catch(() => undefined);
-
-  if (ios) {
-    window.addEventListener('pagehide', () => {
-      if (viewportFrame) window.cancelAnimationFrame(viewportFrame);
-      window.removeEventListener('scroll', scheduleIosViewportSync);
-      window.removeEventListener('resize', scheduleIosViewportSync);
-      window.removeEventListener('orientationchange', scheduleIosViewportSync);
-      visualViewport?.removeEventListener('scroll', scheduleIosViewportSync);
-      visualViewport?.removeEventListener('resize', scheduleIosViewportSync);
-    }, { once: true });
-  }
 };

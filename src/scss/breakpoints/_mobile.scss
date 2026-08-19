@@ -95,44 +95,6 @@
   }
 }
 
-// iOS 26 has a WebKit regression where bottom-fixed UI can be painted against
-// the layout viewport instead of the visible viewport while browser chrome is
-// collapsing. Keep the dock outside normal flow and position it from JS using
-// VisualViewport. The transform never contributes to scrollHeight, so elastic
-// scrolling cannot create extra document length below the page.
-html.is-ios-mobile,
-html.is-ios-mobile body {
-  overscroll-behavior-y: none;
-}
-
-@media (max-width: 840px) {
-  html.is-ios-mobile .booking-dock {
-    --ios-dock-box-height: var(--dock-height);
-
-    position: absolute;
-    top: 0;
-    right: max(12px, env(safe-area-inset-right, 0px));
-    bottom: auto;
-    left: max(12px, env(safe-area-inset-left, 0px));
-    width: auto;
-    max-width: 680px;
-    margin: 0 auto;
-    transform: translate3d(
-      0,
-      calc(
-        var(--ios-dock-visual-bottom, 100dvh) - var(--ios-dock-box-height) -
-          var(--dock-bottom)
-      ),
-      0
-    );
-    will-change: transform;
-  }
-
-  html.is-ios-mobile .booking-dock.is-cta-collapsed:not(.is-event-live) {
-    --ios-dock-box-height: 112px;
-  }
-}
-
 @media (max-width: 720px) {
   .menu-section__background {
     background-position: 58% center;
@@ -175,13 +137,10 @@ html.is-ios-mobile body {
 
     &.is-active .menu-group__heading {
       opacity: 1;
-      transform: translate3d(0, var(--menu-heading-exit-offset, 0%), 0);
     }
   }
 
   .menu-group__heading {
-    --menu-heading-exit-offset: 0%;
-
     position: sticky;
     z-index: 10;
     top: 0;
@@ -190,9 +149,7 @@ html.is-ios-mobile body {
     background: transparent;
     visibility: visible;
     opacity: 1;
-    transform: translate3d(0, var(--menu-heading-exit-offset), 0);
     pointer-events: none;
-    will-change: transform;
     transition: opacity 150ms ease-out;
 
     &::before {

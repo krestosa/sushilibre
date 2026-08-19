@@ -1,4 +1,5 @@
 import { query } from '../shared/dom';
+import { addScrollListener, getScrollY } from '../shared/scroll-root';
 
 const BASE_SPEED = 68;
 const MAX_SPEED = 820;
@@ -27,7 +28,7 @@ export const setupScrollMarquee = (): void => {
   let offset = 0;
   let velocity = BASE_SPEED;
   let targetVelocity = BASE_SPEED;
-  let lastScrollY = window.scrollY;
+  let lastScrollY = getScrollY();
   let lastScrollAt = performance.now();
   let lastFrameAt = 0;
   let frameId = 0;
@@ -73,7 +74,7 @@ export const setupScrollMarquee = (): void => {
 
   const onScroll = (): void => {
     const now = performance.now();
-    const nextScrollY = window.scrollY;
+    const nextScrollY = getScrollY();
     const delta = nextScrollY - lastScrollY;
     lastScrollY = nextScrollY;
 
@@ -107,20 +108,20 @@ export const setupScrollMarquee = (): void => {
     : null;
   resizeObserver?.observe(firstGroup);
 
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      isVisible = entry.isIntersecting;
-      if (isVisible) start();
-      else stop();
-    }, { rootMargin: '180px 0px', threshold: 0 });
-    observer.observe(root);
-  } else {
-    isVisible = true;
-  }
+  const observer = 'IntersectionObserver' in window
+    ? new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        isVisible = entry.isIntersecting;
+        if (isVisible) start();
+        else stop();
+      }, { rootMargin: '180px 0px', threshold: 0 })
+    : null;
 
-  window.addEventListener('scroll', onScroll, { passive: true });
+  if (observer) observer.observe(root);
+  else isVisible = true;
+
+  const removeScrollListener = addScrollListener(onScroll);
   window.addEventListener('resize', measure, { passive: true });
   reducedMotion.addEventListener('change', syncMotionPreference);
 
@@ -128,6 +129,15 @@ export const setupScrollMarquee = (): void => {
     measure();
     start();
   }).catch(() => undefined);
+
+  window.addEventListener('pagehide', () => {
+    removeScrollListener();
+    observer?.disconnect();
+    resizeObserver?.disconnect();
+    stop();
+    window.removeEventListener('resize', measure);
+    reducedMotion.removeEventListener('change', syncMotionPreference);
+  }, { once: true });
 
   start();
 };

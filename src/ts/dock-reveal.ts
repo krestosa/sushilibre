@@ -1,13 +1,16 @@
 import { query } from './shared/dom';
+import { addScrollListener, getScrollY } from './shared/scroll-root';
 
 const dock = query<HTMLElement>('.booking-dock');
 
 if (dock) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let resolved = false;
+  let removeScrollListener: (() => void) | null = null;
 
   const cleanup = (): void => {
-    window.removeEventListener('scroll', prioritizeScrollStability);
+    removeScrollListener?.();
+    removeScrollListener = null;
   };
 
   const finishReveal = (): void => {
@@ -28,7 +31,7 @@ if (dock) {
   };
 
   function prioritizeScrollStability(): void {
-    if (!resolved && window.scrollY > 0) settleImmediately();
+    if (!resolved && getScrollY() > 0) settleImmediately();
   }
 
   dock.addEventListener('animationend', (event) => {
@@ -52,7 +55,7 @@ if (dock) {
     if (!activeDockAnimation && Number.parseFloat(getComputedStyle(dock).opacity) >= 0.99) {
       finishReveal();
     } else {
-      window.addEventListener('scroll', prioritizeScrollStability, { passive: true });
+      removeScrollListener = addScrollListener(prioritizeScrollStability);
       window.requestAnimationFrame(prioritizeScrollStability);
     }
   }

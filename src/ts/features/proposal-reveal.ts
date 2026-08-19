@@ -1,4 +1,5 @@
 import { query, queryAll } from '../shared/dom';
+import { addScrollListener, getViewportHeight } from '../shared/scroll-root';
 
 const RESPONSIVE_REVEAL_QUERY = '(max-width: 840px)';
 const DESKTOP_REVEAL_RATIO = 0.82;
@@ -20,26 +21,20 @@ const bypassReveal = (element: HTMLElement): void => {
   element.classList.add('is-visible', 'is-reveal-bypassed');
 };
 
-const getViewportBottom = (): number => {
-  const viewport = window.visualViewport;
-  return viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
-};
-
 const getRevealBoundary = (
   dock: HTMLElement | null,
   responsiveReveal: MediaQueryList
 ): number => {
-  const viewportBottom = getViewportBottom();
+  const viewportBottom = getViewportHeight();
 
   if (!responsiveReveal.matches || !dock) {
     return viewportBottom * DESKTOP_REVEAL_RATIO;
   }
 
   const dockBounds = dock.getBoundingClientRect();
-  const dockIsFixed = window.getComputedStyle(dock).position === 'fixed';
   const dockOverlapsViewport = dockBounds.bottom > 0 && dockBounds.top < viewportBottom;
 
-  if (!dockIsFixed || !dockOverlapsViewport) {
+  if (!dockOverlapsViewport) {
     return viewportBottom * DESKTOP_REVEAL_RATIO;
   }
 
@@ -156,9 +151,16 @@ export const setupProposalReveal = (): void => {
 
   const dock = query<HTMLElement>('.booking-dock');
   const responsiveReveal = window.matchMedia(RESPONSIVE_REVEAL_QUERY);
-  const visualViewport = window.visualViewport;
   const pendingTargets = new Set(targets);
   let updateFrame = 0;
+  let removeScrollListener: (() => void) | null = null;
+
+  const removeListeners = (): void => {
+    removeScrollListener?.();
+    removeScrollListener = null;
+    window.removeEventListener('resize', scheduleUpdate);
+    responsiveReveal.removeEventListener('change', scheduleUpdate);
+  };
 
   const revealVisibleTargets = (): void => {
     updateFrame = 0;
@@ -178,18 +180,10 @@ export const setupProposalReveal = (): void => {
     if (!pendingTargets.size) removeListeners();
   };
 
-  const scheduleUpdate = (): void => {
+  function scheduleUpdate(): void {
     if (updateFrame) return;
     updateFrame = window.requestAnimationFrame(revealVisibleTargets);
-  };
-
-  const removeListeners = (): void => {
-    window.removeEventListener('scroll', scheduleUpdate);
-    window.removeEventListener('resize', scheduleUpdate);
-    responsiveReveal.removeEventListener('change', scheduleUpdate);
-    visualViewport?.removeEventListener('resize', scheduleUpdate);
-    visualViewport?.removeEventListener('scroll', scheduleUpdate);
-  };
+  }
 
   if (root.classList.contains('proposal-reveal-fallback')) {
     const boundary = getRevealBoundary(dock, responsiveReveal);
@@ -208,12 +202,13 @@ export const setupProposalReveal = (): void => {
     return;
   }
 
-  window.addEventListener('scroll', scheduleUpdate, { passive: true });
+  removeScrollListener = addScrollListener(scheduleUpdate);
   window.addEventListener('resize', scheduleUpdate, { passive: true });
   responsiveReveal.addEventListener('change', scheduleUpdate);
-  visualViewport?.addEventListener('resize', scheduleUpdate, { passive: true });
-  visualViewport?.addEventListener('scroll', scheduleUpdate, { passive: true });
-  window.addEventListener('pagehide', cleanupLineSplits, { once: true });
+  window.addEventListener('pagehide', () => {
+    removeListeners();
+    cleanupLineSplits();
+  }, { once: true });
 
   window.requestAnimationFrame(() => {
     window.requestAnimationFrame(revealVisibleTargets);

@@ -1,4 +1,5 @@
 import { query } from '../shared/dom';
+import { addScrollListener, getScrollY } from '../shared/scroll-root';
 
 type CountdownKey = 'days' | 'hours' | 'minutes' | 'seconds';
 
@@ -81,7 +82,7 @@ export const setupCountdown = (): void => {
   };
 
   const syncFinalMenuCtaActionPosition = (): void => {
-    const nextPassedState = window.scrollY >= finalMenuCtaTriggerScrollY;
+    const nextPassedState = getScrollY() >= finalMenuCtaTriggerScrollY;
     if (nextPassedState === finalMenuCtaActionPassedDock) return;
     finalMenuCtaActionPassedDock = nextPassedState;
     syncDockCtaVisibility();
@@ -91,7 +92,7 @@ export const setupCountdown = (): void => {
     measurementFrame = 0;
     if (!finalMenuCtaAction || !dock) return;
 
-    const scrollY = window.scrollY;
+    const scrollY = getScrollY();
     const actionRect = finalMenuCtaAction.getBoundingClientRect();
     const dockRect = dock.getBoundingClientRect();
     finalMenuCtaTriggerScrollY = Math.max(
@@ -108,11 +109,11 @@ export const setupCountdown = (): void => {
 
   if (finalMenuCtaAction && dock) {
     measureFinalMenuCtaTrigger();
-    window.addEventListener('scroll', syncFinalMenuCtaActionPosition, { passive: true });
+    const removeScrollListener = addScrollListener(syncFinalMenuCtaActionPosition);
     window.addEventListener('resize', scheduleFinalMenuCtaTriggerMeasurement, { passive: true });
     window.addEventListener('orientationchange', scheduleFinalMenuCtaTriggerMeasurement, { passive: true });
-    window.visualViewport?.addEventListener('resize', scheduleFinalMenuCtaTriggerMeasurement, { passive: true });
     document.fonts.ready.then(scheduleFinalMenuCtaTriggerMeasurement).catch(() => undefined);
+    window.addEventListener('pagehide', removeScrollListener, { once: true });
   }
 
   const handleMenuClick = (event: MouseEvent): void => {
