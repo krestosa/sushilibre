@@ -9,60 +9,84 @@ export const setupMenuDepth = (): void => {
   const coarse = window.matchMedia('(pointer: coarse)');
   let frame = 0;
   let active = false;
+  let sectionTop = 0;
+  let scrollDistance = 1;
+
+  const disabled = (): boolean => reduce.matches || coarse.matches;
+
+  const measure = (): void => {
+    const rect = section.getBoundingClientRect();
+    sectionTop = window.scrollY + rect.top;
+    scrollDistance = Math.max(1, rect.height - window.innerHeight);
+  };
 
   const update = (): void => {
     frame = 0;
-    if (!active || reduce.matches) return;
+    if (!active || disabled()) return;
 
-    const rect = section.getBoundingClientRect();
-    const viewport = Math.max(1, window.innerHeight);
-    const distance = Math.max(1, rect.height - viewport);
-    const progress = Math.min(1, Math.max(0, -rect.top / distance));
+    const progress = Math.min(1, Math.max(0, (window.scrollY - sectionTop) / scrollDistance));
     const centered = progress * 2 - 1;
-    const touch = coarse.matches;
-    const y = centered * (touch ? 16 : 30);
-    const x = Math.sin(progress * Math.PI * 2) * (touch ? 2 : 4);
-    const scale = (touch ? 1.055 : 1.07) + Math.sin(progress * Math.PI) * (touch ? 0.007 : 0.01);
+    const y = centered * 30;
+    const x = Math.sin(progress * Math.PI * 2) * 4;
+    const scale = 1.07 + Math.sin(progress * Math.PI) * 0.01;
 
     background.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
   };
 
   const schedule = (): void => {
-    if (active && !reduce.matches && !frame) frame = requestAnimationFrame(update);
+    if (active && !disabled() && !frame) frame = window.requestAnimationFrame(update);
+  };
+
+  const stop = (): void => {
+    if (frame) window.cancelAnimationFrame(frame);
+    frame = 0;
+    background.style.transform = 'none';
+    background.style.willChange = 'auto';
   };
 
   const syncMotion = (): void => {
-    if (reduce.matches) {
-      background.style.transform = 'none';
-      background.style.willChange = 'auto';
+    if (disabled()) {
+      stop();
       return;
     }
+
     background.style.willChange = active ? 'transform' : 'auto';
     schedule();
   };
 
+  const refresh = (): void => {
+    measure();
+    schedule();
+  };
+
   background.style.transformOrigin = 'center';
+  measure();
 
   const observer = new IntersectionObserver((entries) => {
     active = Boolean(entries[0]?.isIntersecting);
-    background.style.willChange = active && !reduce.matches ? 'transform' : 'auto';
-    if (active) schedule();
+    if (!active || disabled()) {
+      stop();
+      return;
+    }
+
+    background.style.willChange = 'transform';
+    schedule();
   }, { rootMargin: '120px 0px', threshold: 0 });
   observer.observe(section);
 
   window.addEventListener('scroll', schedule, { passive: true });
-  window.addEventListener('resize', schedule, { passive: true });
-  window.addEventListener('orientationchange', schedule, { passive: true });
+  window.addEventListener('resize', refresh, { passive: true });
+  window.addEventListener('orientationchange', refresh, { passive: true });
   reduce.addEventListener('change', syncMotion);
-  coarse.addEventListener('change', schedule);
+  coarse.addEventListener('change', syncMotion);
 
   window.addEventListener('pagehide', () => {
     observer.disconnect();
-    if (frame) cancelAnimationFrame(frame);
+    if (frame) window.cancelAnimationFrame(frame);
     window.removeEventListener('scroll', schedule);
-    window.removeEventListener('resize', schedule);
-    window.removeEventListener('orientationchange', schedule);
+    window.removeEventListener('resize', refresh);
+    window.removeEventListener('orientationchange', refresh);
     reduce.removeEventListener('change', syncMotion);
-    coarse.removeEventListener('change', schedule);
+    coarse.removeEventListener('change', syncMotion);
   }, { once: true });
 };

@@ -18,17 +18,32 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
   let updateFrame = 0;
   let resizeTimer = 0;
   let scrollListening = false;
+  let previousHeading: HTMLElement | null = null;
+
+  const currentTarget = (): OverlapTarget | null => {
+    for (const target of nearbyTargets) {
+      if (target.group.classList.contains('is-active')) return target;
+    }
+
+    return nearbyTargets.values().next().value ?? null;
+  };
 
   const updateOverlapState = (): void => {
     updateFrame = 0;
     if (!mobileQuery.matches) return;
 
-    nearbyTargets.forEach(({ heading, sentinel }) => {
-      const headingBounds = heading.getBoundingClientRect();
-      const sentinelBounds = sentinel.getBoundingClientRect();
-      const overlaps = sentinelBounds.top <= headingBounds.bottom;
-      heading.classList.toggle('is-overlapping', overlaps);
-    });
+    const target = currentTarget();
+    if (!target) return;
+
+    if (previousHeading && previousHeading !== target.heading) {
+      previousHeading.classList.remove('is-overlapping');
+    }
+
+    const headingBounds = target.heading.getBoundingClientRect();
+    const sentinelBounds = target.sentinel.getBoundingClientRect();
+    const overlaps = sentinelBounds.top <= headingBounds.bottom;
+    target.heading.classList.toggle('is-overlapping', overlaps);
+    previousHeading = target.heading;
   };
 
   const scheduleUpdate = (): void => {
@@ -56,15 +71,25 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
     window.removeEventListener('scroll', scheduleUpdate);
   };
 
-  const syncViewportMode = (): void => {
-    if (mobileQuery.matches) {
+  const syncScrollTracking = (): void => {
+    if (mobileQuery.matches && nearbyTargets.size) {
       attachScrollListener();
       scheduleUpdate();
       return;
     }
 
     detachScrollListener();
-    targets.forEach(({ heading }) => heading.classList.remove('is-overlapping'));
+  };
+
+  const syncViewportMode = (): void => {
+    if (!mobileQuery.matches) {
+      detachScrollListener();
+      previousHeading = null;
+      targets.forEach(({ heading }) => heading.classList.remove('is-overlapping'));
+      return;
+    }
+
+    syncScrollTracking();
   };
 
   if ('IntersectionObserver' in window) {
@@ -78,9 +103,10 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
         } else {
           nearbyTargets.delete(target);
           target.heading.classList.remove('is-overlapping');
+          if (previousHeading === target.heading) previousHeading = null;
         }
       });
-      scheduleUpdate();
+      syncScrollTracking();
     }, {
       rootMargin: '20% 0px 20% 0px',
       threshold: 0

@@ -7,18 +7,18 @@ export const setupBookingCtaSheen = ({
   coarsePointer
 }: RuntimeContext): void => {
   const ctas = queryAll<HTMLAnchorElement>('[data-booking-cta], .menu-final-cta__action');
-  if (!ctas.length || reducedMotion.matches) return;
+  if (!ctas.length) return;
 
   const compact = compactViewport.matches || coarsePointer.matches;
 
   ctas.forEach((cta) => {
-    if (typeof cta.animate !== 'function') return;
+    cta.classList.add('has-runtime-sheen');
+    if (reducedMotion.matches || compact || typeof cta.animate !== 'function') return;
 
     const isFinalCta = cta.classList.contains('menu-final-cta__action');
     cta.style.filter = 'none';
     cta.style.overflow = 'hidden';
     cta.style.isolation = 'isolate';
-    cta.classList.add('has-runtime-sheen');
 
     let label = cta.querySelector<HTMLElement>(':scope > span');
     if (!label) {
@@ -51,7 +51,7 @@ export const setupBookingCtaSheen = ({
 
     const initialDelay = isFinalCta ? 550 : 1_500;
     const regularDelay = 7_400;
-    const duration = compact ? 1_450 : 1_800;
+    const duration = 1_800;
     let timerId = 0;
     let activeAnimation: Animation | null = null;
     let activeGlow: Animation | null = null;

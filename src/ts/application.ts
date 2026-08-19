@@ -24,6 +24,7 @@ setupPieceCursorPreview();
 setupTapSearchGuard();
 
 if (compactVideo) {
+  const hero = document.querySelector<HTMLElement>('.hero');
   const intro = document.querySelector<HTMLVideoElement>('[data-intro-video]');
   const loops = Array.from(document.querySelectorAll<HTMLVideoElement>('[data-loop-video]'));
 
@@ -102,6 +103,9 @@ if (compactVideo) {
     let activeIndex = -1;
     let boundaryTimer = 0;
     let transitionInProgress = false;
+    let heroVisible = true;
+
+    const canPlay = (): boolean => !document.hidden && heroVisible;
 
     const clearBoundary = (): void => {
       if (!boundaryTimer) return;
@@ -109,9 +113,15 @@ if (compactVideo) {
       boundaryTimer = 0;
     };
 
+    const pauseAll = (): void => {
+      clearBoundary();
+      intro.pause();
+      loops.forEach((video) => video.pause());
+    };
+
     const scheduleBoundary = (): void => {
       clearBoundary();
-      if (activeIndex < 0 || transitionInProgress || document.hidden) return;
+      if (activeIndex < 0 || transitionInProgress || !canPlay()) return;
 
       const active = loops[activeIndex];
       if (!active) return;
@@ -122,6 +132,7 @@ if (compactVideo) {
       }
 
       const schedule = (): void => {
+        if (!canPlay()) return;
         const duration = active.duration;
         if (!Number.isFinite(duration) || duration <= 0) return;
         const remaining = Math.max(0, duration - active.currentTime);
@@ -130,7 +141,7 @@ if (compactVideo) {
 
         boundaryTimer = window.setTimeout(() => {
           boundaryTimer = 0;
-          if (scheduledIndex !== activeIndex || transitionInProgress) return;
+          if (scheduledIndex !== activeIndex || transitionInProgress || !canPlay()) return;
           void transitionTo((activeIndex + 1) % loops.length);
         }, delay);
       };
@@ -163,7 +174,7 @@ if (compactVideo) {
     };
 
     async function transitionTo(nextIndex: number): Promise<void> {
-      if (transitionInProgress || document.hidden) return;
+      if (transitionInProgress || !canPlay()) return;
 
       const incoming = loops[nextIndex];
       if (!incoming) return;
@@ -186,7 +197,7 @@ if (compactVideo) {
         // actually decoded/painted its first frame. This removes the mobile
         // black flash while preserving the fade between the two loop layers.
         await prepareFromStart(incoming);
-        if (document.hidden) {
+        if (!canPlay()) {
           incoming.pause();
           incoming.classList.remove('is-mixing-in');
           transitionInProgress = false;
@@ -194,6 +205,13 @@ if (compactVideo) {
         }
 
         window.requestAnimationFrame(() => {
+          if (!canPlay()) {
+            incoming.pause();
+            incoming.classList.remove('is-mixing-in');
+            transitionInProgress = false;
+            return;
+          }
+
           incoming.classList.add('is-active');
           if (outgoing === intro) outgoing.classList.remove('is-active');
           settleTransition(incoming, outgoing, nextIndex);
@@ -203,13 +221,30 @@ if (compactVideo) {
         incoming.classList.remove('is-active', 'is-mixing-in');
         transitionInProgress = false;
         outgoing.classList.add('is-active');
-        window.setTimeout(() => void transitionTo(nextIndex), 900);
+        if (canPlay()) window.setTimeout(() => void transitionTo(nextIndex), 900);
       }
     }
 
+    const resumeActivePlayback = (): void => {
+      if (!canPlay()) return;
+
+      if (activeIndex >= 0) {
+        const active = loops[activeIndex];
+        if (active) void active.play().then(scheduleBoundary).catch(() => undefined);
+        return;
+      }
+
+      if (intro.ended) {
+        void transitionTo(0);
+        return;
+      }
+
+      void intro.play().catch(() => undefined);
+    };
+
     loops.forEach((video, index) => {
       video.addEventListener('ended', () => {
-        if (index !== activeIndex || transitionInProgress || loops.length < 2) return;
+        if (index !== activeIndex || transitionInProgress || loops.length < 2 || !canPlay()) return;
         void transitionTo((index + 1) % loops.length);
       }, { passive: true });
 
@@ -219,24 +254,30 @@ if (compactVideo) {
     });
 
     intro.addEventListener('ended', () => {
-      void transitionTo(0);
+      if (canPlay()) void transitionTo(0);
     }, { once: true, passive: true });
+
+    if (hero && 'IntersectionObserver' in window) {
+      const heroObserver = new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        const nextVisible = entry.isIntersecting;
+        if (nextVisible === heroVisible) return;
+
+        heroVisible = nextVisible;
+        if (!heroVisible) pauseAll();
+        else resumeActivePlayback();
+      }, { rootMargin: '80px 0px', threshold: 0 });
+      heroObserver.observe(hero);
+    }
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
-        clearBoundary();
-        loops.forEach((video) => video.pause());
+        pauseAll();
         return;
       }
 
-      if (activeIndex >= 0) {
-        const active = loops[activeIndex];
-        if (active) void active.play().then(scheduleBoundary).catch(() => undefined);
-      } else if (intro.ended) {
-        void transitionTo(0);
-      } else {
-        void intro.play().catch(() => undefined);
-      }
+      resumeActivePlayback();
     });
 
     if (intro.ended) void transitionTo(0);

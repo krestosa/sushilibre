@@ -2,6 +2,9 @@ import { query, queryAll } from '../shared/dom';
 
 type DockLayoutMode = 'desktop' | 'compact' | 'mobile';
 
+const MOBILE_QUERY = '(max-width: 840px)';
+const COMPACT_QUERY = '(max-width: 1100px)';
+
 const isIosDevice = (): boolean => {
   const ua = navigator.userAgent;
   return /iPad|iPhone|iPod/i.test(ua)
@@ -20,26 +23,35 @@ export const setupBookingDockLayout = (): void => {
   const root = document.documentElement;
   const ios = isIosDevice();
   const visualViewport = window.visualViewport;
+  const mobileQuery = window.matchMedia(MOBILE_QUERY);
+  const compactQuery = window.matchMedia(COMPACT_QUERY);
 
   let activeMode: DockLayoutMode | null = null;
   let activeLiveState: boolean | null = null;
   let activeSuppressedState: boolean | null = null;
   let scheduledFrame = 0;
   let viewportFrame = 0;
+  let lastVisualBottom: number | null = null;
 
   const syncIosViewport = (): void => {
     viewportFrame = 0;
-    if (!ios) return;
+    if (!ios || !mobileQuery.matches) return;
 
-    const pageTop = visualViewport
-      ? visualViewport.pageTop
-      : window.scrollY;
-    const viewportHeight = visualViewport
-      ? visualViewport.height
-      : window.innerHeight;
-    const visualBottom = Math.max(0, pageTop + viewportHeight);
+    const pageTop = visualViewport?.pageTop ?? window.scrollY;
+    const viewportHeight = visualViewport?.height ?? window.innerHeight;
+    const rawVisualBottom = Math.max(0, pageTop + viewportHeight);
+    const pixelRatio = Math.max(1, window.devicePixelRatio || 1);
+    const visualBottom = Math.round(rawVisualBottom * pixelRatio) / pixelRatio;
 
-    root.style.setProperty('--ios-dock-visual-bottom', `${visualBottom.toFixed(2)}px`);
+    if (
+      lastVisualBottom !== null
+      && Math.abs(lastVisualBottom - visualBottom) < 0.5 / pixelRatio
+    ) {
+      return;
+    }
+
+    lastVisualBottom = visualBottom;
+    dock.style.setProperty('--ios-dock-visual-bottom', `${visualBottom}px`);
   };
 
   const scheduleIosViewportSync = (): void => {
@@ -186,8 +198,8 @@ export const setupBookingDockLayout = (): void => {
   };
 
   const resolveMode = (): DockLayoutMode => {
-    if (window.matchMedia('(max-width: 840px)').matches) return 'mobile';
-    if (window.matchMedia('(max-width: 1100px)').matches) return 'compact';
+    if (mobileQuery.matches) return 'mobile';
+    if (compactQuery.matches) return 'compact';
     return 'desktop';
   };
 
@@ -207,6 +219,8 @@ export const setupBookingDockLayout = (): void => {
     if (nextMode === 'mobile') applyMobileLayout(nextLiveState, nextSuppressedState);
     else if (nextMode === 'compact') applyCompactLayout(nextLiveState, nextSuppressedState);
     else applyDesktopLayout(nextLiveState, nextSuppressedState);
+
+    scheduleIosViewportSync();
   };
 
   const scheduleSync = (): void => {
@@ -222,6 +236,8 @@ export const setupBookingDockLayout = (): void => {
   syncLayout();
   window.addEventListener('resize', scheduleSync, { passive: true });
   window.addEventListener('orientationchange', scheduleSync, { passive: true });
+  mobileQuery.addEventListener('change', scheduleSync);
+  compactQuery.addEventListener('change', scheduleSync);
 
   if ('ResizeObserver' in window) {
     const observer = new ResizeObserver(scheduleSync);
