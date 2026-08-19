@@ -78,23 +78,26 @@ test('active countdown caches the final CTA threshold outside the scroll hot pat
   assert.match(countdown, /finalMenuCtaAction\.getBoundingClientRect\(\)/);
   assert.match(countdown, /dock\.getBoundingClientRect\(\)/);
   assert.match(countdown, /scrollY \+ actionRect\.bottom - dockRect\.top \+ FINAL_CTA_DOCK_CLEARANCE_PX/);
-  assert.match(countdown, /window\.scrollY >= finalMenuCtaTriggerScrollY/);
+  assert.match(countdown, /getScrollY\(\) >= finalMenuCtaTriggerScrollY/);
   assert.match(countdown, /finalMenuCtaActionPassedDock && !menuMode/);
-  assert.match(countdown, /classList\.toggle\('is-suppressed', shouldSuppress\)/);
-  assert.match(countdown, /classList\.toggle\('is-cta-suppressed', shouldSuppress\)/);
-  assert.match(countdown, /window\.addEventListener\('scroll', syncFinalMenuCtaActionPosition/);
+  assert.match(countdown, /classList\.add\('is-suppressed'\)/);
+  assert.match(countdown, /classList\.add\('is-cta-suppressed'\)/);
+  assert.match(countdown, /addScrollListener\(syncFinalMenuCtaActionPosition\)/);
   assert.match(countdown, /window\.addEventListener\('resize', scheduleFinalMenuCtaTriggerMeasurement/);
-  assert.doesNotMatch(countdown, /window\.addEventListener\('scroll', scheduleFinalMenuCtaTriggerMeasurement/);
+  assert.doesNotMatch(countdown, /visualViewport/);
+  assert.doesNotMatch(countdown, /window\.addEventListener\('scroll'/);
   assert.doesNotMatch(countdown, /overlapHeight|FINAL_CTA_DOCK_OVERLAP_PX/);
-  assert.match(layout, /is-cta-suppressed/);
+
+  assert.match(layout, /is-cta-collapsed/);
   assert.match(layout, /--dock-cta-track/);
-  assert.match(layout, /suppressedWidth: 'min\(923px, calc\(100vw - 165px\)\)'/);
-  assert.match(layout, /suppressedWidth: 'min\(667px, calc\(100vw - 145px\)\)'/);
+  assert.match(layout, /suppressedWidth: 'min\(760px, calc\(100vw - 96px\)\)'/);
+  assert.match(layout, /suppressedWidth: 'min\(620px, calc\(100vw - 64px\)\)'/);
   assert.match(layout, /dock\.style\.width = 'min\(680px, calc\(100vw - 24px\)\)'/);
   assert.match(layout, /max-content max-content max-content minmax\(0, 1fr\) var\(--dock-cta-track\)/);
   assert.match(layout, /countdown\.style\.gridColumn = '1 \/ span 4'/);
-  assert.match(layout, /dateMeta\.style\.justifySelf = 'start'/);
-  assert.match(layout, /timeMeta\.style\.justifySelf = 'start'/);
+  assert.match(layout, /placeMetadata\(\{ row: '1', padding: '0 2px' \}\)/);
+  assert.doesNotMatch(layout, /visualViewport|isIosDevice|is-ios-mobile/);
+
   assert.match(mobileStyles, /grid-template-columns:\s*max-content max-content max-content minmax\(0, 1fr\) var\(--dock-cta-track, 96px\)/);
   assert.match(mobileStyles, /column-gap:\s*12px/);
   assert.match(mobileStyles, /\.countdown\s*\{[\s\S]*?grid-column:\s*1 \/ span 4/);
@@ -106,15 +109,16 @@ test('active countdown caches the final CTA threshold outside the scroll hot pat
   assert.match(styles, /pointer-events: none/);
 });
 
-test('reservation CTA motion is slower, brighter and deliberately spaced', async () => {
+test('reservation CTA sheen is disabled on compact or coarse-pointer layouts', async () => {
   const [feature, styles, motion] = await Promise.all([
     readSource('src/ts/features/booking-cta-sheen.ts'),
     readSource('src/scss/components/_booking-button.scss'),
     readSource('src/scss/_motion.scss')
   ]);
 
+  assert.match(feature, /const compact = compactViewport\.matches \|\| coarsePointer\.matches/);
+  assert.match(feature, /reducedMotion\.matches \|\| compact \|\| typeof cta\.animate !== 'function'/);
   assert.match(feature, /const regularDelay = 7_400/);
-  assert.match(feature, /\? 1_450 : 1_800/);
   assert.match(feature, /boxShadow: '0 0 28px/);
   assert.match(feature, /filter: 'brightness\(1\.08\)'/);
   assert.match(styles, /width: 88%/);
@@ -142,5 +146,6 @@ test('compiled distribution keeps booking destinations and action hooks', async 
   assert.match(script, /is-cta-suppressed/);
   assert.match(script, /--dock-cta-track/);
   assert.match(script, /getBoundingClientRect/);
+  assert.doesNotMatch(script, /visualViewport|is-ios-mobile|--ios-dock/);
   assert.match(script, /#menu/);
 });

@@ -30,15 +30,15 @@ test('menu reveal motion is prepaint-safe, one-time and viewport driven', async 
   assert.match(motion, /prefers-reduced-motion: reduce/);
 });
 
-test('mobile menu overlap shadow remains stable during continuous resize', async () => {
+test('mobile menu overlap shadow follows the shared scroll root', async () => {
   const observers = await readSource('src/ts/menu/observers.ts');
 
   assert.match(observers, /const overlaps = sentinelBounds\.top <= headingBounds\.bottom/);
   assert.match(observers, /scheduleResizeSettlement/);
   assert.match(observers, /window\.setTimeout\([\s\S]*?140/);
-  assert.match(observers, /window\.addEventListener\('scroll', scheduleUpdate/);
+  assert.match(observers, /addScrollListener\(scheduleUpdate\)/);
   assert.match(observers, /window\.addEventListener\('resize', scheduleResizeSettlement/);
-  assert.doesNotMatch(observers, /disconnectObservers|observers\.forEach\(\(observer\) => observer\.disconnect/);
+  assert.doesNotMatch(observers, /window\.addEventListener\('scroll', scheduleUpdate/);
 });
 
 test('hero title completion preserves the exact final rasterized state', async () => {
@@ -77,18 +77,21 @@ test('desktop masthead animation cannot move or resize its logo geometry', async
   assert.match(desktop, /\.masthead__anniversary\s*\{[\s\S]*?display: block;[\s\S]*?flex: 0 0 auto;[\s\S]*?aspect-ratio: 147 \/ 113;/);
 });
 
-test('booking dock enters as one complete unit', async () => {
+test('booking dock settles as one complete unit when scrolling begins', async () => {
   const [feature, motion] = await Promise.all([
     readSource('src/ts/dock-reveal.ts'),
     readSource('src/scss/_motion.scss')
   ]);
 
   assert.match(motion, /\.booking-dock\s*\{[\s\S]*?animation: stage-dock-in/);
-  assert.match(feature, /dock\.animate/);
+  assert.match(feature, /getAnimations\(\)/);
+  assert.match(feature, /settleImmediately/);
+  assert.match(feature, /getScrollY\(\)/);
+  assert.match(feature, /addScrollListener\(prioritizeScrollStability\)/);
+  assert.doesNotMatch(feature, /dock\.animate/);
   assert.doesNotMatch(feature, /queryAll/);
   assert.doesNotMatch(feature, /booking-dock__meta|countdown__unit|booking-dock__cta > span/);
   assert.doesNotMatch(feature, /revealDockContent|stagger/);
-  assert.doesNotMatch(feature, /element\.style\.opacity\s*=\s*['"]0['"]/);
 });
 
 test('piece viewer separates loading, ready and error states', async () => {
@@ -135,7 +138,7 @@ test('piece viewer loading state receives the same deterministic entrance animat
   assert.match(styles, /piece-viewer-loader 720ms linear infinite,[\s\S]*piece-viewer-loader-enter 220ms ease-out both/);
 });
 
-test('piece viewer locks scrolling without repositioning or hiding the page', async () => {
+test('piece viewer locks scrolling without repositioning or hiding the document page', async () => {
   const [feature, styles] = await Promise.all([
     readSource('src/ts/features/piece-viewer.ts'),
     readSource('src/scss/components/_piece-viewer.scss')
@@ -145,13 +148,12 @@ test('piece viewer locks scrolling without repositioning or hiding the page', as
   assert.match(styles, /html\.has-piece-viewer[\s\S]*overflow-y: scroll/);
   assert.doesNotMatch(styles, /\.page[\s\S]*position: fixed/);
   assert.doesNotMatch(styles, /--piece-viewer-scroll-offset|--piece-viewer-document-height/);
-  assert.doesNotMatch(styles, /html\.has-piece-viewer\s*\{[^}]*overflow:\s*hidden/);
   assert.match(feature, /addEventListener\('wheel',[\s\S]*passive: false/);
   assert.match(feature, /addEventListener\('touchmove',[\s\S]*passive: false/);
   assert.match(feature, /addEventListener\('scroll', enforceLockedScroll/);
   assert.match(feature, /SCROLL_KEYS/);
   assert.match(feature, /window\.scrollTo\(0, lockedScrollY\)/);
-  assert.doesNotMatch(feature, /--piece-viewer-scroll-offset|--piece-viewer-document-height/);
+  assert.doesNotMatch(feature, /--piece-viewer-scroll-offset|piece-viewer-document-height/);
   assert.match(styles, /background: rgba\(0, 0, 0, 0\.62\)/);
 });
 

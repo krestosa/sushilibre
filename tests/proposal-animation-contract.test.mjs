@@ -39,7 +39,7 @@ const assertIndividualCommercialTargets = (html) => {
   );
 };
 
-test('proposal reveal is restrained, prepaint-safe and sticky-dock aware', async () => {
+test('proposal reveal is restrained, prepaint-safe and overlay-dock aware', async () => {
   const [feature, application, styles, template] = await Promise.all([
     readSource('src/ts/features/proposal-reveal.ts'),
     readSource('src/ts/application.ts'),
@@ -79,14 +79,15 @@ test('proposal reveal is restrained, prepaint-safe and sticky-dock aware', async
   assert.match(feature, /REVEAL_DOCK_GAP_PX = 16/);
   assert.match(feature, /dockBounds\.top - REVEAL_DOCK_GAP_PX/);
   assert.match(feature, /hasCrossedRevealBoundary/);
-  assert.match(feature, /window\.addEventListener\(["']scroll["'], scheduleUpdate/);
+  assert.match(feature, /addScrollListener\(scheduleUpdate\)/);
+  assert.match(feature, /getViewportHeight\(\)/);
   assert.match(feature, /window\.addEventListener\(["']resize["'], scheduleUpdate/);
-  assert.match(feature, /visualViewport\?\.addEventListener\(["']resize["'], scheduleUpdate/);
-  assert.match(feature, /visualViewport\?\.addEventListener\(["']scroll["'], scheduleUpdate/);
   assert.match(feature, /requestAnimationFrame/);
   assert.match(feature, /pendingTargets\.delete\(element\)/);
   assert.match(feature, /classList\.remove\(["']proposal-reveal-fallback["']\)/);
   assert.match(feature, /setAttribute\(\s*["']data-proposal-reveal-ready["']/);
+  assert.doesNotMatch(feature, /visualViewport/);
+  assert.doesNotMatch(feature, /window\.addEventListener\(["']scroll["']/);
   assert.doesNotMatch(feature, /IntersectionObserver/);
 
   assert.match(styles, /html\.has-proposal-reveal \.proposal-reveal/);
@@ -108,7 +109,7 @@ test('proposal reveal is restrained, prepaint-safe and sticky-dock aware', async
   assert.doesNotMatch(keyframes, /scale|rotate|filter|clip|width|height/);
 });
 
-test('compiled distribution includes sticky-aware proposal motion hooks', async () => {
+test('compiled distribution uses the shared scroll root without VisualViewport tracking', async () => {
   const [script, styles, html] = await Promise.all([
     readSource('dist/app.js'),
     readSource('dist/app.css'),
@@ -118,8 +119,8 @@ test('compiled distribution includes sticky-aware proposal motion hooks', async 
   assert.match(script, /data-proposal-reveal/);
   assert.match(script, /data-proposal-reveal-ready/);
   assert.match(script, /max-width: 840px/);
-  assert.match(script, /visualViewport/);
   assert.match(script, /proposal-reveal-fallback/);
+  assert.doesNotMatch(script, /visualViewport/);
   assert.doesNotMatch(script, /0px 0px -18% 0px/);
   assert.match(styles, /html\.has-proposal-reveal \.proposal-reveal/);
   assert.match(styles, /proposal-reveal--prices\.is-visible/);
