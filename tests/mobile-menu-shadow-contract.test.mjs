@@ -4,7 +4,7 @@ import test from 'node:test';
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-test('mobile menu shadow is driven only by sticky progress and reverses continuously', async () => {
+test('mobile menu shadow starts at sticky, stays on while exiting downward and reverses upward', async () => {
   const [observers, styles, main] = await Promise.all([
     readSource('src/ts/menu/observers.ts'),
     readSource('src/scss/_mobile-menu-sticky-shadow.scss'),
@@ -12,24 +12,27 @@ test('mobile menu shadow is driven only by sticky progress and reverses continuo
   ]);
 
   assert.match(observers, /const SHADOW_FADE_DISTANCE_PX = 36/);
+  assert.match(observers, /const STICKY_EPSILON_PX = 0\.75/);
   assert.match(observers, /const naturalHeadingTop = groupBounds\.top \+ groupPaddingTop/);
   assert.match(
     observers,
-    /const enterProgress = clamp01\([\s\S]*?stickyTop - naturalHeadingTop[\s\S]*?SHADOW_FADE_DISTANCE_PX/
+    /const hasReachedSticky = headingBounds\.top <= stickyTop \+ STICKY_EPSILON_PX/
   );
+  assert.match(observers, /const stickyDepth = Math\.max\(0, stickyTop - naturalHeadingTop\)/);
   assert.match(
     observers,
-    /const exitProgress = clamp01\([\s\S]*?headingBounds\.top - stickyTop \+ SHADOW_FADE_DISTANCE_PX/
+    /const shadowProgress = hasReachedSticky[\s\S]*?clamp01\(stickyDepth \/ SHADOW_FADE_DISTANCE_PX\)[\s\S]*?: 0/
   );
   assert.match(observers, /const overlaps = sentinelBounds\.top <= headingBounds\.bottom/);
-  assert.match(observers, /const shadowProgress = Math\.min\(enterProgress, exitProgress\)/);
-  assert.match(observers, /if \(!overlaps && shadowProgress === 0\)/);
+  assert.doesNotMatch(observers, /exitProgress/);
+  assert.doesNotMatch(observers, /Math\.min\(enterProgress, exitProgress\)/);
   assert.match(observers, /--menu-heading-shadow-progress/);
   assert.match(observers, /addScrollListener\(scheduleUpdate\)/);
-  assert.doesNotMatch(observers, /classList\.toggle\('is-overlapping'/);
 
   assert.match(styles, /--menu-heading-shadow-progress:\s*0/);
+  assert.match(styles, /top:\s*-1px/);
   assert.match(styles, /opacity:\s*var\(--menu-heading-shadow-progress\)/);
   assert.match(styles, /transition:\s*none/);
+  assert.doesNotMatch(styles, /is-overlapping/);
   assert.match(main, /@use "mobile-menu-sticky-shadow";/);
 });

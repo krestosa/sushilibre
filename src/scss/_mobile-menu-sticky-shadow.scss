@@ -3,8 +3,8 @@
     --menu-heading-shadow-progress: 0;
   }
 
-  .menu-group__heading::before,
-  .menu-group__heading.is-overlapping::before {
+  .menu-group__heading::before {
+    top: -1px;
     opacity: var(--menu-heading-shadow-progress);
     transition: none;
   }

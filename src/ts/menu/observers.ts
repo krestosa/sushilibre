@@ -8,6 +8,7 @@ interface OverlapTarget {
 }
 
 const SHADOW_FADE_DISTANCE_PX = 36;
+const STICKY_EPSILON_PX = 0.75;
 const clamp01 = (value: number): number => Math.max(0, Math.min(1, value));
 
 export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
@@ -41,24 +42,18 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
       const groupPaddingTop = Number.parseFloat(groupStyle.paddingTop) || 0;
       const stickyTop = Number.parseFloat(headingStyle.top) || 0;
       const naturalHeadingTop = groupBounds.top + groupPaddingTop;
-
-      // Antes de alcanzar el top sticky el progreso permanece en 0. Una vez
-      // fijado, entra durante una distancia corta y reversible de scroll.
-      const enterProgress = clamp01(
-        (stickyTop - naturalHeadingTop) / SHADOW_FADE_DISTANCE_PX
-      );
-
-      // Cuando el siguiente grupo empuja este heading fuera del sticky, la
-      // misma distancia hace el fade inverso y mantiene el handoff continuo.
-      const exitProgress = clamp01(
-        (headingBounds.top - stickyTop + SHADOW_FADE_DISTANCE_PX) /
-          SHADOW_FADE_DISTANCE_PX
-      );
-
+      const hasReachedSticky = headingBounds.top <= stickyTop + STICKY_EPSILON_PX;
+      const stickyDepth = Math.max(0, stickyTop - naturalHeadingTop);
+      const shadowProgress = hasReachedSticky
+        ? clamp01(stickyDepth / SHADOW_FADE_DISTANCE_PX)
+        : 0;
       const overlaps = sentinelBounds.top <= headingBounds.bottom;
-      const shadowProgress = Math.min(enterProgress, exitProgress);
 
-      if (!overlaps && shadowProgress === 0) {
+      // La sombra sólo empieza cuando el heading ya alcanzó el sticky. Una vez
+      // activada no se apaga al ser empujada hacia arriba por la categoría
+      // siguiente; al volver hacia arriba, stickyDepth recorre el mismo tramo
+      // en sentido inverso hasta llegar nuevamente a 0.
+      if (!hasReachedSticky && !overlaps && shadowProgress === 0) {
         heading.style.removeProperty('--menu-heading-shadow-progress');
         return;
       }
