@@ -101,8 +101,12 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
             nearbyTargets.add(target);
           } else {
             nearbyTargets.delete(target);
-            target.heading.classList.remove('is-overlapping');
-            if (previousHeading === target.heading) previousHeading = null;
+            // Un heading sticky puede seguir visible después de que su grupo
+            // salga del margen del observer. Conserva la sombra hasta que otro
+            // heading lo reemplace o hasta abandonar el modo mobile.
+            if (previousHeading !== target.heading) {
+              target.heading.classList.remove('is-overlapping');
+            }
           }
         });
         syncScrollTracking();
