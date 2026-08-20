@@ -1,0 +1,52 @@
+@media (max-width: 620px) {
+  .hero {
+    --hero-mobile-masthead-end: 74px;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows:
+      var(--hero-mobile-masthead-end)
+      minmax(0, 1fr)
+      auto
+      calc(var(--dock-height) + var(--dock-bottom) + 12px);
+    align-items: stretch;
+  }
+
+  .hero .title-lockup,
+  .hero .title-lockup.is-stacked {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    grid-column: 1;
+    grid-row: 2;
+    align-self: center;
+    justify-self: center;
+    width: calc(100% - 32px);
+    max-width: calc(100% - 32px);
+    margin: 0;
+    transform: none;
+    transform-origin: center center;
+  }
+
+  .hero .hero-copy {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    grid-column: 1;
+    grid-row: 3;
+    align-self: end;
+    justify-self: center;
+    margin: 0;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero .hero-copy {
+      animation-name: stage-copy-in;
+    }
+  }
+}

@@ -6,12 +6,11 @@ const INLINE_WIDTH = 'min(1600px, calc(100vw - 48px))';
 const MOBILE_VERTICAL_QUERY = '(max-width: 620px)';
 const COLLISION_BUFFER_PX = 8;
 const RETURN_BUFFER_PX = 24;
-const MOBILE_TARGET_GAP_PX = 12;
+const MOBILE_MIN_GAP_PX = 12;
 
 export const setupHeroTitleLayout = (): void => {
   const hero = query<HTMLElement>('.hero');
   const masthead = query<HTMLElement>('.masthead');
-  const brands = query<HTMLElement>('.masthead__brands', masthead ?? undefined);
   const lockup = query<HTMLElement>('.title-lockup');
   const sushi = query<HTMLElement>('.title-word--sushi');
   const kicker = query<HTMLElement>('.title-kicker');
@@ -24,11 +23,9 @@ export const setupHeroTitleLayout = (): void => {
   let scheduledFrame = 0;
 
   const resetMobileVerticalLayout = (): void => {
-    lockup.style.top = '';
-    lockup.style.rowGap = '';
-    sushi.style.fontSize = '';
-    kicker.style.fontSize = '';
-    libre.style.fontSize = '';
+    hero.style.removeProperty('--hero-mobile-masthead-end');
+    lockup.style.scale = '';
+    lockup.style.transformOrigin = '';
   };
 
   const measureInlineFit = (): { available: number; required: number } => {
@@ -56,42 +53,30 @@ export const setupHeroTitleLayout = (): void => {
   const fitMobileTitleVertically = (): void => {
     if (!mobileVertical.matches) return;
 
-    const mastheadBottom = masthead.offsetTop + masthead.offsetHeight;
-    const brandsBottom = brands
-      ? masthead.offsetTop + brands.offsetTop + brands.offsetHeight
-      : mastheadBottom;
-    const upperBoundary = Math.max(mastheadBottom, brandsBottom);
-    const lowerBoundary = heroCopy.offsetTop;
-    const availableHeight = Math.max(0, lowerBoundary - upperBoundary);
+    lockup.style.scale = '';
+    lockup.style.transformOrigin = 'center center';
 
-    const lockupStyle = window.getComputedStyle(lockup);
-    const sushiStyle = window.getComputedStyle(sushi);
-    const kickerStyle = window.getComputedStyle(kicker);
-    const libreStyle = window.getComputedStyle(libre);
-    const baseHeight = lockup.offsetHeight;
-    const baseRowGap = Number.parseFloat(lockupStyle.rowGap) || 0;
-    const baseSushiSize = Number.parseFloat(sushiStyle.fontSize) || 0;
-    const baseKickerSize = Number.parseFloat(kickerStyle.fontSize) || 0;
-    const baseLibreSize = Number.parseFloat(libreStyle.fontSize) || 0;
-
-    if (baseHeight <= 0 || availableHeight <= 0) return;
-
-    const targetGap = Math.min(MOBILE_TARGET_GAP_PX, availableHeight / 4);
-    const scale = Math.min(
-      1,
-      Math.max(0.01, (availableHeight - targetGap * 2) / baseHeight)
+    const heroRect = hero.getBoundingClientRect();
+    const mastheadRect = masthead.getBoundingClientRect();
+    const mastheadEnd = Math.max(
+      0,
+      Math.min(heroRect.height, mastheadRect.bottom - heroRect.top)
     );
 
-    if (scale < 0.999) {
-      sushi.style.fontSize = `${baseSushiSize * scale}px`;
-      kicker.style.fontSize = `${baseKickerSize * scale}px`;
-      libre.style.fontSize = `${baseLibreSize * scale}px`;
-      lockup.style.rowGap = `${baseRowGap * scale}px`;
-    }
+    hero.style.setProperty('--hero-mobile-masthead-end', `${Math.ceil(mastheadEnd)}px`);
 
-    const scaledHeight = lockup.offsetHeight;
-    const equalGap = Math.max(0, (availableHeight - scaledHeight) / 2);
-    lockup.style.top = `${upperBoundary + equalGap}px`;
+    const copyRect = heroCopy.getBoundingClientRect();
+    const titleRect = lockup.getBoundingClientRect();
+    const availableHeight = Math.max(
+      0,
+      copyRect.top - (heroRect.top + mastheadEnd)
+    );
+    const maxTitleHeight = Math.max(0, availableHeight - MOBILE_MIN_GAP_PX * 2);
+
+    if (titleRect.height <= 0 || maxTitleHeight >= titleRect.height) return;
+
+    const scale = Math.max(0.01, maxTitleHeight / titleRect.height);
+    lockup.style.scale = String(scale);
   };
 
   const syncLayout = (): void => {
@@ -100,7 +85,7 @@ export const setupHeroTitleLayout = (): void => {
     const wasStacked = lockup.classList.contains(STACKED_CLASS);
     const { available, required } = measureInlineFit();
     const buffer = wasStacked ? RETURN_BUFFER_PX : COLLISION_BUFFER_PX;
-    const shouldStack = required + buffer > available;
+    const shouldStack = mobileVertical.matches || required + buffer > available;
 
     lockup.classList.toggle(STACKED_CLASS, shouldStack);
     lockup.style.width = shouldStack ? '' : INLINE_WIDTH;
