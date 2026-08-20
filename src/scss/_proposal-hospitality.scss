@@ -1,20 +1,22 @@
 .proposal__hospitality {
   display: flex;
   align-items: center;
-  gap: clamp(20px, 2.4vw, 36px);
+  gap: clamp(18px, 2vw, 28px);
   margin-top: clamp(34px, 4.8vh, 52px);
 }
 
 .proposal__hospitality-logo {
   display: block;
   flex: 0 0 auto;
-  width: clamp(168px, 14vw, 214px);
+  width: clamp(152px, 12.6vw, 196px);
   height: auto;
   aspect-ratio: 244 / 55;
 }
 
 .proposal__hospitality-copy {
   margin: 0;
+  padding-left: clamp(16px, 1.6vw, 22px);
+  border-left: 1px solid rgba(255, 255, 255, 0.36);
   color: #fff;
   font-size: clamp(14px, 1vw, 18px);
   font-weight: 600;
@@ -32,30 +34,32 @@ html.has-proposal-reveal .proposal-reveal--hospitality {
 
 @media (max-width: 720px) {
   .proposal__hospitality {
-    gap: 18px;
+    gap: 16px;
     margin-top: 32px;
   }
 
   .proposal__hospitality-logo {
-    width: clamp(144px, 34vw, 176px);
+    width: clamp(132px, 31vw, 164px);
   }
 
   .proposal__hospitality-copy {
+    padding-left: 14px;
     font-size: clamp(12px, 2.6vw, 15px);
   }
 }
 
 @media (max-width: 620px) {
   .proposal__hospitality {
-    gap: 14px;
+    gap: 12px;
     margin-top: 28px;
   }
 
   .proposal__hospitality-logo {
-    width: clamp(124px, 38vw, 148px);
+    width: clamp(116px, 34vw, 138px);
   }
 
   .proposal__hospitality-copy {
+    padding-left: 12px;
     font-size: clamp(11px, 3.25vw, 13px);
     line-height: 1;
   }
