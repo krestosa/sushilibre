@@ -1,4 +1,4 @@
-name: Deploy latest branch to Pages
+name: Build, archive and deploy latest branch to Pages
 
 on:
   push:
@@ -37,6 +37,50 @@ jobs:
 
       - name: Build static site
         run: npm run clean && npm run build
+
+      - name: Package downloadable static site
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          safe_ref="$(printf '%s' "$GITHUB_REF_NAME" | tr '/ ' '--')"
+          short_sha="${GITHUB_SHA::7}"
+          artifact_name="sushilibre-static-${safe_ref}-${short_sha}"
+          archive="${artifact_name}.zip"
+
+          python3 - "$archive" <<'PY'
+          from pathlib import Path
+          import sys
+          import zipfile
+
+          archive = Path(sys.argv[1])
+          dist = Path('dist')
+
+          if not dist.is_dir():
+              raise SystemExit('dist/ does not exist after build')
+
+          files = sorted(path for path in dist.rglob('*') if path.is_file())
+          if not files:
+              raise SystemExit('dist/ is empty after build')
+
+          with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=6) as output:
+              for path in files:
+                  output.write(path, path.relative_to(dist))
+          PY
+
+          echo "artifact_name=$artifact_name" >> "$GITHUB_OUTPUT"
+          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+          echo "Built artifact from commit $GITHUB_SHA"
+          ls -lh "$archive"
+
+      - name: Upload downloadable static ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.artifact_name }}
+          path: ${{ steps.package.outputs.archive }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
