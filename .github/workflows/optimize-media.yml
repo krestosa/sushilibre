@@ -5,10 +5,6 @@ on:
     branches:
       - global
     paths:
-      - 'dist/assets/bg_inicio.mp4'
-      - 'dist/assets/bg_loop.mp4'
-      - 'dist/fonts/**'
-      - 'src/scss/_fonts.scss'
       - '.github/workflows/optimize-media.yml'
   workflow_dispatch:
 
@@ -40,37 +36,55 @@ jobs:
           fi
           ffmpeg -version | head -n 1
 
-      - name: Optimize hero videos and font payload
+      - name: Rebuild stable hero encodes from originals
         shell: bash
         run: |
           set -euo pipefail
 
+          SOURCE_COMMIT='32ebbc7fe701d421ea494de0892b7e5771cd31d6'
+
           optimize_video() {
             local input="$1"
+            local source="${input%.mp4}.source.mp4"
             local output="${input%.mp4}.optimized.mp4"
-            local before_size after_size before_dim after_dim before_duration after_duration
+            local before_size after_size before_dim after_dim before_duration after_duration before_rate after_rate
 
-            before_size="$(stat -c%s "$input")"
-            before_dim="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "$input")"
-            before_duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$input")"
+            git show "${SOURCE_COMMIT}:${input}" > "$source"
+
+            before_size="$(stat -c%s "$source")"
+            before_dim="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "$source")"
+            before_rate="$(ffprobe -v error -select_streams v:0 -show_entries stream=avg_frame_rate -of default=nw=1:nk=1 "$source")"
+            before_duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$source")"
 
             ffmpeg -hide_banner -loglevel error -y \
-              -i "$input" \
+              -i "$source" \
               -map 0:v:0 \
               -c:v libx264 \
-              -preset slow \
-              -crf 24 \
+              -preset medium \
+              -crf 20 \
+              -profile:v main \
               -pix_fmt yuv420p \
+              -g 60 \
+              -keyint_min 30 \
+              -sc_threshold 0 \
+              -refs 2 \
+              -bf 2 \
               -movflags +faststart \
               -an \
               "$output"
 
             after_size="$(stat -c%s "$output")"
             after_dim="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "$output")"
+            after_rate="$(ffprobe -v error -select_streams v:0 -show_entries stream=avg_frame_rate -of default=nw=1:nk=1 "$output")"
             after_duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$output")"
 
             if [[ "$before_dim" != "$after_dim" ]]; then
               echo "Resolution changed for $input: $before_dim -> $after_dim" >&2
+              exit 1
+            fi
+
+            if [[ "$before_rate" != "$after_rate" ]]; then
+              echo "Frame rate changed for $input: $before_rate -> $after_rate" >&2
               exit 1
             fi
 
@@ -84,9 +98,15 @@ jobs:
               raise SystemExit(f"Duration changed for {name}: {before:.3f}s -> {after:.3f}s")
           PY
 
-            if (( after_size < before_size )); then
-              mv "$output" "$input"
-              python3 - "$input" "$before_size" "$after_size" <<'PY'
+            if (( after_size >= before_size )); then
+              echo "Stable encode is not smaller for $input; refusing replacement." >&2
+              exit 1
+            fi
+
+            mv "$output" "$input"
+            rm -f "$source"
+
+            python3 - "$input" "$before_size" "$after_size" <<'PY'
           import sys
           name = sys.argv[1]
           before = int(sys.argv[2])
@@ -94,41 +114,29 @@ jobs:
           reduction = (1 - after / before) * 100
           print(f"{name}: {before / 1048576:.2f} MiB -> {after / 1048576:.2f} MiB ({reduction:.1f}% smaller)")
           PY
-            else
-              rm -f "$output"
-              echo "$input: optimized encode was not smaller; keeping original"
-            fi
           }
 
           optimize_video dist/assets/bg_inicio.mp4
           optimize_video dist/assets/bg_loop.mp4
 
-          find dist/fonts -maxdepth 1 -type f -name 'Gazzetta *.otf' \
-            ! -name 'Gazzetta Bold.otf' \
-            ! -name 'Gazzetta ExtraBold.otf' \
-            ! -name 'Gazzetta Black.otf' \
-            -delete
-
-          echo 'Remaining Gazzetta files:'
-          find dist/fonts -maxdepth 1 -type f -name 'Gazzetta *.otf' -printf '%f\n' | sort
-
       - name: Verify build
         run: |
           npm ci --no-audit --no-fund
           npm run build
+          npm test
 
-      - name: Commit optimized payload
+      - name: Commit stable video payload
         shell: bash
         run: |
           set -euo pipefail
-          git add dist/assets/bg_inicio.mp4 dist/assets/bg_loop.mp4 dist/fonts
+          git add dist/assets/bg_inicio.mp4 dist/assets/bg_loop.mp4
 
           if git diff --cached --quiet; then
-            echo 'No media/font binary changes to commit.'
+            echo 'No video changes to commit.'
             exit 0
           fi
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Optimize fonts and video payload'
+          git commit -m 'Re-encode hero videos for stable playback'
           git push origin HEAD:global
