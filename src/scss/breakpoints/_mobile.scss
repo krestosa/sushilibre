@@ -160,7 +160,7 @@
       right: -16px;
       bottom: -34px;
       left: -16px;
-      opacity: 0;
+      opacity: 1;
       pointer-events: none;
       background: linear-gradient(
         180deg,
@@ -170,11 +170,6 @@
         rgba(0, 0, 0, 0.34) 84%,
         rgba(0, 0, 0, 0) 100%
       );
-      transition: opacity 170ms ease-out;
-    }
-
-    &.is-overlapping::before {
-      opacity: 1;
     }
   }
 
