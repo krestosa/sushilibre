@@ -1,11 +1,12 @@
 import { query } from '../shared/dom';
-import { addScrollListener, getScrollY } from '../shared/scroll-root';
+import { addScrollListener, getMaxScrollY, getScrollY } from '../shared/scroll-root';
 
 type CountdownKey = 'days' | 'hours' | 'minutes' | 'seconds';
 
 const keys: CountdownKey[] = ['days', 'hours', 'minutes', 'seconds'];
 const target = new Date('2026-09-03T20:00:00-03:00').getTime();
 const FINAL_CTA_DOCK_CLEARANCE_PX = 8;
+const FINAL_CTA_MOBILE_END_GUARD_PX = 48;
 const DOCK_FADE_MS = 170;
 
 const replaceCtaLabel = (label: HTMLElement, firstLine: string, secondLine: string): void => {
@@ -24,6 +25,7 @@ export const setupCountdown = (): void => {
   const menu = query<HTMLElement>('#menu');
   const finalMenuCtaAction = query<HTMLElement>('.menu-final-cta__action');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const mobileFinalCta = window.matchMedia('(max-width: 720px)');
   let menuMode = false;
   let finalMenuCtaActionPassedDock = false;
   let finalMenuCtaTriggerScrollY = Number.POSITIVE_INFINITY;
@@ -95,10 +97,21 @@ export const setupCountdown = (): void => {
     const scrollY = getScrollY();
     const actionRect = finalMenuCtaAction.getBoundingClientRect();
     const dockRect = dock.getBoundingClientRect();
-    finalMenuCtaTriggerScrollY = Math.max(
+    const overlapTrigger = Math.max(
       0,
       scrollY + actionRect.bottom - dockRect.top + FINAL_CTA_DOCK_CLEARANCE_PX
     );
+
+    // En mobile el CTA puede quedar centrado por encima del dock en pantallas altas.
+    // El guard mantiene alcanzable el colapso antes de la posición final del scroll.
+    const endGuardTrigger = Math.max(
+      0,
+      getMaxScrollY() - FINAL_CTA_MOBILE_END_GUARD_PX
+    );
+
+    finalMenuCtaTriggerScrollY = mobileFinalCta.matches
+      ? Math.min(overlapTrigger, endGuardTrigger)
+      : overlapTrigger;
     syncFinalMenuCtaActionPosition();
   };
 
@@ -112,8 +125,12 @@ export const setupCountdown = (): void => {
     const removeScrollListener = addScrollListener(syncFinalMenuCtaActionPosition);
     window.addEventListener('resize', scheduleFinalMenuCtaTriggerMeasurement, { passive: true });
     window.addEventListener('orientationchange', scheduleFinalMenuCtaTriggerMeasurement, { passive: true });
+    mobileFinalCta.addEventListener('change', scheduleFinalMenuCtaTriggerMeasurement);
     document.fonts.ready.then(scheduleFinalMenuCtaTriggerMeasurement).catch(() => undefined);
-    window.addEventListener('pagehide', removeScrollListener, { once: true });
+    window.addEventListener('pagehide', () => {
+      removeScrollListener();
+      mobileFinalCta.removeEventListener('change', scheduleFinalMenuCtaTriggerMeasurement);
+    }, { once: true });
   }
 
   const handleMenuClick = (event: MouseEvent): void => {
