@@ -4,8 +4,21 @@
   }
 
   .menu-final-cta {
-    height: auto;
+    --final-cta-content-top: calc(var(--cta-meta-line) + clamp(8px, 1.8svh, 16px));
+    --final-cta-dock-reserve: calc(112px + var(--dock-bottom) + 8px);
+
+    box-sizing: border-box;
+    height: calc(100svh - var(--menu-marquee-height));
     min-height: 0;
-    padding-bottom: calc(var(--dock-height) + var(--dock-bottom) + 12px);
+    justify-content: center !important;
+    gap: clamp(12px, 2.6svh, 22px) !important;
+    padding:
+      var(--final-cta-content-top)
+      var(--cta-x)
+      var(--final-cta-dock-reserve) !important;
+  }
+
+  html.event-live .menu-final-cta {
+    --final-cta-dock-reserve: calc(64px + var(--dock-bottom) + 8px);
   }
 }
