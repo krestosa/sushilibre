@@ -1,0 +1,62 @@
+.proposal__hospitality {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 2.4vw, 36px);
+  margin-top: clamp(34px, 4.8vh, 52px);
+}
+
+.proposal__hospitality-logo {
+  display: block;
+  flex: 0 0 auto;
+  width: clamp(168px, 14vw, 214px);
+  height: auto;
+  aspect-ratio: 244 / 55;
+}
+
+.proposal__hospitality-copy {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(14px, 1vw, 18px);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+html.has-proposal-reveal .proposal-reveal--hospitality {
+  --proposal-reveal-distance: 10px;
+  --proposal-reveal-duration: 420ms;
+}
+
+@media (max-width: 720px) {
+  .proposal__hospitality {
+    gap: 18px;
+    margin-top: 32px;
+  }
+
+  .proposal__hospitality-logo {
+    width: clamp(144px, 34vw, 176px);
+  }
+
+  .proposal__hospitality-copy {
+    font-size: clamp(12px, 2.6vw, 15px);
+  }
+}
+
+@media (max-width: 620px) {
+  .proposal__hospitality {
+    gap: 14px;
+    margin-top: 28px;
+  }
+
+  .proposal__hospitality-logo {
+    width: clamp(124px, 38vw, 148px);
+  }
+
+  .proposal__hospitality-copy {
+    font-size: clamp(11px, 3.25vw, 13px);
+    line-height: 1;
+  }
+}

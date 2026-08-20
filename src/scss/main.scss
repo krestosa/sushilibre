@@ -11,6 +11,7 @@
 @use "motion";
 @use "proposal";
 @use "proposal-motion";
+@use "proposal-hospitality";
 
 // Herencia responsive: desktop define la base, tablet la modifica y mobile cierra la cascada.
 @use "breakpoints/desktop";
