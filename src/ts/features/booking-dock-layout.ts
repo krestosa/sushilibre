@@ -10,9 +10,9 @@ export const setupBookingDockLayout = (): void => {
   const metadata = queryAll<HTMLElement>('.booking-dock__meta');
   const countdown = query<HTMLElement>('.countdown');
   const cta = query<HTMLElement>('.booking-dock__cta');
-  const [venueMeta, dateMeta, timeMeta] = metadata;
+  const [venueMeta, dateMeta, timeMeta, capacityMeta] = metadata;
 
-  if (!dock || !venueMeta || !dateMeta || !timeMeta || !countdown || !cta) return;
+  if (!dock || !venueMeta || !dateMeta || !timeMeta || !capacityMeta || !countdown || !cta) return;
 
   const mobileQuery = window.matchMedia(MOBILE_QUERY);
   const compactQuery = window.matchMedia(COMPACT_QUERY);
@@ -23,7 +23,7 @@ export const setupBookingDockLayout = (): void => {
   let scheduledFrame = 0;
 
   const placeMetadata = ({ row, padding }: { row: string; padding: string }): void => {
-    const placements = [venueMeta, dateMeta, timeMeta];
+    const placements = [venueMeta, dateMeta, timeMeta, capacityMeta];
 
     placements.forEach((item, index) => {
       item.style.gridColumn = String(index + 1);
@@ -46,28 +46,31 @@ export const setupBookingDockLayout = (): void => {
   const applySingleRowLayout = ({
     width,
     suppressedWidth,
+    countdownTrack,
     ctaWidth,
     ctaSuppressed,
     metaGap
   }: {
     width: string;
     suppressedWidth: string;
+    countdownTrack: string;
     ctaWidth: string;
     ctaSuppressed: boolean;
     metaGap: string;
   }): void => {
     dock.style.width = ctaSuppressed ? suppressedWidth : width;
+    dock.style.setProperty('--dock-countdown-track', countdownTrack);
     dock.style.setProperty('--dock-cta-track', ctaSuppressed ? '0px' : ctaWidth);
-    dock.style.gridTemplateColumns = `max-content max-content max-content minmax(0, 1fr) var(--dock-cta-track)`;
+    dock.style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr)) var(--dock-countdown-track) var(--dock-cta-track)';
     dock.style.gridTemplateRows = 'minmax(0, 1fr)';
     dock.style.columnGap = metaGap;
     dock.style.rowGap = '0';
 
     placeMetadata({ row: '1', padding: '0 4px' });
-    countdown.style.gridColumn = '4';
+    countdown.style.gridColumn = '5';
     countdown.style.gridRow = '1';
     styleCountdownBoundary(true);
-    cta.style.gridColumn = '5';
+    cta.style.gridColumn = '6';
     cta.style.gridRow = '1';
   };
 
@@ -82,7 +85,7 @@ export const setupBookingDockLayout = (): void => {
   }): void => {
     dock.style.width = width;
     dock.style.setProperty('--dock-cta-track', ctaWidth);
-    dock.style.gridTemplateColumns = `max-content max-content max-content var(--dock-cta-track)`;
+    dock.style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr)) var(--dock-cta-track)';
     dock.style.gridTemplateRows = 'minmax(0, 1fr)';
     dock.style.columnGap = metaGap;
     dock.style.rowGap = '0';
@@ -91,14 +94,14 @@ export const setupBookingDockLayout = (): void => {
     countdown.style.gridColumn = '';
     countdown.style.gridRow = '';
     styleCountdownBoundary(false);
-    cta.style.gridColumn = '4';
+    cta.style.gridColumn = '5';
     cta.style.gridRow = '1';
   };
 
   const applyDesktopLayout = (eventLive: boolean, ctaSuppressed: boolean): void => {
     if (eventLive) {
       applyEventLiveSingleRowLayout({
-        width: 'min(680px, calc(100vw - 48px))',
+        width: 'min(800px, calc(100vw - 48px))',
         ctaWidth: '108px',
         metaGap: '20px'
       });
@@ -106,8 +109,9 @@ export const setupBookingDockLayout = (): void => {
     }
 
     applySingleRowLayout({
-      width: 'min(960px, calc(100vw - 48px))',
-      suppressedWidth: 'min(760px, calc(100vw - 96px))',
+      width: 'min(1080px, calc(100vw - 48px))',
+      suppressedWidth: 'min(960px, calc(100vw - 96px))',
+      countdownTrack: '300px',
       ctaWidth: '108px',
       ctaSuppressed,
       metaGap: '20px'
@@ -125,8 +129,9 @@ export const setupBookingDockLayout = (): void => {
     }
 
     applySingleRowLayout({
-      width: 'min(740px, calc(100vw - 32px))',
-      suppressedWidth: 'min(620px, calc(100vw - 64px))',
+      width: 'min(900px, calc(100vw - 32px))',
+      suppressedWidth: 'min(780px, calc(100vw - 64px))',
+      countdownTrack: 'minmax(210px, 2fr)',
       ctaWidth: '104px',
       ctaSuppressed,
       metaGap: '14px'
