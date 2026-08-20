@@ -14,6 +14,15 @@ export const getViewportHeight = (): number => (
   usesAppScrollRoot() && page ? page.clientHeight : window.innerHeight
 );
 
+export const getMaxScrollY = (): number => {
+  if (usesAppScrollRoot() && page) {
+    return Math.max(0, page.scrollHeight - page.clientHeight);
+  }
+
+  const scrollRoot = document.scrollingElement ?? document.documentElement;
+  return Math.max(0, scrollRoot.scrollHeight - window.innerHeight);
+};
+
 export const addScrollListener = (listener: EventListener): (() => void) => {
   const options: AddEventListenerOptions = { passive: true };
   window.addEventListener('scroll', listener, options);
