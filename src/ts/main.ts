@@ -1,3 +1,4 @@
+import './features/booking-dock-capacity';
 import './application';
 import './dock-reveal';
 import './menu-bootstrap';
