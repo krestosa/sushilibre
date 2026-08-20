@@ -1,11 +1,6 @@
 name: Optimize media payload
 
 on:
-  push:
-    branches:
-      - global
-    paths:
-      - '.github/workflows/optimize-media.yml'
   workflow_dispatch:
 
 permissions:
@@ -105,15 +100,6 @@ jobs:
 
             mv "$output" "$input"
             rm -f "$source"
-
-            python3 - "$input" "$before_size" "$after_size" <<'PY'
-          import sys
-          name = sys.argv[1]
-          before = int(sys.argv[2])
-          after = int(sys.argv[3])
-          reduction = (1 - after / before) * 100
-          print(f"{name}: {before / 1048576:.2f} MiB -> {after / 1048576:.2f} MiB ({reduction:.1f}% smaller)")
-          PY
           }
 
           optimize_video dist/assets/bg_inicio.mp4
