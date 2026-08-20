@@ -13,7 +13,8 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
   const sentinel = firstGroup
     ? query<HTMLElement>('.menu-group__overlap-sentinel', firstGroup)
     : null;
-  if (!firstGroup || !shadowHost || !heading || !sentinel) return;
+  const menuSection = shadowHost?.closest<HTMLElement>('.menu-section') ?? null;
+  if (!firstGroup || !shadowHost || !heading || !sentinel || !menuSection) return;
 
   const mobileQuery = window.matchMedia('(max-width: 720px)');
   let updateFrame = 0;
@@ -22,6 +23,7 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
 
   const clearShadowProgress = (): void => {
     shadowHost.style.removeProperty('--menu-sticky-shadow-progress');
+    shadowHost.style.removeProperty('--menu-sticky-shadow-clip-bottom');
   };
 
   const updateOverlapState = (): void => {
@@ -31,22 +33,35 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
     const groupBounds = firstGroup.getBoundingClientRect();
     const headingBounds = heading.getBoundingClientRect();
     const sentinelBounds = sentinel.getBoundingClientRect();
+    const menuBounds = menuSection.getBoundingClientRect();
     const groupStyle = window.getComputedStyle(firstGroup);
     const headingStyle = window.getComputedStyle(heading);
+    const shadowStyle = window.getComputedStyle(shadowHost, '::before');
     const groupPaddingTop = Number.parseFloat(groupStyle.paddingTop) || 0;
     const stickyTop = Number.parseFloat(headingStyle.top) || 0;
+    const shadowHeight = Number.parseFloat(shadowStyle.height) || 0;
     const naturalHeadingTop = groupBounds.top + groupPaddingTop;
     const overlaps = sentinelBounds.top <= headingBounds.bottom;
     const shadowProgress = clamp01(
       (stickyTop - naturalHeadingTop) / SHADOW_FADE_DISTANCE_PX
     );
 
+    const visibleShadowHeight = Math.max(
+      0,
+      Math.min(shadowHeight, menuBounds.bottom + 1)
+    );
+    const clipBottom = Math.max(0, shadowHeight - visibleShadowHeight);
+
+    shadowHost.style.setProperty(
+      '--menu-sticky-shadow-clip-bottom',
+      `${clipBottom.toFixed(2)}px`
+    );
+
     // El primer umbral sticky controla una única sombra fija para todo el menú.
-    // Al bajar, una vez alcanzado el valor 1 no existe ningún reset por cambio
-    // de categoría. Al volver hacia arriba, la misma geometría invierte el fade
-    // únicamente cuando el primer heading abandona el sticky.
+    // El recorte inferior sigue el borde real de la sección para impedir que la
+    // sombra invada el marquee o cualquier contenido posterior al menú.
     if (!overlaps && shadowProgress === 0) {
-      clearShadowProgress();
+      shadowHost.style.removeProperty('--menu-sticky-shadow-progress');
       return;
     }
 
