@@ -1,0 +1,11 @@
+@media (max-width: 720px) {
+  .menu-section__shell {
+    padding-bottom: 0;
+  }
+
+  .menu-final-cta {
+    height: auto;
+    min-height: 0;
+    padding-bottom: calc(var(--dock-height) + var(--dock-bottom) + 12px);
+  }
+}
