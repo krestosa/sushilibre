@@ -8,15 +8,17 @@
 
 @media (min-width: 1101px) {
   .booking-dock:not(.is-cta-collapsed) {
+    --dock-countdown-track: 300px;
     width: min(1080px, calc(100vw - 48px)) !important;
     grid-template-columns:
-      repeat(4, minmax(104px, 1fr))
-      minmax(260px, 2.2fr)
+      repeat(4, minmax(0, 1fr))
+      var(--dock-countdown-track)
       var(--dock-cta-track) !important;
   }
 
   .booking-dock:not(.is-cta-collapsed) .booking-dock__meta {
     width: 100% !important;
+    min-width: 0 !important;
     justify-self: stretch !important;
   }
 
@@ -38,6 +40,8 @@
 
   .booking-dock:not(.is-event-live) .countdown {
     grid-column: 5 !important;
+    width: 100%;
+    min-width: 0;
   }
 
   .booking-dock__cta {
@@ -46,7 +50,7 @@
 
   .booking-dock.is-event-live:not(.is-cta-collapsed) {
     grid-template-columns:
-      repeat(4, minmax(104px, 1fr))
+      repeat(4, minmax(0, 1fr))
       var(--dock-cta-track) !important;
   }
 
