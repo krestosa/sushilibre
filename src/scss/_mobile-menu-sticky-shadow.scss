@@ -1,6 +1,7 @@
 @media (max-width: 720px) {
   .menu-section__groups {
     --menu-sticky-shadow-progress: 0;
+    --menu-sticky-shadow-clip-bottom: 0px;
   }
 
   .menu-section__groups::before {
@@ -12,6 +13,7 @@
     left: 0;
     height: clamp(132px, 34vw, 176px);
     opacity: var(--menu-sticky-shadow-progress);
+    clip-path: inset(0 0 var(--menu-sticky-shadow-clip-bottom) 0);
     pointer-events: none;
     background: linear-gradient(
       180deg,
