@@ -22,7 +22,8 @@ test('mobile menu shadow is driven only by sticky progress and reverses continuo
     /const exitProgress = clamp01\([\s\S]*?headingBounds\.top - stickyTop \+ SHADOW_FADE_DISTANCE_PX/
   );
   assert.match(observers, /const overlaps = sentinelBounds\.top <= headingBounds\.bottom/);
-  assert.match(observers, /const stickyProgress = Math\.min\(enterProgress, exitProgress\)/);
+  assert.match(observers, /const shadowProgress = Math\.min\(enterProgress, exitProgress\)/);
+  assert.match(observers, /if \(!overlaps && shadowProgress === 0\)/);
   assert.match(observers, /--menu-heading-shadow-progress/);
   assert.match(observers, /addScrollListener\(scheduleUpdate\)/);
   assert.doesNotMatch(observers, /classList\.toggle\('is-overlapping'/);

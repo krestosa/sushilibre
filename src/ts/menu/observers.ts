@@ -56,10 +56,12 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
       );
 
       const overlaps = sentinelBounds.top <= headingBounds.bottom;
-      const stickyProgress = Math.min(enterProgress, exitProgress);
-      const shadowProgress = overlaps && enterProgress > 0
-        ? exitProgress
-        : stickyProgress;
+      const shadowProgress = Math.min(enterProgress, exitProgress);
+
+      if (!overlaps && shadowProgress === 0) {
+        heading.style.removeProperty('--menu-heading-shadow-progress');
+        return;
+      }
 
       heading.style.setProperty(
         '--menu-heading-shadow-progress',
