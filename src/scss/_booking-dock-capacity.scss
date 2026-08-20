@@ -1,0 +1,166 @@
+.booking-dock::after {
+  content: none !important;
+}
+
+.booking-dock__meta--capacity {
+  min-width: 0;
+}
+
+@media (min-width: 1101px) {
+  .booking-dock:not(.is-cta-collapsed) {
+    width: min(1080px, calc(100vw - 48px)) !important;
+    grid-template-columns:
+      repeat(4, minmax(104px, 1fr))
+      minmax(260px, 2.2fr)
+      var(--dock-cta-track) !important;
+  }
+
+  .booking-dock:not(.is-cta-collapsed) .booking-dock__meta {
+    width: 100% !important;
+    justify-self: stretch !important;
+  }
+
+  .booking-dock__meta--location {
+    grid-column: 1 !important;
+  }
+
+  .booking-dock__meta:not(.booking-dock__meta--location):not(.booking-dock__meta--time):not(.booking-dock__meta--capacity) {
+    grid-column: 2 !important;
+  }
+
+  .booking-dock__meta--time {
+    grid-column: 3 !important;
+  }
+
+  .booking-dock__meta--capacity {
+    grid-column: 4 !important;
+  }
+
+  .booking-dock:not(.is-event-live) .countdown {
+    grid-column: 5 !important;
+  }
+
+  .booking-dock__cta {
+    grid-column: 6 !important;
+  }
+
+  .booking-dock.is-event-live:not(.is-cta-collapsed) {
+    grid-template-columns:
+      repeat(4, minmax(104px, 1fr))
+      var(--dock-cta-track) !important;
+  }
+
+  .booking-dock.is-event-live .booking-dock__cta {
+    grid-column: 5 !important;
+  }
+}
+
+@media (min-width: 841px) and (max-width: 1100px) {
+  .booking-dock:not(.is-cta-collapsed) {
+    width: min(900px, calc(100vw - 32px)) !important;
+    grid-template-columns:
+      repeat(4, minmax(82px, 1fr))
+      minmax(210px, 2fr)
+      var(--dock-cta-track) !important;
+  }
+
+  .booking-dock:not(.is-cta-collapsed) .booking-dock__meta {
+    width: 100% !important;
+    justify-self: stretch !important;
+  }
+
+  .booking-dock__meta--location {
+    grid-column: 1 !important;
+  }
+
+  .booking-dock__meta:not(.booking-dock__meta--location):not(.booking-dock__meta--time):not(.booking-dock__meta--capacity) {
+    grid-column: 2 !important;
+  }
+
+  .booking-dock__meta--time {
+    grid-column: 3 !important;
+  }
+
+  .booking-dock__meta--capacity {
+    grid-column: 4 !important;
+  }
+
+  .booking-dock:not(.is-event-live) .countdown {
+    grid-column: 5 !important;
+  }
+
+  .booking-dock__cta {
+    grid-column: 6 !important;
+  }
+
+  .booking-dock.is-event-live:not(.is-cta-collapsed) {
+    grid-template-columns:
+      repeat(4, minmax(82px, 1fr))
+      var(--dock-cta-track) !important;
+  }
+
+  .booking-dock.is-event-live .booking-dock__cta {
+    grid-column: 5 !important;
+  }
+}
+
+@media (max-width: 840px) {
+  .booking-dock:not(.is-cta-collapsed) .booking-dock__meta {
+    grid-row: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-self: stretch !important;
+    padding: 0 2px !important;
+  }
+
+  .booking-dock:not(.is-event-live):not(.is-cta-collapsed) {
+    grid-template-columns:
+      max-content max-content max-content minmax(0, 1fr)
+      var(--dock-cta-track) !important;
+    grid-template-rows: 48px 96px !important;
+  }
+
+  .booking-dock__meta--location {
+    grid-column: 1 !important;
+  }
+
+  .booking-dock__meta:not(.booking-dock__meta--location):not(.booking-dock__meta--time):not(.booking-dock__meta--capacity) {
+    grid-column: 2 !important;
+  }
+
+  .booking-dock__meta--time {
+    grid-column: 3 !important;
+  }
+
+  .booking-dock:not(.is-event-live) .booking-dock__meta--capacity {
+    grid-column: 4 / 6 !important;
+    padding-left: 12px !important;
+  }
+
+  .booking-dock:not(.is-event-live) .countdown {
+    grid-column: 1 / span 4 !important;
+    grid-row: 2 !important;
+  }
+
+  .booking-dock:not(.is-event-live) .booking-dock__cta {
+    grid-column: 5 !important;
+    grid-row: 2 !important;
+  }
+
+  .booking-dock.is-event-live:not(.is-cta-collapsed) {
+    grid-template-columns:
+      max-content max-content max-content minmax(0, 1fr)
+      var(--dock-cta-track) !important;
+    grid-template-rows: 48px !important;
+  }
+
+  .booking-dock.is-event-live .booking-dock__meta--capacity {
+    grid-column: 4 !important;
+    padding-left: 12px !important;
+  }
+
+  .booking-dock.is-event-live .booking-dock__cta {
+    grid-column: 5 !important;
+    grid-row: 1 !important;
+  }
+}
