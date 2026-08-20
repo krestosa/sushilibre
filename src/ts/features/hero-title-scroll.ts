@@ -1,4 +1,5 @@
 import { query } from '../shared/dom';
+import { addScrollListener, getScrollY, getViewportHeight } from '../shared/scroll-root';
 
 const clamp = (n: number): number => Math.max(0, Math.min(1, n));
 const ease = (n: number): number => n * n * (3 - 2 * n);
@@ -86,15 +87,15 @@ export const setupHeroTitleScroll = (): void => {
     const safeGap = mobile ? 30 : tablet ? 26 : 30;
     copyShiftY = copy ? Math.max(0, kickerBottom + safeGap - copy.top) : 0;
 
-    heroTop = window.scrollY + h.top;
-    const height = Math.max(hero.offsetHeight, window.innerHeight);
+    heroTop = getScrollY() + h.top;
+    const height = Math.max(hero.offsetHeight, getViewportHeight());
     start = height * (mobile ? 0.004 : tablet ? 0.006 : 0.01);
     distance = height * (mobile ? 0.15 : tablet ? 0.17 : 0.23);
   };
 
   const render = (): void => {
     frame = 0;
-    const raw = clamp((window.scrollY - heroTop - start) / distance);
+    const raw = clamp((getScrollY() - heroTop - start) / distance);
     const p = ease(raw);
     const scale = 1 + (finalScale - 1) * p;
 
@@ -119,7 +120,7 @@ export const setupHeroTitleScroll = (): void => {
     }
   };
 
-  const scheduleRender = (): void => {
+  const scheduleRender: EventListener = () => {
     if (frame) return;
     frame = window.requestAnimationFrame(render);
   };
@@ -131,7 +132,7 @@ export const setupHeroTitleScroll = (): void => {
     });
   };
 
-  window.addEventListener('scroll', scheduleRender, { passive: true });
+  addScrollListener(scheduleRender);
   window.addEventListener('resize', refresh, { passive: true });
   window.addEventListener('orientationchange', refresh, { passive: true });
   document.fonts.ready.then(refresh).catch(() => undefined);
