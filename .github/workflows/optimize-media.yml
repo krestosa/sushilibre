@@ -1,0 +1,134 @@
+name: Optimize media payload
+
+on:
+  push:
+    branches:
+      - global
+    paths:
+      - 'dist/assets/bg_inicio.mp4'
+      - 'dist/assets/bg_loop.mp4'
+      - 'dist/fonts/**'
+      - 'src/scss/_fonts.scss'
+      - '.github/workflows/optimize-media.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: optimize-media-global
+  cancel-in-progress: false
+
+jobs:
+  optimize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout global
+        uses: actions/checkout@v6
+        with:
+          ref: global
+          fetch-depth: 0
+
+      - name: Install ffmpeg
+        shell: bash
+        run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+
+      - name: Optimize hero videos and font payload
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          optimize_video() {
+            local input="$1"
+            local output="${input%.mp4}.optimized.mp4"
+            local before_size after_size before_dim after_dim before_duration after_duration
+
+            before_size="$(stat -c%s "$input")"
+            before_dim="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "$input")"
+            before_duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$input")"
+
+            ffmpeg -hide_banner -loglevel error -y \
+              -i "$input" \
+              -map 0:v:0 \
+              -c:v libx264 \
+              -preset slow \
+              -crf 24 \
+              -pix_fmt yuv420p \
+              -movflags +faststart \
+              -an \
+              "$output"
+
+            after_size="$(stat -c%s "$output")"
+            after_dim="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "$output")"
+            after_duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$output")"
+
+            if [[ "$before_dim" != "$after_dim" ]]; then
+              echo "Resolution changed for $input: $before_dim -> $after_dim" >&2
+              exit 1
+            fi
+
+            python3 - "$before_duration" "$after_duration" "$input" <<'PY'
+          import math
+          import sys
+          before = float(sys.argv[1])
+          after = float(sys.argv[2])
+          name = sys.argv[3]
+          if not math.isfinite(before) or not math.isfinite(after) or abs(before - after) > 0.15:
+              raise SystemExit(f"Duration changed for {name}: {before:.3f}s -> {after:.3f}s")
+          PY
+
+            if (( after_size < before_size )); then
+              mv "$output" "$input"
+              python3 - "$input" "$before_size" "$after_size" <<'PY'
+          import sys
+          name = sys.argv[1]
+          before = int(sys.argv[2])
+          after = int(sys.argv[3])
+          reduction = (1 - after / before) * 100
+          print(f"{name}: {before / 1048576:.2f} MiB -> {after / 1048576:.2f} MiB ({reduction:.1f}% smaller)")
+          PY
+            else
+              rm -f "$output"
+              echo "$input: optimized encode was not smaller; keeping original"
+            fi
+          }
+
+          optimize_video dist/assets/bg_inicio.mp4
+          optimize_video dist/assets/bg_loop.mp4
+
+          find dist/fonts -maxdepth 1 -type f -name 'Gazzetta *.otf' \
+            ! -name 'Gazzetta Bold.otf' \
+            ! -name 'Gazzetta ExtraBold.otf' \
+            ! -name 'Gazzetta Black.otf' \
+            -delete
+
+          echo 'Remaining Gazzetta files:'
+          find dist/fonts -maxdepth 1 -type f -name 'Gazzetta *.otf' -printf '%f\n' | sort
+
+      - name: Verify build
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - name: Commit optimized payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add dist/assets/bg_inicio.mp4 dist/assets/bg_loop.mp4 dist/fonts
+
+          if git diff --cached --quiet; then
+            echo 'No media/font binary changes to commit.'
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Optimize fonts and video payload'
+          git push origin HEAD:global
