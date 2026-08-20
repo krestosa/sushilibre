@@ -1,30 +1,30 @@
 @media (max-width: 720px) {
   .menu-section__groups {
-    --menu-sticky-shadow-height: clamp(132px, 34vw, 176px);
     --menu-sticky-shadow-progress: 0;
   }
 
   .menu-section__groups::before {
     content: "";
-    position: sticky;
+    position: fixed;
     z-index: 9;
     top: -1px;
-    display: block;
-    width: calc(100% + 32px);
-    height: var(--menu-sticky-shadow-height);
-    margin-right: -16px;
-    margin-bottom: calc(-1 * var(--menu-sticky-shadow-height));
-    margin-left: -16px;
+    right: 0;
+    left: 0;
+    height: clamp(132px, 34vw, 176px);
     opacity: var(--menu-sticky-shadow-progress);
     pointer-events: none;
     background: linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.97) 0%,
-      rgba(0, 0, 0, 0.93) 48%,
-      rgba(0, 0, 0, 0.72) 68%,
-      rgba(0, 0, 0, 0.34) 84%,
+      rgba(0, 0, 0, 0.99) 0%,
+      rgba(0, 0, 0, 0.96) 44%,
+      rgba(0, 0, 0, 0.78) 66%,
+      rgba(0, 0, 0, 0.38) 84%,
       rgba(0, 0, 0, 0) 100%
     );
+  }
+
+  .menu-group__heading {
+    z-index: 10;
   }
 
   .menu-group__heading::before {

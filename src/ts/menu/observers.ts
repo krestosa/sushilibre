@@ -2,7 +2,6 @@ import { query } from '../shared/dom';
 import { addScrollListener } from '../shared/scroll-root';
 
 const SHADOW_FADE_DISTANCE_PX = 36;
-const STICKY_EPSILON_PX = 0.75;
 const clamp01 = (value: number): number => Math.max(0, Math.min(1, value));
 
 export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
@@ -37,18 +36,16 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
     const groupPaddingTop = Number.parseFloat(groupStyle.paddingTop) || 0;
     const stickyTop = Number.parseFloat(headingStyle.top) || 0;
     const naturalHeadingTop = groupBounds.top + groupPaddingTop;
-    const hasReachedSticky = headingBounds.top <= stickyTop + STICKY_EPSILON_PX;
-    const stickyDepth = Math.max(0, stickyTop - naturalHeadingTop);
-    const shadowProgress = hasReachedSticky
-      ? clamp01(stickyDepth / SHADOW_FADE_DISTANCE_PX)
-      : 0;
     const overlaps = sentinelBounds.top <= headingBounds.bottom;
+    const shadowProgress = clamp01(
+      (stickyTop - naturalHeadingTop) / SHADOW_FADE_DISTANCE_PX
+    );
 
-    // La sombra pertenece al rail sticky completo, no a cada heading. Una vez
-    // que el primer título activa el sticky permanece encendida durante todos
-    // los handoffs de categorías y sólo se desvanece al volver por encima del
-    // umbral inicial.
-    if (!hasReachedSticky && !overlaps && shadowProgress === 0) {
+    // El primer umbral sticky controla una única sombra fija para todo el menú.
+    // Al bajar, una vez alcanzado el valor 1 no existe ningún reset por cambio
+    // de categoría. Al volver hacia arriba, la misma geometría invierte el fade
+    // únicamente cuando el primer heading abandona el sticky.
+    if (!overlaps && shadowProgress === 0) {
       clearShadowProgress();
       return;
     }
