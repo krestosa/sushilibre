@@ -13,8 +13,7 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
   const sentinel = firstGroup
     ? query<HTMLElement>('.menu-group__overlap-sentinel', firstGroup)
     : null;
-  const menuSection = shadowHost?.closest<HTMLElement>('.menu-section') ?? null;
-  if (!firstGroup || !shadowHost || !heading || !sentinel || !menuSection) return;
+  if (!firstGroup || !shadowHost || !heading || !sentinel) return;
 
   const mobileQuery = window.matchMedia('(max-width: 720px)');
   let updateFrame = 0;
@@ -33,12 +32,13 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
     const groupBounds = firstGroup.getBoundingClientRect();
     const headingBounds = heading.getBoundingClientRect();
     const sentinelBounds = sentinel.getBoundingClientRect();
-    const menuBounds = menuSection.getBoundingClientRect();
+    const shadowHostBounds = shadowHost.getBoundingClientRect();
     const groupStyle = window.getComputedStyle(firstGroup);
     const headingStyle = window.getComputedStyle(heading);
     const shadowStyle = window.getComputedStyle(shadowHost, '::before');
     const groupPaddingTop = Number.parseFloat(groupStyle.paddingTop) || 0;
     const stickyTop = Number.parseFloat(headingStyle.top) || 0;
+    const shadowTop = Number.parseFloat(shadowStyle.top) || 0;
     const shadowHeight = Number.parseFloat(shadowStyle.height) || 0;
     const naturalHeadingTop = groupBounds.top + groupPaddingTop;
     const overlaps = sentinelBounds.top <= headingBounds.bottom;
@@ -46,9 +46,12 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
       (stickyTop - naturalHeadingTop) / SHADOW_FADE_DISTANCE_PX
     );
 
+    // El overlay fijo sólo puede pintar dentro del rail de categorías. El rail
+    // termina inmediatamente antes del marquee, por lo que el recorte sigue su
+    // borde inferior y nunca invade el contenido azul posterior.
     const visibleShadowHeight = Math.max(
       0,
-      Math.min(shadowHeight, menuBounds.bottom + 1)
+      Math.min(shadowHeight, shadowHostBounds.bottom - shadowTop)
     );
     const clipBottom = Math.max(0, shadowHeight - visibleShadowHeight);
 
@@ -57,9 +60,6 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
       `${clipBottom.toFixed(2)}px`
     );
 
-    // El primer umbral sticky controla una única sombra fija para todo el menú.
-    // El recorte inferior sigue el borde real de la sección para impedir que la
-    // sombra invada el marquee o cualquier contenido posterior al menú.
     if (!overlaps && shadowProgress === 0) {
       shadowHost.style.removeProperty('--menu-sticky-shadow-progress');
       return;
