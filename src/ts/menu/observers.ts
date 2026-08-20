@@ -7,6 +7,9 @@ interface OverlapTarget {
   sentinel: HTMLElement;
 }
 
+const SHADOW_FADE_DISTANCE_PX = 36;
+const clamp01 = (value: number): number => Math.max(0, Math.min(1, value));
+
 export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
   const mobileQuery = window.matchMedia('(max-width: 720px)');
   const targets = groups.flatMap((group): OverlapTarget[] => {
@@ -14,41 +17,59 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
     const sentinel = query<HTMLElement>('.menu-group__overlap-sentinel', group);
     return heading && sentinel ? [{ group, heading, sentinel }] : [];
   });
-  const nearbyTargets = new Set<OverlapTarget>();
-  const targetByGroup = new Map(targets.map((target) => [target.group, target]));
   let updateFrame = 0;
   let resizeTimer = 0;
   let removeScrollListener: (() => void) | null = null;
-  let previousHeading: HTMLElement | null = null;
 
-  const currentTarget = (): OverlapTarget | null => {
-    for (const target of nearbyTargets) {
-      if (target.group.classList.contains('is-active')) return target;
-    }
-
-    return nearbyTargets.values().next().value ?? null;
+  const clearShadowProgress = (): void => {
+    targets.forEach(({ heading }) => {
+      heading.classList.remove('is-overlapping');
+      heading.style.removeProperty('--menu-heading-shadow-progress');
+    });
   };
 
   const updateOverlapState = (): void => {
     updateFrame = 0;
     if (!mobileQuery.matches) return;
 
-    const target = currentTarget();
-    if (!target) return;
+    targets.forEach(({ group, heading, sentinel }) => {
+      const groupBounds = group.getBoundingClientRect();
+      const headingBounds = heading.getBoundingClientRect();
+      const sentinelBounds = sentinel.getBoundingClientRect();
+      const groupStyle = window.getComputedStyle(group);
+      const headingStyle = window.getComputedStyle(heading);
+      const groupPaddingTop = Number.parseFloat(groupStyle.paddingTop) || 0;
+      const stickyTop = Number.parseFloat(headingStyle.top) || 0;
+      const naturalHeadingTop = groupBounds.top + groupPaddingTop;
 
-    if (previousHeading && previousHeading !== target.heading) {
-      previousHeading.classList.remove('is-overlapping');
-    }
+      // Antes de alcanzar el top sticky el progreso permanece en 0. Una vez
+      // fijado, entra durante una distancia corta y reversible de scroll.
+      const enterProgress = clamp01(
+        (stickyTop - naturalHeadingTop) / SHADOW_FADE_DISTANCE_PX
+      );
 
-    const headingBounds = target.heading.getBoundingClientRect();
-    const sentinelBounds = target.sentinel.getBoundingClientRect();
-    const overlaps = sentinelBounds.top <= headingBounds.bottom;
-    target.heading.classList.toggle('is-overlapping', overlaps);
-    previousHeading = target.heading;
+      // Cuando el siguiente grupo empuja este heading fuera del sticky, la
+      // misma distancia hace el fade inverso y mantiene el handoff continuo.
+      const exitProgress = clamp01(
+        (headingBounds.top - stickyTop + SHADOW_FADE_DISTANCE_PX) /
+          SHADOW_FADE_DISTANCE_PX
+      );
+
+      const overlaps = sentinelBounds.top <= headingBounds.bottom;
+      const stickyProgress = Math.min(enterProgress, exitProgress);
+      const shadowProgress = overlaps && enterProgress > 0
+        ? exitProgress
+        : stickyProgress;
+
+      heading.style.setProperty(
+        '--menu-heading-shadow-progress',
+        shadowProgress.toFixed(3)
+      );
+    });
   };
 
   const scheduleUpdate = (): void => {
-    if (updateFrame || !mobileQuery.matches || !nearbyTargets.size) return;
+    if (updateFrame || !mobileQuery.matches) return;
     updateFrame = window.requestAnimationFrame(updateOverlapState);
   };
 
@@ -70,57 +91,16 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
     removeScrollListener = null;
   };
 
-  const syncScrollTracking = (): void => {
-    if (mobileQuery.matches && nearbyTargets.size) {
+  const syncViewportMode = (): void => {
+    if (mobileQuery.matches) {
       attachScrollListener();
       scheduleUpdate();
       return;
     }
 
     detachScrollListener();
+    clearShadowProgress();
   };
-
-  const syncViewportMode = (): void => {
-    if (!mobileQuery.matches) {
-      detachScrollListener();
-      previousHeading = null;
-      targets.forEach(({ heading }) => heading.classList.remove('is-overlapping'));
-      return;
-    }
-
-    syncScrollTracking();
-  };
-
-  const proximityObserver = 'IntersectionObserver' in window
-    ? new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          const target = targetByGroup.get(entry.target as HTMLElement);
-          if (!target) return;
-
-          if (entry.isIntersecting) {
-            nearbyTargets.add(target);
-          } else {
-            nearbyTargets.delete(target);
-            // Un heading sticky puede seguir visible después de que su grupo
-            // salga del margen del observer. Conserva la sombra hasta que otro
-            // heading lo reemplace o hasta abandonar el modo mobile.
-            if (previousHeading !== target.heading) {
-              target.heading.classList.remove('is-overlapping');
-            }
-          }
-        });
-        syncScrollTracking();
-      }, {
-        rootMargin: '20% 0px 20% 0px',
-        threshold: 0
-      })
-    : null;
-
-  if (proximityObserver) {
-    targets.forEach(({ group }) => proximityObserver.observe(group));
-  } else {
-    targets.forEach((target) => nearbyTargets.add(target));
-  }
 
   syncViewportMode();
   mobileQuery.addEventListener('change', syncViewportMode);
@@ -131,7 +111,7 @@ export const configureMobileOverlapShadows = (groups: HTMLElement[]): void => {
     if (updateFrame) window.cancelAnimationFrame(updateFrame);
     if (resizeTimer) window.clearTimeout(resizeTimer);
     detachScrollListener();
-    proximityObserver?.disconnect();
+    clearShadowProgress();
     mobileQuery.removeEventListener('change', syncViewportMode);
     window.removeEventListener('resize', scheduleResizeSettlement);
   }, { once: true });

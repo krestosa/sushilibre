@@ -1,0 +1,11 @@
+@media (max-width: 720px) {
+  .menu-group__heading {
+    --menu-heading-shadow-progress: 0;
+  }
+
+  .menu-group__heading::before,
+  .menu-group__heading.is-overlapping::before {
+    opacity: var(--menu-heading-shadow-progress);
+    transition: none;
+  }
+}
