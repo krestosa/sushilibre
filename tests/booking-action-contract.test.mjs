@@ -130,10 +130,9 @@ test('compiled distribution keeps booking destinations and action hooks', async 
   assertBookingDestinations(html);
   assert.match(html, /booking-dock__external-arrow/);
   assert.match(html, /RECOVA/);
-  assert.match(html, /03\/09/);
-  assert.match(html, /assets\/bg_inicio\.mp4/);
-  assert.match(html, /assets\/bg_loop\.mp4/);
-  assert.doesNotMatch(html, /\.webm/);
+  assert.match(html, /19\/11/);
+  assert.match(html, /assets\/hero-loop\.webm/);
+  assert.doesNotMatch(html, /assets\/bg_inicio\.mp4|assets\/bg_loop\.mp4/);
   assert.match(script, /data-booking-cta/);
   assert.match(script, /scrollIntoView/);
   assert.match(script, /replaceChildren/);

@@ -4,66 +4,33 @@ import test from 'node:test';
 
 const countMatches = (value, pattern) => [...value.matchAll(pattern)].length;
 
-const assertSequencedVideoMarkup = (html) => {
+const assertSingleLoopVideoMarkup = (html) => {
   const stack = html.match(/<div class="hero__video-stack"[\s\S]*?<\/div>/)?.[0];
   assert.ok(stack, 'Hero video stack was not found.');
 
-  assert.equal(countMatches(stack, /<video\b/g), 3);
+  assert.equal(countMatches(stack, /<video\b/g), 1);
   assert.equal(countMatches(stack, /<source\b[^>]*\bsrc=/g), 1);
-  assert.equal(countMatches(stack, /\bdata-intro-video\b/g), 1);
-  assert.equal(countMatches(stack, /\bdata-loop-video\b/g), 2);
-  assert.equal(countMatches(stack, /\bpreload="metadata"/g), 1);
-  assert.equal(countMatches(stack, /\bpreload="none"/g), 2);
-
-  assert.match(
-    stack,
-    /<video\b[^>]*\bdata-intro-video\b[^>]*data-video-source="assets\/bg_inicio\.mp4"[^>]*\bautoplay\b[^>]*\bmuted\b[^>]*\bplaysinline\b/
-  );
-  assert.match(stack, /<source\b[^>]*src="assets\/bg_inicio\.mp4"[^>]*type="video\/mp4"/);
-  assert.equal(countMatches(stack, /data-video-source="assets\/bg_loop\.mp4"/g), 2);
-  assert.doesNotMatch(stack, /\.webm/);
-  assert.doesNotMatch(stack, /<video\b[^>]*\bdata-intro-video\b[^>]*\bloop\b/);
+  assert.match(stack, /<video\b[\s\S]*?\bautoplay\b[\s\S]*?\bmuted\b[\s\S]*?\bloop\b[\s\S]*?\bplaysinline\b/);
+  assert.match(stack, /<source src="assets\/hero-loop\.webm" type="video\/webm"/);
+  assert.doesNotMatch(stack, /data-intro-video|data-loop-video|\.mp4/);
 };
 
-test('the hero loads the intro once and keeps two deferred loop layers', async () => {
+test('the hero uses one muted WebM video with native looping', async () => {
   const [template, distribution] = await Promise.all([
     readFile(new URL('../src/static/index.html', import.meta.url), 'utf8'),
     readFile(new URL('../dist/index.html', import.meta.url), 'utf8')
   ]);
 
-  assertSequencedVideoMarkup(template);
-  assertSequencedVideoMarkup(distribution);
-
-  await Promise.all([
-    access(new URL('../dist/assets/bg_inicio.mp4', import.meta.url)),
-    access(new URL('../dist/assets/bg_loop.mp4', import.meta.url))
-  ]);
+  assertSingleLoopVideoMarkup(template);
+  assertSingleLoopVideoMarkup(distribution);
+  await access(new URL('../dist/assets/hero-loop.webm', import.meta.url));
 });
 
-test('runtime switches permanently from intro to the crossfaded loop pair', async () => {
-  const source = await readFile(new URL('../src/ts/features/video-loop.ts', import.meta.url), 'utf8');
-
-  assert.match(source, /query<HTMLVideoElement>\('\[data-intro-video\]'\)/);
-  assert.match(source, /queryAll<HTMLVideoElement>\('\[data-loop-video\]'\)/);
-  assert.match(source, /introVideo\.addEventListener\('ended',[\s\S]*?introCompleted = true;[\s\S]*?transitionToLoop\(0\)/);
-  assert.match(source, /const nextLoopIndex = \(index: number\): number/);
-  assert.match(source, /void transitionToLoop\(nextLoopIndex\(activeLoopIndex\)\)/);
-  assert.match(source, /incoming\.classList\.add\('is-mixing-in'\)/);
-  assert.match(source, /incoming\.classList\.add\('is-active'\)/);
-  assert.match(source, /--video-mix-duration/);
-  assert.match(source, /addEventListener\('waiting'/);
-  assert.match(source, /addEventListener\('stalled'/);
-  assert.match(source, /addEventListener\('pageshow'/);
-  assert.match(source, /HARD_STALL_THRESHOLD/);
-});
-
-test('intro cuts directly to loop while loop boundaries retain the crossfade', async () => {
+test('the single-video hero keeps its fade and dark overlays', async () => {
   const motion = await readFile(new URL('../src/scss/_motion.scss', import.meta.url), 'utf8');
 
-  assert.match(
-    motion,
-    /\.hero__video-stack:has\(\.hero__video\[data-intro-video\]\.is-active\)[\s\S]*?\.hero__video\[data-loop-video\][\s\S]*?transition:\s*none/
-  );
+  assert.match(motion, /animation: video-settle 400ms/);
+  assert.match(motion, /animation: stage-overlay-in 220ms ease-out 200ms/);
   assert.match(motion, /\.hero__black-filter\s*\{[\s\S]*?--stage-overlay-opacity:\s*0\.66/);
   assert.match(motion, /\.hero__gradient\s*\{[\s\S]*?--stage-overlay-opacity:\s*0\.52/);
 });
