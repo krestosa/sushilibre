@@ -117,7 +117,7 @@ export const setupBookingDockLayout = (): void => {
   }): void => {
     dock.style.width = width;
     dock.style.setProperty('--dock-cta-track', ctaWidth);
-    dock.style.gridTemplateColumns = `max-content max-content max-content var(--dock-cta-track)`;
+    dock.style.gridTemplateColumns = `repeat(3, minmax(0, 1fr)) var(--dock-cta-track)`;
     dock.style.gridTemplateRows = 'minmax(0, 1fr)';
     dock.style.columnGap = metaGap;
     dock.style.rowGap = '0';

@@ -167,9 +167,17 @@
   color: rgba(255, 255, 255, 0.56);
   font-size: clamp(8px, 0.55vw, 10px);
   font-weight: 400;
-  line-height: 1.35;
+  line-height: 1.55;
   letter-spacing: 0.005em;
   text-transform: uppercase;
+}
+
+.proposal__sponsor-logo {
+  display: block;
+  width: min(100%, 460px);
+  height: auto;
+  transform: translateX(-2.8%);
+  margin-top: clamp(20px, 3vh, 28px);
 }
 
 .proposal + .menu-section .menu-section__shell {

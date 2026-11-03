@@ -6,7 +6,7 @@ const REVEAL_DOCK_GAP_PX = 16;
 const MIN_VISIBLE_PX = 12;
 const MAX_VISIBLE_PX = 28;
 const VISIBLE_RATIO = 0.08;
-const LINE_SPLIT_SELECTOR = '.proposal__intro, .proposal__condition p, .proposal__legal';
+const LINE_SPLIT_SELECTOR = '.proposal__intro, .proposal__condition p';
 const LINE_TOP_TOLERANCE_PX = 3;
 const originalLineHtml = new WeakMap<HTMLElement, string>();
 

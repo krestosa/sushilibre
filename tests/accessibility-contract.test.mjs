@@ -20,7 +20,7 @@ const assertAccessibleMarkup = (html) => {
   });
 
   assert.match(compact, /<span\b[^>]*class=["']sr-only["'][^>]*>Recova — abrir en Google Maps<\/span>/i);
-  assert.match(compact, /<span\b[^>]*class=["']sr-only["'][^>]*>Jueves 3 de septiembre<\/span>/i);
+  assert.match(compact, /<span\b[^>]*class=["']sr-only["'][^>]*>Jueves 19 de noviembre<\/span>/i);
 
   const locationLink = findOpeningTag(compact, 'a', (tag) => (
     hasClass(tag, 'booking-dock__meta--location')

@@ -39,12 +39,11 @@ test('booking dock exposes reservation and Maps destinations', async () => {
   assert.match(template, /data-booking-cta-label/);
   assert.match(template, /booking-dock__external-arrow/);
   assert.match(template, /RECOVA/);
-  assert.match(template, /JUEVES 03\/09/);
-  assert.match(template, /JUE 03\/09/);
-  assert.match(template, /data-video-source="assets\/bg_inicio\.mp4"/);
-  assert.match(template, /<source src="assets\/bg_inicio\.mp4" type="video\/mp4"/);
-  assert.equal((template.match(/data-video-source="assets\/bg_loop\.mp4"/g) ?? []).length, 2);
-  assert.doesNotMatch(template, /\.webm/);
+  assert.match(template, /JUEVES 19\/11/);
+  assert.match(template, /JUE 19\/11/);
+  assert.equal((template.match(/<video\b/g) ?? []).length, 1);
+  assert.match(template, /<video[\s\S]*?\bautoplay\b[\s\S]*?\bmuted\b[\s\S]*?\bloop\b[\s\S]*?\bplaysinline\b/);
+  assert.match(template, /<source src="assets\/hero-loop\.webm" type="video\/webm"/);
   assert.match(styles, /\.booking-dock__meta--location/);
   assert.match(styles, /\.booking-dock__external-arrow/);
   assert.match(styles, /translate3d\(2px, -2px, 0\)/);
@@ -53,7 +52,7 @@ test('booking dock exposes reservation and Maps destinations', async () => {
 test('countdown converts the CTA into a smooth menu action at zero', async () => {
   const countdown = await readSource('src/ts/features/countdown.ts');
 
-  assert.match(countdown, /2026-09-03T20:00:00-03:00/);
+  assert.match(countdown, /2026-11-19T20:00:00-03:00/);
   assert.match(countdown, /activateMenuMode/);
   assert.match(countdown, /cta\.href = '#menu'/);
   assert.match(countdown, /replaceCtaLabel\(ctaLabel, 'IR A', 'MENÚ'\)/);

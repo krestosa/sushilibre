@@ -102,7 +102,7 @@ test('hero lockup stays inline until its real content would collide', async () =
   assert.match(fonts, /\.title-word__sup\s*\{[\s\S]*?position:\s*relative;[\s\S]*?top:\s*-0\.44em;[\s\S]*?display:\s*inline-block;[\s\S]*?margin-left:\s*0\.06em;[\s\S]*?vertical-align:\s*top;[\s\S]*?font-size:\s*0\.24em;[\s\S]*?font-weight:\s*900;/);
   assert.doesNotMatch(fonts, /\.title-word__sup\s*\{[\s\S]*?position:\s*absolute;/);
   for (const html of [template, distribution]) {
-    assert.match(html, /title-word title-word--libre[\s\S]*?LIBRE[\s\S]*?<sup class="title-word__sup" aria-hidden="true">2<\/sup\s*>[\s\S]*?al cuadrado/);
+    assert.match(html, /title-word title-word--libre[\s\S]*?LIBRE[\s\S]*?<sup class="title-word__sup" aria-hidden="true">3<\/sup\s*>[\s\S]*?al cubo/);
   }
 });
 

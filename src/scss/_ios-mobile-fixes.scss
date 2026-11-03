@@ -37,7 +37,7 @@
 
 @media (max-width: 620px) {
   .hero-copy {
-    // Move the copy slightly lower so LIBRE² has breathing room while still
+    // Move the copy slightly lower so LIBRE³ has breathing room while still
     // keeping a safe cushion above the fixed booking dock on short iOS views.
     bottom: calc(var(--dock-height) + var(--dock-bottom) + 12px);
   }

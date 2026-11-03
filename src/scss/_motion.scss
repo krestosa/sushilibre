@@ -40,12 +40,6 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
   opacity: var(--stage-overlay-opacity);
 }
 
-// La intro corta directamente al primer frame del loop. El crossfade sólo existe
-// entre las dos capas de bg_loop.webm una vez que la intro dejó de estar activa.
-.hero__video-stack:has(.hero__video[data-intro-video].is-active)
-  .hero__video[data-loop-video] {
-  transition: none;
-}
 
 @media (prefers-reduced-motion: no-preference) {
   .booking-dock__cta::before {
@@ -53,36 +47,36 @@ html.has-menu-reveal.menu-reveal-fallback .menu-reveal {
   }
 
   .hero__video-stack {
-    animation: video-settle 850ms var(--ease-soft) both;
+    animation: video-settle 400ms var(--ease-soft) both;
   }
 
   .hero__black-filter,
   .hero__gradient {
-    animation: stage-overlay-in 300ms ease-out 1500ms both;
+    animation: stage-overlay-in 220ms ease-out 200ms both;
   }
 
   .title-word--sushi {
-    animation: stage-title-in 520ms var(--ease-out) 1800ms both;
+    animation: stage-title-in 470ms var(--ease-out) 430ms both;
   }
 
   .title-word--libre {
-    animation: stage-title-in 540ms var(--ease-out) 1850ms both;
+    animation: stage-title-in 490ms var(--ease-out) 480ms both;
   }
 
   .title-kicker {
-    animation: stage-copy-in 380ms var(--ease-out) 2020ms both;
+    animation: stage-copy-in 340ms var(--ease-out) 570ms both;
   }
 
   .hero-copy {
-    animation: stage-copy-centered-in 440ms var(--ease-out) 2150ms both;
+    animation: stage-copy-centered-in 400ms var(--ease-out) 680ms both;
   }
 
   .booking-dock {
-    animation: stage-dock-in 460ms var(--ease-out) 2390ms both;
+    animation: stage-dock-in 420ms var(--ease-out) 800ms both;
   }
 
   .masthead {
-    animation: stage-masthead-in 400ms var(--ease-out) 2660ms both;
+    animation: stage-masthead-in 350ms var(--ease-out) 900ms both;
   }
 }
 

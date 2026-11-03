@@ -186,7 +186,7 @@ const renderMenuGroup = (section) => {
 };
 
 const renderMarqueeItems = () => Array.from({ length: 6 }, () => [
-  '<span class="menu-marquee__item">SUSHI LIBRE<sup>2</sup></span>',
+  '<span class="menu-marquee__item">SUSHI LIBRE<sup>3</sup></span>',
   '<span class="menu-marquee__separator" aria-hidden="true">•</span>'
 ].join('')).join('');
 
