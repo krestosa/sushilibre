@@ -1996,6 +1996,9 @@ html.has-proposal-reveal.proposal-reveal-fallback .proposal-reveal {
     justify-self: start;
     text-align: left;
   }
+  .return-voucher__amount {
+    font-size: clamp(62px, 16vw, 66px);
+  }
   .return-voucher + .menu-section .menu-section__shell {
     padding-top: 76px;
   }
