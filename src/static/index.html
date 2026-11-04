@@ -343,6 +343,101 @@
         </div>
       </section>
 
+      <!-- Voucher de regreso: opción 29 «Marquesina viva» -->
+      <section
+        class="return-voucher"
+        id="voucher-regreso"
+        aria-labelledby="voucher-regreso-titulo"
+      >
+        <div class="return-voucher__shell">
+          <div class="return-voucher__marquee" aria-hidden="true">
+            <div class="return-voucher__track">
+              <span class="return-voucher__word">VOLVÉ POR MÁS</span>
+            </div>
+            <div class="return-voucher__track return-voucher__track--orange">
+              <span class="return-voucher__word">OTRA VEZ</span>
+            </div>
+          </div>
+
+          <div class="return-voucher__footer">
+            <div class="return-voucher__message">
+              <p class="return-voucher__eyebrow">
+                SI YA VIVISTE SUSHI LIBRE 1 O 2, ESTA ES PARA VOS
+              </p>
+              <h2 class="return-voucher__heading" id="voucher-regreso-titulo">
+                <span class="return-voucher__heading-line">YA SABÉS LO QUE ES.</span>
+                <span class="return-voucher__heading-line">AHORA VOLVÉ A VIVIRLO.</span>
+              </h2>
+              <p class="return-voucher__description">
+                USÁ TU VOUCHER EN LA EDICIÓN 03.
+              </p>
+            </div>
+            <div class="return-voucher__benefit">
+              <p class="return-voucher__benefit-label">
+                TU REGALO POR VOLVER
+              </p>
+              <p class="return-voucher__amount">$15.000</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <script>
+        (() => {
+          const marquee = document.querySelector("#voucher-regreso .return-voucher__marquee");
+          if (!marquee) return;
+
+          // Cada pista conserva UN solo span; las repeticiones son sombras
+          // del texto, no nodos clonados ni copias adicionales en el DOM.
+          const tracks = [...marquee.querySelectorAll(".return-voucher__track")];
+          let pending = false;
+          let previousWidth = 0;
+
+          function update() {
+            pending = false;
+            const viewport = marquee.clientWidth;
+            if (!viewport) return;
+
+            for (const track of tracks) {
+              const word = track.querySelector(".return-voucher__word");
+              if (!word) continue;
+
+              track.classList.remove("is-ready");
+              const step = word.getBoundingClientRect().width;
+              if (!step) continue;
+
+              const orange = track.classList.contains("return-voucher__track--orange");
+              const color = getComputedStyle(word).color;
+              const copies = Math.ceil((viewport * 2 + step) / step) + 3;
+              const shadows = [];
+
+              for (let n = -copies; n <= copies; n++) {
+                if (n !== 0) shadows.push((n * step).toFixed(2) + "px 0 0 " + color);
+              }
+
+              word.style.textShadow = shadows.join(", ");
+              track.style.setProperty("--rv-step", step + "px");
+              track.style.setProperty("--rv-offset", orange ? (viewport * .62) + "px" : "0px");
+              track.style.setProperty("--rv-duration", orange ? "13s" : "11s");
+              track.classList.add("is-ready");
+            }
+
+            previousWidth = viewport;
+          }
+
+          function requestUpdate(force = false) {
+            if (!force && Math.abs(marquee.clientWidth - previousWidth) < 1) return;
+            if (pending) return;
+            pending = true;
+            requestAnimationFrame(update);
+          }
+
+          requestUpdate(true);
+          document.fonts?.ready.then(() => requestUpdate(true));
+          window.addEventListener("resize", () => requestUpdate());
+        })();
+      </script>
+
+
       <!-- MENU_SECTION -->
     </main>
   </body>

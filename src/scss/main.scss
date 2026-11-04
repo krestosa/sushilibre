@@ -12,6 +12,7 @@
 @use "proposal";
 @use "proposal-motion";
 
+@use "return-voucher";
 // Herencia responsive: desktop define la base, tablet la modifica y mobile cierra la cascada.
 @use "breakpoints/desktop";
 @use "breakpoints/tablet";
