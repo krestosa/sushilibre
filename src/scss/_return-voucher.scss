@@ -124,7 +124,14 @@
 
 .return-voucher__benefit {
   justify-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   text-align: left;
+}
+
+.return-voucher__value-group {
+  margin-top: clamp(18px, 1.6vw, 24px);
 }
 
 .return-voucher__benefit-label {
@@ -138,9 +145,9 @@
 }
 
 .return-voucher__amount {
-  margin: 10px 0 0;
+  margin: 0;
   color: #fff;
-  font-size: clamp(82px, 10.1cqw, 132px);
+  font-size: clamp(70px, 7.4cqw, 98px);
   font-weight: 500;
   line-height: .94;
   letter-spacing: -.072em;
@@ -148,10 +155,10 @@
 }
 
 .return-voucher__discount {
-  margin: 3px 0 0;
+  margin: 7px 0 0;
   color: #fff;
   font-family: "Inter", Arial, sans-serif;
-  font-size: clamp(23px, 2.1vw, 30px);
+  font-size: clamp(21px, 1.75vw, 27px);
   font-weight: 700;
   line-height: 1.05;
   letter-spacing: -.04em;
@@ -159,7 +166,7 @@
 }
 
 .return-voucher__voucher-note {
-  margin: 6px 0 0;
+  margin: clamp(19px, 1.5vw, 24px) 0 0;
   color: rgba(255, 255, 255, .55);
   font-family: "Inter", Arial, sans-serif;
   font-size: clamp(13px, 1.08vw, 17px);
